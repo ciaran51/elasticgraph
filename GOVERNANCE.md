@@ -32,11 +32,6 @@ source code. The mechanism to propose such a change is a GitHub pull request. Ma
 
 If a maintainer opposes a proposed change, then the change cannot land.
 
-See:
-
-* [List of maintainers - `MAINTAINERS.md`](./MAINTAINERS.md)
-* [Contribution Guide - `CONTRIBUTING.md`](./CONTRIBUTING.md)
-
 ### Maintainer activities
 
 * Helping users and novice contributors
