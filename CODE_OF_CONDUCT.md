@@ -58,13 +58,7 @@ This Code of Conduct applies within all project spaces, and it also applies when
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the Block Open Source Governance Committee (GC) at
-`open-source-governance@block.xyz`. All complaints will be reviewed and 
-investigated promptly and fairly.
-
-The GC is obligated to respect the privacy and security of the
-reporter of any incident.
+Instances of unacceptable behavior may be reported to the GoC at `open-source-governance@block.xyz`. All complaints will be reviewed and investigated promptly and fairly, and will result in a response that is deemed necessary and appropriate to the circumstances.
 
 ## Enforcement Guidelines
 
