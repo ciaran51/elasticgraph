@@ -43,9 +43,30 @@ end
 # we can compare the the current directory to the repo root.
 if repo_root == __dir__
   # When we are at the root, we want to load the gemspecs for each ElasticGraph gem in the repository.
-  gems_in_this_repo.sort.each do |gem_name|
-    gemspec path: gem_name
-  end
+  # Note: dependabot can't handle `gemspec` calls that use a variable (e.g. `gemspec path: gem_name`)
+  # rather than a literal value, so this is an intentionally unrolled loop.
+  gemspec path: "elasticgraph"
+  gemspec path: "elasticgraph-admin"
+  gemspec path: "elasticgraph-admin_lambda"
+  gemspec path: "elasticgraph-apollo"
+  gemspec path: "elasticgraph-datastore_core"
+  gemspec path: "elasticgraph-elasticsearch"
+  gemspec path: "elasticgraph-graphql"
+  gemspec path: "elasticgraph-graphql_lambda"
+  gemspec path: "elasticgraph-health_check"
+  gemspec path: "elasticgraph-indexer"
+  gemspec path: "elasticgraph-indexer_autoscaler_lambda"
+  gemspec path: "elasticgraph-indexer_lambda"
+  gemspec path: "elasticgraph-json_schema"
+  gemspec path: "elasticgraph-lambda_support"
+  gemspec path: "elasticgraph-local"
+  gemspec path: "elasticgraph-opensearch"
+  gemspec path: "elasticgraph-query_interceptor"
+  gemspec path: "elasticgraph-query_registry"
+  gemspec path: "elasticgraph-rack"
+  gemspec path: "elasticgraph-schema_artifacts"
+  gemspec path: "elasticgraph-schema_definition"
+  gemspec path: "elasticgraph-support"
 else
   # Otherwise, we just load the local `.gemspec` file in the current directory.
   gemspec
