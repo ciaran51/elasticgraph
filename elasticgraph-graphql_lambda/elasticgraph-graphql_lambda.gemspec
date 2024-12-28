@@ -6,14 +6,44 @@
 #
 # frozen_string_literal: true
 
-require_relative "../gemspec_helper"
+require_relative "../elasticgraph-support/lib/elastic_graph/version"
 
-ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, category: :lambda) do |spec, eg_version|
+Gem::Specification.new do |spec|
+  spec.name = "elasticgraph-graphql_lambda"
+  spec.version = ElasticGraph::VERSION
+  spec.authors = ["Myron Marston", "Ben VandenBos", "Block Engineering"]
+  spec.email = ["myron@squareup.com"]
+  spec.homepage = "https://block.github.io/elasticgraph/"
+  spec.license = "MIT"
   spec.summary = "ElasticGraph gem that wraps elasticgraph-graphql in an AWS Lambda."
 
-  spec.add_dependency "elasticgraph-graphql", eg_version
-  spec.add_dependency "elasticgraph-lambda_support", eg_version
+  # See https://guides.rubygems.org/specification-reference/#metadata
+  # for metadata entries understood by rubygems.org.
+  spec.metadata = {
+    "bug_tracker_uri" => "https://github.com/block/elasticgraph/issues",
+    "changelog_uri" => "https://github.com/block/elasticgraph/releases/tag/v#{ElasticGraph::VERSION}",
+    "documentation_uri" => "https://block.github.io/elasticgraph/docs/main/",
+    "homepage_uri" => "https://block.github.io/elasticgraph/",
+    "source_code_uri" => "https://github.com/block/elasticgraph/tree/v#{ElasticGraph::VERSION}/#{spec.name}",
+    "gem_category" => "lambda" # used by script/update_codebase_overview
+  }
 
-  spec.add_development_dependency "elasticgraph-elasticsearch", eg_version
-  spec.add_development_dependency "elasticgraph-query_registry", eg_version
+  # Specify which files should be added to the gem when it is released.
+  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
+  # We also remove `.rspec` and `Gemfile` because these files are not needed in
+  # the packaged gem (they are for local development of the gems) and cause a problem
+  # for some users of the gem due to the fact that they are symlinks to a parent path.
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
+    `git ls-files -z`.split("\x0").reject do |f|
+      (f == __FILE__) || f.match(%r{\A(?:(?:test|spec|features|sig)/|\.(?:git|travis|circleci)|appveyor)})
+    end - [".rspec", "Gemfile", ".yardopts"]
+  end
+
+  spec.required_ruby_version = "~> 3.2"
+
+  spec.add_dependency "elasticgraph-graphql", ElasticGraph::VERSION
+  spec.add_dependency "elasticgraph-lambda_support", ElasticGraph::VERSION
+
+  spec.add_development_dependency "elasticgraph-elasticsearch", ElasticGraph::VERSION
+  spec.add_development_dependency "elasticgraph-query_registry", ElasticGraph::VERSION
 end
