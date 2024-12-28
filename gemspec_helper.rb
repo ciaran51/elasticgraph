@@ -45,9 +45,6 @@ module ElasticGraphGemspecHelper
         end - [".rspec", "Gemfile", ".yardopts"]
       end
 
-      spec.bindir = "exe"
-      spec.executables = spec.files.grep(%r{\Aexe/}) { |f| ::File.basename(f) }
-      spec.require_paths = ["lib"]
       spec.required_ruby_version = "~> 3.2"
 
       yield spec, ElasticGraph::VERSION
