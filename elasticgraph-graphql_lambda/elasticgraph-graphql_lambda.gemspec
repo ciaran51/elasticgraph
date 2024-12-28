@@ -16,5 +16,4 @@ ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, catego
 
   spec.add_development_dependency "elasticgraph-elasticsearch", eg_version
   spec.add_development_dependency "elasticgraph-query_registry", eg_version
-  spec.add_development_dependency "httpx", "~> 1.3"
 end

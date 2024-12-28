@@ -15,5 +15,4 @@ ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, catego
 
   spec.add_dependency "elasticgraph-admin", eg_version
   spec.add_dependency "elasticgraph-lambda_support", eg_version
-  spec.add_development_dependency "httpx", "~> 1.3"
 end

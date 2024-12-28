@@ -19,6 +19,4 @@ ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, catego
   # we have to add an explicit dependency. It supports ox, oga, libxml, nokogiri or rexml, and of those, ox seems to be the
   # best choice: it leads benchmarks, is well-maintained, has no dependencies, and is MIT-licensed.
   spec.add_dependency "ox", "~> 2.14"
-
-  spec.add_development_dependency "httpx", "~> 1.3"
 end

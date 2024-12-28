@@ -18,5 +18,4 @@ ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, catego
   spec.add_development_dependency "elasticgraph-graphql", eg_version
   spec.add_development_dependency "elasticgraph-indexer", eg_version
   spec.add_development_dependency "elasticgraph-indexer_autoscaler_lambda", eg_version
-  spec.add_development_dependency "httpx", "~> 1.3"
 end

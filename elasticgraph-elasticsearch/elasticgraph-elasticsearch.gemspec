@@ -15,6 +15,4 @@ ElasticGraphGemspecHelper.define_elasticgraph_gem(gemspec_file: __FILE__, catego
   spec.add_dependency "elasticsearch", "~> 8.16"
   spec.add_dependency "faraday", "~> 2.12"
   spec.add_dependency "faraday-retry", "~> 2.2"
-
-  spec.add_development_dependency "httpx", "~> 1.3"
 end
