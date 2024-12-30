@@ -28,7 +28,7 @@ module ElasticGraph
         expect(gemspec.name).to eq gem_name
       end
 
-      it "has no symlinked files included in the gem since they do not work correctly when the gem is packaged packaged" do
+      it "has no symlinked files included in the gem since they do not work correctly when the gem is packaged" do
         symlink_files = gemspec.files.select { |f| ::File.exist?(f) && ::File.ftype(f) == "link" }
         expect(symlink_files).to be_empty
       end
