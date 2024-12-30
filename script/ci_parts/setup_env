@@ -30,7 +30,6 @@ export NO_VCR=1
 # track test coverage for all specs
 export COVERAGE=1
 
-export bundler_version=$(cat Gemfile.lock | grep "BUNDLED WITH" -A 2 | grep "[0-9]" | xargs)
 export all_gems=$(script/list_eg_gems.rb)
 
 # elasticgraph-local contains the rake tasks that manage our datastores. Running the acceptance tests for it can
@@ -61,10 +60,10 @@ else
   datastore_version=$(echo "${datastore}" | cut -d ":" -f 2)
 
   function halt_datastore_daemon() {
-    bundle _$bundler_version\_ exec rake ${datastore_backend}:${boot_env}:${datastore_version}:halt
+    bundle exec rake ${datastore_backend}:${boot_env}:${datastore_version}:halt
   }
 
-  bundle _$bundler_version\_ exec rake ${datastore_backend}:${boot_env}:${datastore_version}:daemon
+  bundle exec rake ${datastore_backend}:${boot_env}:${datastore_version}:daemon
 
   # Occasionally, we've see transient "Partial shards failure (N shards unavailable)" errors from
   # Elasticsearch/OpenSearch on CI from the first tests that run after booting it. Locally that

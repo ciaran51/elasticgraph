@@ -28,6 +28,6 @@ pushd $gem
   #      is a dependency of any other elasticgraph gem). To ensure that there is a proper `Gemfile` in
   #      each gem subdirectory, we pass the ENV var here. If the file does not exist, we'll get an error.
   cp ../Gemfile.lock Gemfile.lock
-  BUNDLE_GEMFILE=Gemfile bundle _$bundler_version\_ check || (rm -rf Gemfile.lock && bundle _$bundler_version\_ install)
-  BUNDLE_GEMFILE=Gemfile bundle _$bundler_version\_ exec rspec --backtrace --format progress
+  BUNDLE_GEMFILE=Gemfile bundle check || (rm -rf Gemfile.lock && bundle install)
+  BUNDLE_GEMFILE=Gemfile bundle exec rspec --backtrace --format progress
 popd
