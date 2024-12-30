@@ -8,6 +8,36 @@
 
 source "https://rubygems.org"
 
+# Gems needed by the test suite and other CI checks.
+group :development do
+  gem "aws_lambda_ric", "~> 2.0"
+  gem "coderay", "~> 1.1"
+  gem "factory_bot", "~> 6.4"
+  gem "faker", "~> 3.5"
+  gem "flatware-rspec", "~> 2.3", ">= 2.3.3"
+  gem "httpx", "~> 1.3"
+  gem "method_source", "~> 1.1"
+  gem "rubocop-factory_bot", "~> 2.26"
+  gem "rubocop-rake", "~> 0.6"
+  gem "rubocop-rspec", "~> 3.1"
+  gem "rspec", "~> 3.13"
+  gem "rspec-retry", "~> 0.6"
+  gem "simplecov", "~> 0.22"
+  gem "simplecov-console", "~> 0.9"
+  gem "standard", "~> 1.41.0"
+  gem "steep", "~> 1.9.0"
+  gem "super_diff", "~> 0.13"
+  gem "vcr", "~> 6.3", ">= 6.3.1"
+end
+
+# Documentation generation gems
+group :site do
+  gem "filewatcher", "~> 2.1"
+  gem "jekyll", "~> 4.3"
+  gem "yard", "~> 0.9", ">= 0.9.36"
+  gem "yard-doctest", "~> 0.1", ">= 0.1.17"
+end
+
 # Since this file gets symlinked both at the repo root and into each Gem directory, we have
 # to dynamically detect the repo root, by looking for the `.git` directory.
 repo_root = ::Pathname.new(::Dir.pwd).ascend.find { |dir| ::Dir.exist?("#{dir}/.git") }.to_s
@@ -67,6 +97,13 @@ if repo_root == __dir__
   gemspec path: "elasticgraph-schema_artifacts"
   gemspec path: "elasticgraph-schema_definition"
   gemspec path: "elasticgraph-support"
+
+  unless @gemspecs.empty?
+    missing_gemspecs = gems_in_this_repo - @gemspecs.map(&:name)
+    unless missing_gemspecs.empty?
+      raise "`Gemfile` is missing `gemspec` calls for gems: #{missing_gemspecs.join(", ")}"
+    end
+  end
 else
   # Otherwise, we just load the local `.gemspec` file in the current directory.
   gemspec
@@ -111,34 +148,4 @@ else
     # transitive development dependencies.
     register_gemspec_gems_with_path.call(loaded_gemspec.dependencies)
   end
-end
-
-# Gems needed by the test suite and other CI checks.
-group :development do
-  gem "aws_lambda_ric", "~> 2.0"
-  gem "coderay", "~> 1.1"
-  gem "factory_bot", "~> 6.4"
-  gem "faker", "~> 3.5"
-  gem "flatware-rspec", "~> 2.3", ">= 2.3.3"
-  gem "httpx", "~> 1.3"
-  gem "method_source", "~> 1.1"
-  gem "rubocop-factory_bot", "~> 2.26"
-  gem "rubocop-rake", "~> 0.6"
-  gem "rubocop-rspec", "~> 3.1"
-  gem "rspec", "~> 3.13"
-  gem "rspec-retry", "~> 0.6"
-  gem "simplecov", "~> 0.22"
-  gem "simplecov-console", "~> 0.9"
-  gem "standard", "~> 1.41.0"
-  gem "steep", "~> 1.9.0"
-  gem "super_diff", "~> 0.13"
-  gem "vcr", "~> 6.3", ">= 6.3.1"
-end
-
-# Documentation generation gems
-group :site do
-  gem "filewatcher", "~> 2.1"
-  gem "jekyll", "~> 4.3"
-  gem "yard", "~> 0.9", ">= 0.9.36"
-  gem "yard-doctest", "~> 0.1", ">= 0.1.17"
 end
