@@ -8,17 +8,17 @@ script/type_check
 script/update_codebase_overview --verify
 script/update_ci_yaml --verify
 
-bundle _$bundler_version\_ exec standardrb
-bundle _$bundler_version\_ exec rake schema_artifacts:check VERBOSE=true
+bundle exec standardrb
+bundle exec rake schema_artifacts:check VERBOSE=true
 
 # verify that we can index fake data locally. Note: this must come _after_ `rake schema_artifacts:check`
 # because the `index_fake_data:widgets:local` task depends on `schema_artifacts:dump`.
-bundle _$bundler_version\_ exec rake "index_fake_data:widgets[1]"
-bundle _$bundler_version\_ exec rspec config/linting
+bundle exec rake "index_fake_data:widgets[1]"
+bundle exec rspec config/linting
 
 # Validate the website. We get frozen string errors form liquid if we leave
 # frozen string literals enabled, so we have to disable them here.
-RUBYOPT=--disable-frozen-string-literal bundle _$bundler_version\_ exec rake site:validate
+RUBYOPT=--disable-frozen-string-literal bundle exec rake site:validate
 
 # The apollo compatibility tests boot docker containers and need all the resources we can provide them.
 # There does not appear to be enough resources on GitHub Actions for them to run while the the datastore

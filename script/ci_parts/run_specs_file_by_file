@@ -7,7 +7,7 @@ source "script/ci_parts/setup_env" "test" $1 $2
 unset COVERAGE
 
 # Setup standalone binstubs for RSpec that we use below.
-bundle _$bundler_version\_ install --standalone && bundle _$bundler_version\_ binstubs rspec-core --standalone
+bundle install --standalone && bundle binstubs rspec-core --standalone
 
 function run_gem_specs_file_by_file() {
   gem=$1
