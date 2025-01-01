@@ -39,8 +39,8 @@ group :site do
 end
 
 # Since this file gets symlinked both at the repo root and into each Gem directory, we have
-# to dynamically detect the repo root, by looking for the `.git` directory.
-repo_root = ::Pathname.new(::Dir.pwd).ascend.find { |dir| ::Dir.exist?("#{dir}/.git") }.to_s
+# to dynamically detect the repo root, by looking for a file that only exists at the root.
+repo_root = ::Pathname.new(::Dir.pwd).ascend.find { |dir| ::File.exist?("#{dir}/CODE_OF_CONDUCT.md") }.to_s
 
 # `tmp` and `log` are git-ignored but many of our build tasks and scripts expect them to exist.
 # We create them here since `Gemfile` evaluation happens before anything else.
