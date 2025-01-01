@@ -20,5 +20,7 @@ module ElasticGraphGems
 end
 
 if $PROGRAM_NAME == __FILE__
+  # :nocov: -- specs only require this file, not run it as a script.
   puts ElasticGraphGems.list.join("\n")
+  # :nocov:
 end
