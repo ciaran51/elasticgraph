@@ -633,6 +633,9 @@ module ElasticGraph
                   f.renamed_from "old_description"
                 end
                 t.renamed_from "Widget3"
+
+                t.field "id", "ID"
+                t.index "widgets"
               end
             end
           EOS

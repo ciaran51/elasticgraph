@@ -575,6 +575,7 @@ module ElasticGraph
               t.field "id", "ID" do |f|
                 expect(f).not_to respond_to(*field_extensions)
               end
+              t.index "t1"
             end
 
             schema.interface_type "T2" do |t|

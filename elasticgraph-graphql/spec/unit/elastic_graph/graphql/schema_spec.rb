@@ -34,7 +34,9 @@ module ElasticGraph
       describe "#type_named" do
         let(:schema) do
           define_schema do |s|
-            s.object_type "Color"
+            s.object_type "Color" do |f|
+              f.field "name", "String"
+            end
           end
         end
 
@@ -77,7 +79,9 @@ module ElasticGraph
             s.enum_type "Options" do |t|
               t.value "firstOption"
             end
-            s.object_type "Color"
+            s.object_type "Color" do |t|
+              t.field "name", "String"
+            end
           end
 
           expect(schema.defined_types).to all be_a Schema::Type
