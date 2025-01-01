@@ -39,8 +39,8 @@ group :site do
 end
 
 # Since this file gets symlinked both at the repo root and into each Gem directory, we have
-# to dynamically detect the repo root, by looking for a file that only exists at the root.
-repo_root = ::Pathname.new(::Dir.pwd).ascend.find { |dir| ::File.exist?("#{dir}/CODE_OF_CONDUCT.md") }.to_s
+# to dynamically detect the repo root, by looking for one of the subdirs at the root.
+repo_root = ::Pathname.new(__dir__).ascend.find { |dir| ::Dir.exist?("#{dir}/elasticgraph-support") }.to_s
 
 # `tmp` and `log` are git-ignored but many of our build tasks and scripts expect them to exist.
 # We create them here since `Gemfile` evaluation happens before anything else.
@@ -48,8 +48,9 @@ repo_root = ::Pathname.new(::Dir.pwd).ascend.find { |dir| ::File.exist?("#{dir}/
 ::FileUtils.mkdir_p("#{repo_root}/tmp")
 
 # Identify the gems that live in the ElasticGraph repository.
-require "#{repo_root}/script/list_eg_gems"
-gems_in_this_repo = ::ElasticGraphGems.list.to_set
+gems_in_this_repo = ::Dir.glob("#{repo_root}/*/*.gemspec").map do |gemspec|
+  ::File.basename(::File.dirname(gemspec))
+end.to_set
 
 # Here we override the `gem` method to automatically add the ElasticGraph version
 # to all ElasticGraph gems. If we don't do this, we can get confusing bundler warnings
