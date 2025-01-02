@@ -15,7 +15,7 @@ module ElasticGraph
 
       context "on a relation with an outbound foreign key" do
         it "includes a foreign key field for a GraphQL relation field" do
-          one, many = index_mappings_for "my_type_one", "my_type_many" do |s|
+          mappings = index_mappings_for "my_type_one", "my_type_many" do |s|
             s.object_type "OtherType" do |t|
               t.field "id", "ID!"
               t.index "other_type"
@@ -32,7 +32,9 @@ module ElasticGraph
               t.relates_to_many "other", "OtherType", via: "other_id", dir: :out, singular: "other"
               t.index "my_type_many"
             end
-          end.map { |h| h.dig("properties") }
+          end
+
+          one, many = mappings.map { |h| h.dig("properties") }
 
           expect([one, many]).to all include({
             "id" => {"type" => "keyword"},
