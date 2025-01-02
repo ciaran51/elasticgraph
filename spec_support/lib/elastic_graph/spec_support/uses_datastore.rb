@@ -458,8 +458,6 @@ end
 
 RSpec.configure do |config|
   curl_output = `curl -is #{datastore_url}`
-  version = nil
-  backend = nil
 
   # :nocov: -- only executed when the datastore isn't running.
   unless /200 OK/.match?(curl_output)
