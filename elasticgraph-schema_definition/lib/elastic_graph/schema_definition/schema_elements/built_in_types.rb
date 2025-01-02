@@ -504,7 +504,8 @@ module ElasticGraph
 
           schema_def_api.factory.new_aggregated_values_type_for_index_leaf_type "NonNumeric" do |t|
             t.documentation "A return type used from aggregations to provided aggregated values over non-numeric fields."
-          end.tap { |t| schema_def_api.state.register_object_interface_or_union_type(t) }
+            schema_def_api.state.register_object_interface_or_union_type(t)
+          end
 
           register_framework_object_type "AggregationCountDetail" do |t|
             t.documentation "Provides detail about an aggregation `#{names.count}`."
