@@ -163,6 +163,18 @@ module ElasticGraph
         expect(query_adapter.interceptors).to match_array(yield) # we yield to make it lazy since the interceptors are loaded lazily
         expect(query_adapter.interceptors.map(&:elasticgraph_graphql)).to all be graphql
       end
+
+      def generate_schema_artifacts
+        super do |schema|
+          yield schema
+
+          # Ensure there's at least one indexed type defined to avoid GraphQL validation errors.
+          schema.object_type "Widget" do |t|
+            t.field "id", "ID"
+            t.index "widgets"
+          end
+        end
+      end
     end
   end
 end

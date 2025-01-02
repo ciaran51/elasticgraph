@@ -15,7 +15,9 @@ module ElasticGraph
       RSpec.describe Type, :ensure_no_orphaned_types do
         it "exposes the name as a capitalized symbol" do
           type = define_schema do |schema|
-            schema.object_type "Color"
+            schema.object_type "Color" do |t|
+              t.field "name", "String"
+            end
           end.type_named("Color")
 
           expect(type.name).to eq :Color
@@ -23,7 +25,9 @@ module ElasticGraph
 
         it "inspects well" do
           type = define_schema do |schema|
-            schema.object_type "Color"
+            schema.object_type "Color" do |t|
+              t.field "name", "String"
+            end
           end.type_named("Color")
 
           expect(type.inspect).to eq "#<ElasticGraph::GraphQL::Schema::Type Color>"
@@ -608,7 +612,7 @@ module ElasticGraph
         describe "#search_index_definitions" do
           it "returns an empty array for a non-union type that is not indexed" do
             search_index_definitions = search_index_definitions_from do |schema, type|
-              schema.object_type(type) {}
+              schema.object_type(type) { |t| t.field "name", "String" }
             end
 
             expect(search_index_definitions).to eq []

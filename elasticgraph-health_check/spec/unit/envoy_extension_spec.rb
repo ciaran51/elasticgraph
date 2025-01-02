@@ -147,6 +147,10 @@ module ElasticGraph
           config = {http_path_segment: http_path_segment}.compact
           schema_artifacts = generate_schema_artifacts do |schema|
             schema.register_graphql_extension(EnvoyExtension, defined_at: "elastic_graph/health_check/envoy_extension", **config)
+            schema.object_type "Widget" do |t|
+              t.field "id", "ID"
+              t.index "widgets"
+            end
           end
 
           build_graphql(schema_artifacts: schema_artifacts)
