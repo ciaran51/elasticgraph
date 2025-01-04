@@ -14,7 +14,7 @@ group :development do
   gem "coderay", "~> 1.1"
   gem "factory_bot", "~> 6.4"
   gem "faker", "~> 3.5"
-  gem "flatware-rspec", "~> 2.3", ">= 2.3.3"
+  gem "flatware-rspec", "~> 2.3"
   gem "httpx", "~> 1.3"
   gem "method_source", "~> 1.1"
   gem "rubocop-factory_bot", "~> 2.26"
