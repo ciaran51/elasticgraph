@@ -105,7 +105,10 @@ module ElasticGraph
             list_datastore_management_tasks do |t|
               t.env_port_mapping = {local: "123"}
             end
-          }.to raise_error a_string_including('`env_port_mapping` has invalid ports: {:local=>"123"}')
+          }.to raise_error a_string_including(
+            "`env_port_mapping` has invalid ports: ",
+            inspect_output_of('{local: "123"}')
+          )
         end
 
         it "raises an error when a port number is too high" do
@@ -113,7 +116,10 @@ module ElasticGraph
             list_datastore_management_tasks do |t|
               t.env_port_mapping = {local: "45000"}
             end
-          }.to raise_error a_string_including('`env_port_mapping` has invalid ports: {:local=>"45000"}')
+          }.to raise_error a_string_including(
+            "`env_port_mapping` has invalid ports: ",
+            inspect_output_of('{local: "45000"}')
+          )
         end
 
         context "when `opensearch_versions` is empty" do
