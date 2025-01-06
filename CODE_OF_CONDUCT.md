@@ -21,24 +21,20 @@ diverse, inclusive, and healthy community.
 Examples of behavior that contributes to a positive environment for our
 community include:
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful and welcoming of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall
-  community
+* **Be open.** We invite anyone to participate in any aspect of our projects. Our community is open, and any responsibility can be carried by a contributor who demonstrates the required capacity and competence.
+* **Be considerate.** People use our work, and we depend on the work of others. Consider users and colleagues before taking action. For example, changes to code, infrastructure, policy, and documentation may negatively impact others.
+* **Be respectful.** We expect people to work together to resolve conflict, assume good intentions, and act with empathy. Do not turn disagreements into personal attacks.
+* **Be collaborative.** Collaboration reduces redundancy and improves the quality of our work. We strive for transparency within our open source community, and we work closely with upstream developers and others in the free software community to coordinate our efforts.
+* **Be pragmatic.** Questions are encouraged and should be asked early in the process to avoid problems later. Be thoughtful and considerate when seeking out the appropriate forum for your questions. Those who are asked should be responsive and helpful.
+* **Step down considerately.** Members of every project come and go. When somebody leaves or disengages from the project, they should make it known and take the proper steps to ensure that others can pick up where they left off.
 
 Examples of unacceptable behavior include:
-
-* The use of sexualized language or imagery, and sexual attention or advances of
-  any kind
+* The use of sexualized language or imagery, and sexual attention or advances of any kind
 * Trolling, insulting or derogatory comments, and personal or political attacks
 * Public or private harassment
-* Publishing others' private information, such as a physical or email address,
-  without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+* Publishing others' private information, such as a physical or email address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a professional setting
+
 
 ## Enforcement Responsibilities
 
