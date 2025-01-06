@@ -290,6 +290,7 @@ module ElasticGraph
             self
           end
 
+          # :nocov: -- these methods are not called on an adapter when `indexed?` returns `false`.
           def customize_query(query, representations)
             nil
           end
@@ -297,6 +298,7 @@ module ElasticGraph
           def index_search_hits(response)
             nil
           end
+          # :nocov:
 
           def identify_matching_hit(indexed_search_hits, representation, context:, index:)
             representation.representation_hash
