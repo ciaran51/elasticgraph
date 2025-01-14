@@ -54,7 +54,7 @@ This Code of Conduct applies within all project spaces, and it also applies when
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to the GoC at [`open-source-governance@block.xyz`](mailto:open-source-governance@block.xyz). All complaints will be reviewed and investigated promptly and fairly, and will result in a response that is deemed necessary and appropriate to the circumstances.
+Instances of unacceptable behavior may be reported to the GC at [`open-source-governance@block.xyz`](mailto:open-source-governance@block.xyz). All complaints will be reviewed and investigated promptly and fairly, and will result in a response that is deemed necessary and appropriate to the circumstances.
 
 ## Enforcement Guidelines
 
