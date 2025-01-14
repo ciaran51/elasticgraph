@@ -1,7 +1,7 @@
 
 # Block Code of Conduct
 
-Block's mission is Economic Empowerment. This means opening the global economy to everyone. We extend the same principles of inclusion to our developer ecosystem. We are excited to build with you. So we will ensure our community is truly open, transparent and inclusive. Because of the global nature of our project, diversity and inclusivity is paramount to our success. We not only welcome diverse perspectives, we **need** them!
+Block's purpose is Economic Empowerment. This means opening the global economy to everyone. We extend the same principles of inclusion to our developer ecosystem. We are excited to build with you, and want to ensure our community is truly open, transparent and inclusive. Because of the global nature of our project, diversity and inclusivity is paramount to our success. We not only welcome diverse perspectives, we **need** them!
 
 The code of conduct below reflects the expectations for ourselves and for our community.
 
@@ -21,24 +21,20 @@ diverse, inclusive, and healthy community.
 Examples of behavior that contributes to a positive environment for our
 community include:
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful and welcoming of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall
-  community
+* **Be open.** We invite anyone to participate in any aspect of our projects. Our community is open, and any responsibility can be carried by a contributor who demonstrates the required capacity and competence.
+* **Be considerate.** People use our work, and we depend on the work of others. Consider users and colleagues before taking action. For example, changes to code, infrastructure, policy, and documentation may negatively impact others.
+* **Be respectful.** We expect people to work together to resolve conflict, assume good intentions, and act with empathy. Do not turn disagreements into personal attacks.
+* **Be collaborative.** Collaboration reduces redundancy and improves the quality of our work. We strive for transparency within our open source community, and we work closely with upstream developers and others in the free software community to coordinate our efforts.
+* **Be pragmatic.** Questions are encouraged and should be asked early in the process to avoid problems later. Be thoughtful and considerate when seeking out the appropriate forum for your questions. Those who are asked should be responsive and helpful.
+* **Step down considerately.** Members of every project come and go. When somebody leaves or disengages from the project, they should make it known and take the proper steps to ensure that others can pick up where they left off.
 
 Examples of unacceptable behavior include:
-
-* The use of sexualized language or imagery, and sexual attention or advances of
-  any kind
+* The use of sexualized language or imagery, and sexual attention or advances of any kind
 * Trolling, insulting or derogatory comments, and personal or political attacks
 * Public or private harassment
-* Publishing others' private information, such as a physical or email address,
-  without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+* Publishing others' private information, such as a physical or email address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a professional setting
+
 
 ## Enforcement Responsibilities
 
@@ -58,13 +54,7 @@ This Code of Conduct applies within all project spaces, and it also applies when
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the Block Open Source Governance Committee (GC) at
-`open-source-governance@block.xyz`. All complaints will be reviewed and 
-investigated promptly and fairly.
-
-The GC is obligated to respect the privacy and security of the
-reporter of any incident.
+Instances of unacceptable behavior may be reported to the GC at [`open-source-governance@block.xyz`](mailto:open-source-governance@block.xyz). All complaints will be reviewed and investigated promptly and fairly, and will result in a response that is deemed necessary and appropriate to the circumstances.
 
 ## Enforcement Guidelines
 
@@ -85,7 +75,7 @@ behavior was inappropriate. A public apology may be requested.
 **Community Impact**: A violation through a single incident or series of
 actions.
 
-**Consequence**: A warning with consequences for continued behavior. No
+**Consequence**: A warning with consequences for continued behavior. The offending party is warned to have no
 interaction with the people involved, including unsolicited interaction with
 those enforcing the Code of Conduct, for a specified period of time. This
 includes avoiding interactions in community spaces as well as external channels
@@ -112,7 +102,7 @@ Violating these terms may lead to a permanent ban.
 standards, including sustained inappropriate behavior, harassment of an
 individual, or aggression toward or disparagement of classes of individuals.
 
-**Consequence**: A permanent ban from any sort of public interaction within the
+**Consequence**: A permanent ban from any form of public interaction within the
 community.
 
 ## Attribution
