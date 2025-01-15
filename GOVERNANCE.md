@@ -30,12 +30,7 @@ Maintainers have write access to GitHub repositories and act as project administ
 Both maintainers and non-maintainers may propose changes to
 source code. The mechanism to propose such a change is a GitHub pull request. Maintainers review and merge (_land_) pull requests.
 
-If a maintainer opposes a proposed change, then the change cannot land. The exception is if the Governance Committee (GC) votes to approve the change despite the opposition. Usually, involving the GC is unnecessary.
-
-See:
-
-* [List of maintainers - `MAINTAINERS.md`](./MAINTAINERS.md)
-* [Contribution Guide - `CONTRIBUTING.md`](./CONTRIBUTING.md)
+If a maintainer opposes a proposed change, then the change cannot land.
 
 ### Maintainer activities
 
@@ -49,11 +44,9 @@ See:
 
 The Block Open Source Governance Committee (GC) has final authority over this project, including:
 
-* Technical direction
 * Project governance and process (including this policy)
 * Contribution policy
 * GitHub repository hosting
 * Conduct guidelines
-* Maintaining the list of maintainers
 
 The GC may be reached through `open-source-governance@block.xyz` and is an available resource in mediation or for sensitive cases beyond the scope of project maintainers. It operates as a "Self-appointing council or board" as defined by Red Hat: [Open Source Governance Models](https://www.redhat.com/en/blog/understanding-open-source-governance-models).
