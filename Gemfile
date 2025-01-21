@@ -19,7 +19,7 @@ group :development do
   gem "method_source", "~> 1.1"
   gem "rubocop-factory_bot", "~> 2.26"
   gem "rubocop-rake", "~> 0.6"
-  gem "rubocop-rspec", "~> 3.1"
+  gem "rubocop-rspec", "~> 3.4"
   gem "rspec", "~> 3.13"
   gem "rspec-retry", "~> 0.6"
   gem "simplecov", "~> 0.22"
