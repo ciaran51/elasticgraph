@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/block/elasticgraph/actions/workflows/ci.yaml?query=branch%3Amain" alt="CI Status">
-    <img src="https://img.shields.io/github/check-runs/block/elasticgraph/main?label=CI%20Status" /></a>
+    <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/block/elasticgraph/ci.yaml?branch=main&label=CI%20Status"></a>
   <a href="https://github.com/block/elasticgraph/blob/main/spec_support/lib/elastic_graph/spec_support/enable_simplecov.rb" alt="ElasticGraph maintains 100% Test Coverage">
     <img src="https://img.shields.io/badge/Test%20Coverage-100%25-green" /></a>
   <a href="https://github.com/block/elasticgraph/pulse" alt="Activity">
