@@ -44,6 +44,7 @@ module ElasticGraph
       :initially_registered_built_in_types,
       :built_in_types_customization_blocks,
       :user_definition_complete,
+      :user_definition_complete_callbacks,
       :sub_aggregation_paths_by_type,
       :type_refs_by_name,
       :output,
@@ -86,6 +87,7 @@ module ElasticGraph
           initially_registered_built_in_types: ::Set.new,
           built_in_types_customization_blocks: [],
           user_definition_complete: false,
+          user_definition_complete_callbacks: [],
           sub_aggregation_paths_by_type: {},
           type_refs_by_name: {},
           type_namer: SchemaElements::TypeNamer.new(
@@ -189,6 +191,10 @@ module ElasticGraph
             # :nocov:
           end
         end
+      end
+
+      def after_user_definition_complete(&block)
+        user_definition_complete_callbacks << block
       end
 
       private
