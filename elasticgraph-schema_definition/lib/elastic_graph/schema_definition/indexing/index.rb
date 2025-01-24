@@ -55,12 +55,14 @@ module ElasticGraph
 
           super(name, [], settings, schema_def_state, indexed_type, [], nil)
 
-          # `id` is the field Elasticsearch/OpenSearch use for routing by default:
-          # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-routing-field.html
-          # By using it here, it will cause queries to pass a `routing` parameter when
-          # searching with id filtering on an index that does not use custom shard routing, giving
-          # us a nice efficiency boost.
-          self.routing_field_path = public_field_path("id", explanation: "indexed types must have an `id` field")
+          schema_def_state.after_user_definition_complete do
+            # `id` is the field Elasticsearch/OpenSearch use for routing by default:
+            # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-routing-field.html
+            # By using it here, it will cause queries to pass a `routing` parameter when
+            # searching with id filtering on an index that does not use custom shard routing, giving
+            # us a nice efficiency boost.
+            self.routing_field_path = public_field_path("id", explanation: "indexed types must have an `id` field")
+          end
 
           yield self if block_given?
         end
@@ -290,7 +292,7 @@ module ElasticGraph
 
         def public_field_path(public_path_string, explanation:)
           parent_is_not_list = ->(parent_field) { !parent_field.type.list? }
-          resolver = SchemaElements::FieldPath::Resolver.new
+          resolver = schema_def_state.field_path_resolver
           resolved_path = resolver.resolve_public_path(indexed_type, public_path_string, &parent_is_not_list)
           return resolved_path if resolved_path
 

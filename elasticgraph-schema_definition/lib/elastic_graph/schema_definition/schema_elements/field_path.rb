@@ -51,13 +51,17 @@ module ElasticGraph
 
         # Responsible for resolving a particular field path (given as a string) into a `FieldPath` object.
         #
-        # Important: this class optimizes performance by memoizing some things based on the current state
-        # of the ElasticGraph schema. It's intended to be used AFTER the schema is fully defined (e.g.
-        # as part of dumping schema artifacts). Using it before the schema has fully been defined requires
-        # that you discard the instance after using it, as it won't be aware of additions to the schema
-        # and may yield inaccurate results.
+        # Cannot be instantiated until the user has finished defining the schema.
+        # If we allowed it to be used before then, it creates a situation where the order of definition matters.
+        # In addition, this class optimizes performance by memoizing some things based on the current state, and
+        # if the state is updated after an instance is created, inaccurate results could be produced.
         class Resolver
-          def initialize
+          def initialize(state)
+            unless state.user_definition_complete
+              raise Errors::SchemaError,
+                "A `FieldPath::Resolver` cannot be created before the user definition of the schema is complete."
+            end
+
             @indexing_fields_by_public_name_by_type = ::Hash.new do |hash, type|
               hash[type] = type
                 .indexing_fields_by_name_in_index

@@ -6,8 +6,7 @@ module ElasticGraph
           schema_def_state: State,
           object_type: indexableType,
           relationship_name: ::String,
-          sourced_fields: ::Array[SchemaElements::Field],
-          field_path_resolver: SchemaElements::FieldPath::Resolver
+          sourced_fields: ::Array[SchemaElements::Field]
         ) -> void
 
         def resolve: () -> untyped
@@ -18,7 +17,6 @@ module ElasticGraph
         attr_reader object_type: indexableType
         attr_reader relationship_name: ::String
         attr_reader sourced_fields: ::Array[SchemaElements::Field]
-        attr_reader field_path_resolver: SchemaElements::FieldPath::Resolver
 
         def relationship_error_prefix: () -> ::String
         def validate_foreign_key: (

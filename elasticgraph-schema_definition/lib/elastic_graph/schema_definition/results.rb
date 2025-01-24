@@ -180,9 +180,6 @@ module ElasticGraph
       # Builds a map, keyed by object type name, of extra `update_targets` that have been generated
       # from any fields that use `sourced_from` on other types.
       def identify_extra_update_targets_by_object_type_name
-        # The field_path_resolver memoizes some calculations, and we want the same instance to be
-        # used by all UpdateTargetBuilders to maximize its effectiveness.
-        field_path_resolver = SchemaElements::FieldPath::Resolver.new
         sourced_field_errors = [] # : ::Array[::String]
         relationship_errors = [] # : ::Array[::String]
 
@@ -210,8 +207,7 @@ module ElasticGraph
               schema_def_state: state,
               object_type: object_type,
               relationship_name: relationship_name,
-              sourced_fields: sourced_fields,
-              field_path_resolver: field_path_resolver
+              sourced_fields: sourced_fields
             )
 
             resolved_relationship, relationship_error = relationship_resolver.resolve
@@ -222,7 +218,7 @@ module ElasticGraph
                 object_type: object_type,
                 resolved_relationship: resolved_relationship,
                 sourced_fields: sourced_fields,
-                field_path_resolver: field_path_resolver
+                field_path_resolver: state.field_path_resolver
               )
 
               update_target, errors = update_target_resolver.resolve

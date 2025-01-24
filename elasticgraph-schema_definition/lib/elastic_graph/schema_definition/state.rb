@@ -11,6 +11,7 @@ require "elastic_graph/errors"
 require "elastic_graph/schema_definition/factory"
 require "elastic_graph/schema_definition/mixins/has_readable_to_s_and_inspect"
 require "elastic_graph/schema_definition/schema_elements/enum_value_namer"
+require "elastic_graph/schema_definition/schema_elements/field_path"
 require "elastic_graph/schema_definition/schema_elements/type_namer"
 require "elastic_graph/schema_definition/schema_elements/sub_aggregation_path"
 
@@ -195,6 +196,10 @@ module ElasticGraph
 
       def after_user_definition_complete(&block)
         user_definition_complete_callbacks << block
+      end
+
+      def field_path_resolver
+        @field_path_resolver ||= SchemaElements::FieldPath::Resolver.new(self)
       end
 
       private

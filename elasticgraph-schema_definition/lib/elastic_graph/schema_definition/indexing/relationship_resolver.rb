@@ -11,12 +11,11 @@ module ElasticGraph
     module Indexing
       # @private
       class RelationshipResolver
-        def initialize(schema_def_state:, object_type:, relationship_name:, sourced_fields:, field_path_resolver:)
+        def initialize(schema_def_state:, object_type:, relationship_name:, sourced_fields:)
           @schema_def_state = schema_def_state
           @object_type = object_type
           @relationship_name = relationship_name
           @sourced_fields = sourced_fields
-          @field_path_resolver = field_path_resolver
         end
 
         def resolve
@@ -51,8 +50,8 @@ module ElasticGraph
 
         private
 
-        # @dynamic schema_def_state, object_type, relationship_name, sourced_fields, field_path_resolver
-        attr_reader :schema_def_state, :object_type, :relationship_name, :sourced_fields, :field_path_resolver
+        # @dynamic schema_def_state, object_type, relationship_name, sourced_fields
+        attr_reader :schema_def_state, :object_type, :relationship_name, :sourced_fields
 
         # Helper method for building the prefix of relationship-related error messages.
         def relationship_error_prefix
@@ -67,7 +66,7 @@ module ElasticGraph
         end
 
         def validate_foreign_key(foreign_key_parent_type, relation_metadata)
-          foreign_key_field = field_path_resolver.resolve_public_path(foreign_key_parent_type, relation_metadata.foreign_key) { true }
+          foreign_key_field = schema_def_state.field_path_resolver.resolve_public_path(foreign_key_parent_type, relation_metadata.foreign_key) { true }
           # If its an inbound foreign key, verify that the foreign key exists on the related type.
           # Note: we don't verify this for outbound foreign keys, because when we define a relationship with an outbound foreign
           # key, we automatically define an indexing only field for the foreign key (since it exists on the same type). We don't
