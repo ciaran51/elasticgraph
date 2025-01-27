@@ -120,23 +120,25 @@ module ElasticGraph
         #     end
         #   end
         def rollover(frequency, timestamp_field_path_name)
-          timestamp_field_path = public_field_path(timestamp_field_path_name, explanation: "it is referenced as an index `rollover` field")
+          schema_def_state.after_user_definition_complete do
+            timestamp_field_path = public_field_path(timestamp_field_path_name, explanation: "it is referenced as an index `rollover` field")
 
-          unless date_and_datetime_types.include?(timestamp_field_path.type.fully_unwrapped.name)
-            date_or_datetime_description = date_and_datetime_types.map { |t| "`#{t}`" }.join(" or ")
-            raise Errors::SchemaError, "rollover field `#{timestamp_field_path.full_description}` cannot be used for rollover since it is not a #{date_or_datetime_description} field."
+            unless date_and_datetime_types.include?(timestamp_field_path.type.fully_unwrapped.name)
+              date_or_datetime_description = date_and_datetime_types.map { |t| "`#{t}`" }.join(" or ")
+              raise Errors::SchemaError, "rollover field `#{timestamp_field_path.full_description}` cannot be used for rollover since it is not a #{date_or_datetime_description} field."
+            end
+
+            if timestamp_field_path.type.list?
+              raise Errors::SchemaError, "rollover field `#{timestamp_field_path.full_description}` cannot be used for rollover since it is a list field."
+            end
+
+            timestamp_field_path.path_parts.each { |f| f.json_schema nullable: false }
+
+            self.rollover_config = RolloverConfig.new(
+              frequency: frequency,
+              timestamp_field_path: timestamp_field_path
+            )
           end
-
-          if timestamp_field_path.type.list?
-            raise Errors::SchemaError, "rollover field `#{timestamp_field_path.full_description}` cannot be used for rollover since it is a list field."
-          end
-
-          timestamp_field_path.path_parts.each { |f| f.json_schema nullable: false }
-
-          self.rollover_config = RolloverConfig.new(
-            frequency: frequency,
-            timestamp_field_path: timestamp_field_path
-          )
         end
 
         # Configures the index to [route documents to shards](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/mapping-routing-field.html)
@@ -169,17 +171,19 @@ module ElasticGraph
         #     end
         #   end
         def route_with(routing_field_path_name)
-          routing_field_path = public_field_path(routing_field_path_name, explanation: "it is referenced as an index `route_with` field")
+          schema_def_state.after_user_definition_complete do
+            routing_field_path = public_field_path(routing_field_path_name, explanation: "it is referenced as an index `route_with` field")
 
-          unless routing_field_path.type.leaf?
-            raise Errors::SchemaError, "shard routing field `#{routing_field_path.full_description}` cannot be used for routing since it is not a leaf field."
+            unless routing_field_path.type.leaf?
+              raise Errors::SchemaError, "shard routing field `#{routing_field_path.full_description}` cannot be used for routing since it is not a leaf field."
+            end
+
+            self.routing_field_path = routing_field_path
+
+            routing_field_path.path_parts[0..-2].each { |f| f.json_schema nullable: false }
+            routing_field_path.last_part.json_schema nullable: false, pattern: HAS_NON_WHITE_SPACE_REGEX
+            indexed_type.append_to_documentation "For more performant queries on this type, please filter on `#{routing_field_path_name}` if possible."
           end
-
-          self.routing_field_path = routing_field_path
-
-          routing_field_path.path_parts[0..-2].each { |f| f.json_schema nullable: false }
-          routing_field_path.last_part.json_schema nullable: false, pattern: HAS_NON_WHITE_SPACE_REGEX
-          indexed_type.append_to_documentation "For more performant queries on this type, please filter on `#{routing_field_path_name}` if possible."
         end
 
         # @see #route_with

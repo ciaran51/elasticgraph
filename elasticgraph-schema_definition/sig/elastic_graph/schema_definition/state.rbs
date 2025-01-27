@@ -22,6 +22,7 @@ module ElasticGraph
       attr_accessor initially_registered_built_in_types: ::Set[::String]
       attr_accessor built_in_types_customization_blocks: ::Array[^(SchemaElements::graphQLType) -> void]
       attr_accessor user_definition_complete: bool
+      attr_accessor user_definition_complete_callbacks: ::Array[^() -> void]
       attr_accessor sub_aggregation_paths_by_type: ::Hash[Mixins::SupportsFilteringAndAggregation, ::Array[SchemaElements::SubAggregationPath]]
       attr_accessor type_refs_by_name: ::Hash[::String, SchemaElements::TypeReference]
       attr_reader type_namer: SchemaElements::TypeNamer
@@ -50,6 +51,7 @@ module ElasticGraph
         initially_registered_built_in_types: ::Set[::String],
         built_in_types_customization_blocks: ::Array[^(SchemaElements::graphQLType) -> void],
         user_definition_complete: bool,
+        user_definition_complete_callbacks: ::Array[^() -> void],
         sub_aggregation_paths_by_type: ::Hash[Mixins::SupportsFilteringAndAggregation, ::Array[SchemaElements::SubAggregationPath]],
         type_refs_by_name: ::Hash[::String, SchemaElements::TypeReference],
         type_namer: SchemaElements::TypeNamer,
@@ -92,6 +94,9 @@ module ElasticGraph
 
       @user_defined_field_references_by_type_name: ::Hash[::String, ::Array[SchemaElements::Field]]?
       def user_defined_field_references_by_type_name: () -> ::Hash[::String, ::Array[SchemaElements::Field]]
+
+      def after_user_definition_complete: () { () -> void } -> void
+
       private
 
       RESERVED_TYPE_NAMES: ::Set[::String]

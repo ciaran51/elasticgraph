@@ -13,6 +13,11 @@ module ElasticGraph
     RSpec.describe "RuntimeMetadata #index_definitions_by_name" do
       include_context "RuntimeMetadata support"
 
+      let(:type_definition_orders) do
+        types = ["NestedFields", "MyType"]
+        [types, types.reverse]
+      end
+
       it "dumps the `route_with` value" do
         widgets = index_definition_metadata_for("widgets") do |i|
           i.route_with "group_id"
@@ -27,11 +32,13 @@ module ElasticGraph
         expect(widgets.route_with).to eq "group_id_index"
       end
 
-      it "supports nested `route_with` fields, using the `name_in_index` at each layer" do
-        widgets = index_definition_metadata_for("widgets") do |i|
-          i.route_with "nested_fields_gql.some_id_gql"
+      it "supports nested `route_with` fields regardless of definition order, using the `name_in_index` at each layer" do
+        type_definition_orders.each do |type_definition_order|
+          widgets = index_definition_metadata_for("widgets", type_definition_order: type_definition_order) do |i|
+            i.route_with "nested_fields_gql.some_id_gql"
+          end
+          expect(widgets.route_with).to eq "nested_fields_index.some_id_index"
         end
-        expect(widgets.route_with).to eq "nested_fields_index.some_id_index"
       end
 
       it "defaults `route_with` to `id` because that's the default routing the datastore uses" do
@@ -62,14 +69,16 @@ module ElasticGraph
         )
       end
 
-      it "supports nested `rollover` timestamp fields, using the `name_in_index` at each layer" do
-        widgets = index_definition_metadata_for("widgets") do |i|
-          i.rollover :monthly, "nested_fields_gql.some_timestamp_gql"
+      it "supports nested `rollover` timestamp fields regardless of definition order, using the `name_in_index` at each layer" do
+        type_definition_orders.each do |type_definition_order|
+          widgets = index_definition_metadata_for("widgets", type_definition_order: type_definition_order) do |i|
+            i.rollover :monthly, "nested_fields_gql.some_timestamp_gql"
+          end
+          expect(widgets.rollover).to eq SchemaArtifacts::RuntimeMetadata::IndexDefinition::Rollover.new(
+            frequency: :monthly,
+            timestamp_field_path: "nested_fields_index.some_timestamp_index"
+          )
         end
-        expect(widgets.rollover).to eq SchemaArtifacts::RuntimeMetadata::IndexDefinition::Rollover.new(
-          frequency: :monthly,
-          timestamp_field_path: "nested_fields_index.some_timestamp_index"
-        )
       end
 
       it "dumps the `default_sort_fields`" do
@@ -875,14 +884,14 @@ module ElasticGraph
         end
       end
 
-      def index_definition_metadata_for(name, on_my_type: nil, **options, &block)
-        runtime_metadata = define_schema do |s|
-          s.object_type "NestedFields" do |t|
+      def index_definition_metadata_for(name, type_definition_order: ["NestedFields", "MyType"], on_my_type: nil, **options, &block)
+        type_defs = {
+          "NestedFields" => ->(t) do
             t.field "some_id_gql", "ID", name_in_index: "some_id_index"
             t.field "some_timestamp_gql", "DateTime", name_in_index: "some_timestamp_index"
-          end
+          end,
 
-          s.object_type "MyType" do |t|
+          "MyType" => ->(t) do
             t.field "id", "ID!"
             t.field "group_id", "ID!"
             t.field "group_id_gql", "ID", name_in_index: "group_id_index"
@@ -891,6 +900,12 @@ module ElasticGraph
             t.field "nested_fields_gql", "NestedFields", name_in_index: "nested_fields_index"
             on_my_type&.call(t)
             t.index(name, **options, &block)
+          end
+        }
+
+        runtime_metadata = define_schema do |s|
+          type_definition_order.each do |type_name|
+            s.object_type(type_name, &type_defs.fetch(type_name))
           end
         end.runtime_metadata
 

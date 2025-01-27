@@ -1394,24 +1394,24 @@ module ElasticGraph
         end
 
         it "respects configured type name overrides when determining if a rollover field is a valid type" do
-          json_schema = dump_schema(type_name_overrides: {"Date" => "Etad", "DateTime" => "EmitEtad"}) do |s|
-            s.object_type "Widget" do |t|
-              t.field "id", "ID"
-              t.field "created_at", "EmitEtad"
-              t.index "widgets" do |i|
-                i.rollover :monthly, "created_at"
+          expect {
+            dump_schema(type_name_overrides: {"Date" => "Etad", "DateTime" => "EmitEtad"}) do |s|
+              s.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.field "created_at", "EmitEtad"
+                t.index "widgets" do |i|
+                  i.rollover :monthly, "created_at"
+                end
               end
-            end
 
-            s.object_type "Component" do |t|
-              t.field "id", "ID"
-              t.field "created_on", "Etad"
-              t.index "widgets" do |i|
-                i.rollover :monthly, "created_on"
+              s.object_type "Component" do |t|
+                t.field "id", "ID"
+                t.field "created_on", "Etad"
+                t.index "widgets" do |i|
+                  i.rollover :monthly, "created_on"
+                end
               end
-            end
 
-            expect {
               s.object_type "Part" do |t|
                 t.field "id", "ID"
                 t.field "created_at", "String"
@@ -1419,12 +1419,10 @@ module ElasticGraph
                   i.rollover :monthly, "created_at"
                 end
               end
-            }.to raise_error(Errors::SchemaError, a_string_including(
-              "rollover field `Part.created_at: String` cannot be used for rollover since it is not a `Etad` or `EmitEtad` field"
-            ))
-          end
-
-          expect(json_schema.fetch("$defs").keys).to include("Widget", "Component")
+            end
+          }.to raise_error(Errors::SchemaError, a_string_including(
+            "rollover field `Part.created_at: String` cannot be used for rollover since it is not a `Etad` or `EmitEtad` field"
+          ))
         end
 
         it "raises an error if a rollover timestamp field references a list field" do
@@ -1453,7 +1451,7 @@ module ElasticGraph
           }.to raise_error(Errors::SchemaError, a_string_including("rollover field `Widget.created_ons: [Date]` cannot be used for rollover since it is a list field."))
         end
 
-        it "raises an error if the timestamp field specified in `rollover` is defined after the `index` call" do
+        it "allows the timestamp field specified in `rollover` to be defined after the `index` call" do
           expect {
             dump_schema do |s|
               s.object_type "Widget" do |t|
@@ -1461,12 +1459,11 @@ module ElasticGraph
                 t.index "widgets" do |i|
                   i.rollover :monthly, "created_at"
                 end
-                # :nocov: -- the error is raised before we get here
+
                 t.field "created_at", "DateTime"
-                # :nocov:
               end
             end
-          }.to raise_error(Errors::SchemaError, a_string_including("the `Widget.created_at` definition must come before the `index` call"))
+          }.not_to raise_error
         end
       end
 
@@ -1643,7 +1640,7 @@ module ElasticGraph
           }.not_to raise_error
         end
 
-        it "raises an error if the specified custom shard routing field is defined after `index`" do
+        it "allows the specified custom shard routing field to be defined after `index`" do
           expect {
             dump_schema do |s|
               s.object_type "Widget" do |t|
@@ -1651,12 +1648,11 @@ module ElasticGraph
                 t.index "widgets" do |i|
                   i.route_with "user_id"
                 end
-                # :nocov: -- the error is raised before we get here
+
                 t.field "user_id", "ID"
-                # :nocov:
               end
             end
-          }.to raise_error(Errors::SchemaError, a_string_including("the `Widget.user_id` definition must come before the `index` call"))
+          }.not_to raise_error
         end
 
         it "mentions the expected field in the error message when dealing with nested fields" do

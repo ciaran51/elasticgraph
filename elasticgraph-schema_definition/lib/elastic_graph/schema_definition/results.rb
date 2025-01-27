@@ -109,6 +109,7 @@ module ElasticGraph
       def after_initialize
         # Record that we are now generating results so that caching can kick in.
         state.user_definition_complete = true
+        state.user_definition_complete_callbacks.each(&:call)
       end
 
       def json_schema_with_metadata_merger
