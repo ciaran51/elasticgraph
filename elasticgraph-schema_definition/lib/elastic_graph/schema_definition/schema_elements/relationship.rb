@@ -191,11 +191,15 @@ module ElasticGraph
 
         # @private
         def runtime_metadata
-          field_path_resolver = SchemaElements::FieldPath::Resolver.new
           resolved_related_type = (_ = related_type.unwrap_list.as_object_type) # : indexableType
-          foreign_key_nested_paths = field_path_resolver.determine_nested_paths(resolved_related_type, @foreign_key)
+          foreign_key_nested_paths = schema_def_state.field_path_resolver.determine_nested_paths(resolved_related_type, @foreign_key)
           foreign_key_nested_paths ||= [] # : ::Array[::String]
-          SchemaArtifacts::RuntimeMetadata::Relation.new(foreign_key: @foreign_key, direction: @direction, additional_filter: @additional_filter, foreign_key_nested_paths: foreign_key_nested_paths)
+          SchemaArtifacts::RuntimeMetadata::Relation.new(
+            foreign_key: @foreign_key,
+            direction: @direction,
+            additional_filter: @additional_filter,
+            foreign_key_nested_paths: foreign_key_nested_paths
+          )
         end
 
         private

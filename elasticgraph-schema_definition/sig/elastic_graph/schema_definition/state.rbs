@@ -97,6 +97,9 @@ module ElasticGraph
 
       def after_user_definition_complete: () { () -> void } -> void
 
+      @field_path_resolver: SchemaElements::FieldPath::Resolver?
+      def field_path_resolver: () -> SchemaElements::FieldPath::Resolver
+
       private
 
       RESERVED_TYPE_NAMES: ::Set[::String]

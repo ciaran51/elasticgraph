@@ -20,7 +20,7 @@ module ElasticGraph
 
         class Resolver
           @indexing_fields_by_public_name_by_type: ::Hash[indexableType, ::Hash[::String, Field]]
-          def initialize: () -> void
+          def initialize: (State) -> void
           def resolve_public_path: (indexableType, ::String) { (Field) -> bool } -> FieldPath?
           def determine_nested_paths: (indexableType, ::String) -> ::Array[::String]?
         end
