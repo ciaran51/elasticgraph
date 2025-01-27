@@ -50,6 +50,11 @@ module ElasticGraph
         # so we set it here.
         @api.json_schema_version 1
 
+        @api.object_type "SomeIndexedTypeToEnsureQueryTypeHasFields" do |t|
+          t.field "id", "ID"
+          t.index "some_indexed_type"
+        end
+
         # Store the api instance so that `ElasticGraph.define_schema` can access it.
         ::Thread.current[:ElasticGraph_SchemaDefinition_API_instance] = @api
       end
