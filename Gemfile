@@ -33,7 +33,7 @@ end
 # Documentation generation gems
 group :site do
   gem "filewatcher", "~> 2.1"
-  gem "jekyll", "~> 4.3"
+  gem "jekyll", "~> 4.4"
   gem "yard", "~> 0.9", ">= 0.9.36"
   gem "yard-doctest", "~> 0.1", ">= 0.1.17"
 end
