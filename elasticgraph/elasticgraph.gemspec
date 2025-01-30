@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.email = ["myron@squareup.com"]
   spec.homepage = "https://block.github.io/elasticgraph/"
   spec.license = "MIT"
-  spec.summary = "ElasticGraph meta-gem that pulls in all the core ElasticGraph gems."
+  spec.summary = "Bootstraps ElasticGraph projects."
 
   # See https://guides.rubygems.org/specification-reference/#metadata
   # for metadata entries understood by rubygems.org.
@@ -41,8 +41,10 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = [">= 3.2", "< 3.5"]
 
-  spec.add_dependency "elasticgraph-admin", ElasticGraph::VERSION
-  spec.add_dependency "elasticgraph-graphql", ElasticGraph::VERSION
-  spec.add_dependency "elasticgraph-indexer", ElasticGraph::VERSION
-  spec.add_dependency "elasticgraph-local", ElasticGraph::VERSION
+  spec.add_dependency "elasticgraph-support", ElasticGraph::VERSION
+  spec.add_dependency "thor", "~> 1.3"
+
+  # Expose 'elasticgraph' as a binary
+  spec.bindir = "exe"
+  spec.executables = ["elasticgraph"]
 end

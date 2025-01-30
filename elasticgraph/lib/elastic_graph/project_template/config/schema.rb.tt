@@ -1,0 +1,21 @@
+require "pathname"
+
+ElasticGraph.define_schema do |schema|
+  # ElasticGraph will tell you when you need to bump this.
+  schema.json_schema_version 1
+
+  # This registers the elasticgraph-query_registry extension, which can be used to reject queries that
+  # clients have not registered (and to reject queries that differ from what a client has registered).
+  # In addition, every registered query is validated against the schema in the CI build, giving you
+  # confidence as you evolve your schema that you're not breaking client queries.
+  #
+  # If you don't want to use this extension, you can remove these lines.
+  require(query_registry_path = "elastic_graph/query_registry/graphql_extension")
+  schema.register_graphql_extension ElasticGraph::QueryRegistry::GraphQLExtension, defined_at: query_registry_path
+end
+
+# Load the rest of the schema from files at config/schema/**/*.rb.
+Dir["#{__dir__}/schema/**/*.rb"].each do |schema_def_file|
+  # Must use `load`, not `require` so that if the schema is evaluated multiple times it works.
+  load Pathname(schema_def_file).expand_path
+end
