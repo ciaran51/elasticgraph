@@ -53,7 +53,7 @@ module ElasticGraph
 
           settings = DEFAULT_SETTINGS.merge(Support::HashUtil.flatten_and_stringify_keys(settings, prefix: "index"))
 
-          super(name, [], settings, schema_def_state, indexed_type, [], nil)
+          super(name, [], settings, schema_def_state, indexed_type, nil, nil)
 
           schema_def_state.after_user_definition_complete do
             # `id` is the field Elasticsearch/OpenSearch use for routing by default:
