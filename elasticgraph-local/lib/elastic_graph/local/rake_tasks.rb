@@ -102,7 +102,7 @@ module ElasticGraph
       #     local_config_yaml: "config/settings/local.yaml",
       #     path_to_schema: "config/schema.rb"
       #   ) do |tasks|
-      #     tasks.derived_type_name_formats = {AggregatedValues: "Metrics"}
+      #     tasks.derived_type_name_formats = {AggregatedValues: "%{base}Metrics"}
       #   end
       #
       # @dynamic derived_type_name_formats, derived_type_name_formats=
