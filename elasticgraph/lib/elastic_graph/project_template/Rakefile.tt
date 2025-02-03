@@ -41,9 +41,6 @@ ElasticGraph::Local::RakeTasks.new(
     # IDFilterInput: "IDFilter"
   }
 
-  # Disable support for <%= ElasticGraph.setup_env.other_datastore_name %> since we are using <%= ElasticGraph.setup_env.datastore_name %> instead.
-  tasks.<%= ElasticGraph.setup_env.other_datastore %>_versions = []
-
   tasks.define_fake_data_batch_for :artists do |batch|
     batch.concat(<%= ElasticGraph.setup_env.app_module %>::FakeDataBatchGenerator.generate(artists: 100, venues: 10))
   end

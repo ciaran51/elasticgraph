@@ -239,7 +239,8 @@ module ElasticGraph
       attr_accessor :enforce_json_schema_version
 
       # List of Elasticsearch versions you want to be able to boot. Rake tasks will be defined for each version to support booting and
-      # halting Elasticsearch locally. Defaults to the versions of Elasticsearch that are exercised by the ElasticGraph test suite, as
+      # halting Elasticsearch locally. If the configuration of `local_config_yaml` only configures `opensearch` as a cluster backend,
+      # will default to an empty array. Otherwise, defaults to the versions of Elasticsearch that are exercised by the ElasticGraph test suite, as
       # defined by `lib/elastic_graph/local/tested_datastore_versions.yaml`:
       #
       # {include:file:elasticgraph-local/lib/elastic_graph/local/tested_datastore_versions.yaml}
@@ -247,19 +248,20 @@ module ElasticGraph
       # @return [Array<String>] list of Elasticsearch versions
       # @see #opensearch_versions
       #
-      # @example Disable Elasticsearch tasks for a project that uses OpenSearch
+      # @example Configure the Elasticsearch versions available to boot locally
       #   ElasticGraph::Local::RakeTasks.new(
       #     local_config_yaml: "config/settings/local.yaml",
       #     path_to_schema: "config/schema.rb"
       #   ) do |tasks|
-      #     tasks.elasticsearch_versions = []
+      #     tasks.elasticsearch_versions = ["8.16.1"]
       #   end
       #
       # @dynamic elasticsearch_versions, elasticsearch_versions=
       attr_accessor :elasticsearch_versions
 
       # List of OpenSearch versions you want to be able to boot. Rake tasks will be defined for each version to support booting and
-      # halting OpenSearch locally. Defaults to the versions of OpenSearch that are exercised by the ElasticGraph test suite, as
+      # halting OpenSearch locally. If the configuration of `local_config_yaml` only configures `elasticsearch` as a cluster backend,
+      # will default to an empty array. Otherwise, defaults to the versions of OpenSearch that are exercised by the ElasticGraph test suite, as
       # defined by `lib/elastic_graph/local/tested_datastore_versions.yaml`:
       #
       # {include:file:elasticgraph-local/lib/elastic_graph/local/tested_datastore_versions.yaml}
@@ -267,12 +269,12 @@ module ElasticGraph
       # @return [Array<String>] list of OpenSearch versions
       # @see #elasticsearch_versions
       #
-      # @example Disable OpenSearch tasks for a project that uses Elasticsearch
+      # @example Configure the OpenSearch versions available to boot locally
       #   ElasticGraph::Local::RakeTasks.new(
       #     local_config_yaml: "config/settings/local.yaml",
       #     path_to_schema: "config/schema.rb"
       #   ) do |tasks|
-      #     tasks.opensearch_versions = []
+      #     tasks.opensearch_versions = ["2.18.0"]
       #   end
       #
       # @dynamic opensearch_versions, opensearch_versions=
@@ -365,8 +367,8 @@ module ElasticGraph
         self.daemon_timeout = 300
 
         datastore_versions = ::YAML.load_file("#{__dir__}/tested_datastore_versions.yaml")
-        self.elasticsearch_versions = datastore_versions.fetch("elasticsearch")
-        self.opensearch_versions = datastore_versions.fetch("opensearch")
+        self.elasticsearch_versions = local_cluster_backends.include?("elasticsearch") ? datastore_versions.fetch("elasticsearch") : []
+        self.opensearch_versions = local_cluster_backends.include?("opensearch") ? datastore_versions.fetch("opensearch") : []
 
         @fake_data_batch_generator_by_type = {}
 
@@ -538,6 +540,15 @@ module ElasticGraph
           .fetch("main")
           .fetch("url")[/localhost:(\d+)$/, 1]
           .then { |port_str| Integer(port_str) }
+      end
+
+      def local_cluster_backends
+        @local_cluster_backends ||= local_config
+          .fetch("datastore")
+          .fetch("clusters")
+          .values
+          .map { |v| v.fetch("backend") }
+          .to_set
       end
 
       def local_config
