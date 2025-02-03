@@ -12,7 +12,7 @@ source "https://rubygems.org"
 group :development do
   gem "aws_lambda_ric", "~> 2.0"
   gem "coderay", "~> 1.1"
-  gem "factory_bot", "~> 6.4"
+  gem "factory_bot", "~> 6.5"
   gem "faker", "~> 3.5"
   gem "flatware-rspec", "~> 2.3", ">= 2.3.4"
   gem "httpx", "~> 1.3"
