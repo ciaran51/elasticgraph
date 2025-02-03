@@ -42,7 +42,8 @@ module ElasticGraph
       setup_env = SetupEnv.new(
         app_name: app_name,
         app_module: app_name.split("_").map(&:capitalize).join,
-        datastore: options.fetch(:datastore)
+        datastore: options.fetch(:datastore),
+        gemfile_elasticgraph_details_code_snippet: %(["#{VERSION}"])
       )
 
       say "Creating a new #{setup_env.datastore_name} ElasticGraph project called '#{app_name}' at: #{new_app_path}", :green
@@ -76,7 +77,7 @@ module ElasticGraph
     end
   end
 
-  class SetupEnv < ::Data.define(:app_name, :app_module, :datastore)
+  class SetupEnv < ::Data.define(:app_name, :app_module, :datastore, :gemfile_elasticgraph_details_code_snippet)
     DATASTORE_NAMES = {"elasticsearch" => "Elasticsearch", "opensearch" => "OpenSearch"}
     DATASTORE_UI_NAMES = {"elasticsearch" => "Kibana", "opensearch" => "OpenSearch Dashboards"}
     OTHER_DATASTORE = {"elasticsearch" => "opensearch", "opensearch" => "elasticsearch"}

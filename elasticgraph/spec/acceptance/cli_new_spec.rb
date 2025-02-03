@@ -153,34 +153,13 @@ module ElasticGraph
     # bootstrapped files can reference and use ElasticGraph files that have not
     # yet been released (but are available locally, and will be in the next release).
     #
-    # Here we hook into the call our CLI makes to `Bundler.with_unbundled_env` to
-    # edit the `Gemfile` just before `bundle install` gets run.
+    # Here we hook into the call to `ElasticGraph.setup_env` in order to override its
+    # `gemfile_elasticgraph_details_code_snippet`, to force it to use oru local gems.
     def override_gemfile_to_use_local_elasticgraph_gems
-      allow(::Bundler).to receive(:with_unbundled_env).and_wrap_original do |original, &block|
-        gemfile_contents = ::File.read("Gemfile")
-
-        # This pattern matches one or more consecutive lines starting with:
-        #   gem "elasticgraph-..."
-        # capturing them as a single chunk (capture group 1).
-        pattern = /
-        (
-          ^\s*gem\s+"elasticgraph-[^"]+"[^\n]*\n
-          (?:^\s*gem\s+"elasticgraph-[^"]+"[^\n]*\n)*
+      allow(::ElasticGraph).to receive(:setup_env).and_wrap_original do |original|
+        original.call&.with(
+          gemfile_elasticgraph_details_code_snippet: %([git: "file://#{CommonSpecHelpers::REPO_ROOT}"])
         )
-        /mx
-
-        new_contents = gemfile_contents.gsub(pattern) do |eg_gem_section|
-          <<~EOS
-
-            git "file://#{CommonSpecHelpers::REPO_ROOT}" do
-              #{eg_gem_section.delete_prefix("\n").split("\n").join("\n  ")}
-            end
-          EOS
-        end
-
-        ::File.write("Gemfile", new_contents)
-
-        original.call(&block)
       end
     end
 

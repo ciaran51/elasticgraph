@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Gem details for the elasticgraph gems.
-elasticgraph_details = ["<%= ElasticGraph::VERSION %>"]
+elasticgraph_details = <%= ElasticGraph.setup_env.gemfile_elasticgraph_details_code_snippet %>
 
 gem "elasticgraph-local", *elasticgraph_details
 gem "elasticgraph-<%= ElasticGraph.setup_env.datastore %>", *elasticgraph_details
