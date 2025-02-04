@@ -140,7 +140,8 @@ module ElasticGraph
         def routing_value_source_for_index(index)
           return nil unless index.uses_custom_routing?
 
-          @equivalent_field_paths_by_local_path.fetch(index.routing_field_path.path) do |local_need|
+          index_routing_field_path = index.routing_field_path # : FieldPath
+          @equivalent_field_paths_by_local_path.fetch(index_routing_field_path.path) do |local_need|
             yield local_need
           end
         end

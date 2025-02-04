@@ -4,7 +4,7 @@ module ElasticGraph
       # Note: this is a partial signature definition (`index.rb` is ignored in `Steepfile`)
       class Index
         attr_reader name: ::String
-        attr_reader routing_field_path: SchemaElements::FieldPath
+        attr_reader routing_field_path: SchemaElements::FieldPath?
         attr_reader rollover_config: RolloverConfig?
         def uses_custom_routing?: () -> bool
         def to_index_config: () -> ::Hash[::String, untyped]
