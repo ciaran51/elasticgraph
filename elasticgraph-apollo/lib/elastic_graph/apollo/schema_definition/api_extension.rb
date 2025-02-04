@@ -59,14 +59,6 @@ module ElasticGraph
       #     tasks.schema_definition_extension_modules = [ElasticGraph::Apollo::SchemaDefinition::APIExtension]
       #   end
       module APIExtension
-        # @private
-        def results
-          register_graphql_extension GraphQL::EngineExtension, defined_at: "elastic_graph/apollo/graphql/engine_extension"
-          define_apollo_schema_elements
-
-          super
-        end
-
         # Applies an apollo tag to built-in types so that they are included in the Apollo contract schema.
         #
         # @param name [String] tag name
@@ -126,6 +118,11 @@ module ElasticGraph
             # Built-in types like `PageInfo` need to be tagged with `@shareable` on Federation V2 since other subgraphs may
             # have them and they aren't entity types. `Query`, as the root, is a special case that must be skipped.
             (_ = type).apollo_shareable if type.respond_to?(:apollo_shareable) && type.name != "Query"
+          end
+
+          api.register_graphql_extension GraphQL::EngineExtension, defined_at: "elastic_graph/apollo/graphql/engine_extension"
+          api.state.after_user_definition_complete do
+            api.send(:define_apollo_schema_elements)
           end
         end
 
