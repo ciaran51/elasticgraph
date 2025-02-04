@@ -18,7 +18,7 @@ module ElasticGraph
       UI_PORT_OFFSET: ::Integer
       VALID_PORT_RANGE: ::Range[::Integer]
 
-      def define_fake_data_batch_for: (::Symbol) { (::Array[::Hash[::String, untyped]]) -> void } -> void
+      def define_fake_data_batch_for: (::Symbol) { () -> ::Array[::Hash[::String, untyped]] } -> void
 
       def initialize: (
         local_config_yaml: ::String | ::Pathname,
@@ -26,7 +26,7 @@ module ElasticGraph
       ) ?{ (RakeTasks) -> void } -> void
 
       @local_config_yaml: ::String
-      @fake_data_batch_generator_by_type: ::Hash[::Symbol, ^(::Array[::Hash[::String, untyped]]) -> void]
+      @fake_data_batch_generator_by_type: ::Hash[::Symbol, ^() -> ::Array[::Hash[::String, untyped]]]
 
       private
 

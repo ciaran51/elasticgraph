@@ -336,8 +336,8 @@ module ElasticGraph
       #     local_config_yaml: "config/settings/local.yaml",
       #     path_to_schema: "config/schema.rb"
       #   ) do |tasks|
-      #     tasks.define_fake_data_batch_for :campaigns do |batch|
-      #       batch.concat(FactoryBot.build_list(:campaigns))
+      #     tasks.define_fake_data_batch_for :campaigns do
+      #       FactoryBot.build_list(:campaigns)
       #     end
       #   end
       def define_fake_data_batch_for(type, &block)
