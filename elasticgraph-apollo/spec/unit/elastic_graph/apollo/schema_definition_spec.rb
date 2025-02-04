@@ -31,7 +31,15 @@ module ElasticGraph
         let(:schema_elements) { SchemaArtifacts::RuntimeMetadata::SchemaElementNames.new(form: schema_element_name_form) }
 
         it "defines the static schema elements that must be present in every apollo subgraph schema" do
-          schema_string = graphql_schema_string { |s| define_some_types_on(s) }
+          schema_string = graphql_schema_string do |s|
+            define_some_types_on(s)
+
+            # Verify that calling `results` multiple times does not trigger duplicate definition errors.
+            # (at one point it did).
+            s.results
+            s.results
+          end
+
           expect(schema_string).to include(*SchemaDefinition::APIExtension::DIRECTIVE_DEFINITIONS_BY_FEDERATION_VERSION.fetch("2.6"))
 
           # Verify the 2.6 vs 2.0 differences.
