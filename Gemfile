@@ -25,7 +25,7 @@ group :development do
   gem "simplecov", "~> 0.22"
   gem "simplecov-console", "~> 0.9"
   gem "standard", "~> 1.44.0"
-  gem "steep", "~> 1.9.0"
+  gem "steep", "~> 1.9.4"
   gem "super_diff", "~> 0.15"
   gem "vcr", "~> 6.3", ">= 6.3.1"
 end
