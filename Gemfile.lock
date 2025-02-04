@@ -99,7 +99,7 @@ PATH
   specs:
     elasticgraph-json_schema (0.19.0.0)
       elasticgraph-support (= 0.19.0.0)
-      json_schemer (~> 2.3)
+      json_schemer (~> 2.4)
 
 PATH
   remote: elasticgraph-lambda_support
