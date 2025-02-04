@@ -80,7 +80,6 @@ module ElasticGraph
   class SetupEnv < ::Data.define(:app_name, :app_module, :datastore, :gemfile_elasticgraph_details_code_snippet)
     DATASTORE_NAMES = {"elasticsearch" => "Elasticsearch", "opensearch" => "OpenSearch"}
     DATASTORE_UI_NAMES = {"elasticsearch" => "Kibana", "opensearch" => "OpenSearch Dashboards"}
-    OTHER_DATASTORE = {"elasticsearch" => "opensearch", "opensearch" => "elasticsearch"}
 
     def datastore_name
       DATASTORE_NAMES.fetch(datastore)
@@ -88,14 +87,6 @@ module ElasticGraph
 
     def datastore_ui_name
       DATASTORE_UI_NAMES.fetch(datastore)
-    end
-
-    def other_datastore
-      OTHER_DATASTORE.fetch(datastore)
-    end
-
-    def other_datastore_name
-      DATASTORE_NAMES.fetch(other_datastore)
     end
 
     def ruby_major_minor

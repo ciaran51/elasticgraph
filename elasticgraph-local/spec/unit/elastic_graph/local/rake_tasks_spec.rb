@@ -9,6 +9,7 @@
 require "elastic_graph/local/rake_tasks"
 require "elastic_graph/schema_definition/rake_tasks"
 require "pathname"
+require "tmpdir"
 
 module ElasticGraph
   module Local
@@ -40,16 +41,51 @@ module ElasticGraph
           rake schema_artifacts:dump                      # Dumps all schema artifacts based on the current ElasticGraph schema definition
         EOS
 
-        # Note: we are careful to avoid asserting on exact versions here, since we don't specify any in this test and
-        # we want to be able to update `tested_datastore_versions.yaml` without breaking this test.
-        expect(output).to include(expected_snippet_1, expected_snippet_2, expected_snippet_3, *%w[
-          rake elasticsearch:local:boot
-          rake elasticsearch:local:daemon
-          rake elasticsearch:local:halt
-          rake opensearch:local:boot
-          rake opensearch:local:daemon
-          rake opensearch:local:halt
-        ])
+        expect(output).to include(expected_snippet_1, expected_snippet_2, expected_snippet_3)
+      end
+
+      context "when the local config file configures an `elasticsearch` backend" do
+        it "defines elasticsearch tasks" do
+          output = run_rake_with_yaml_changes "-T" do |config|
+            config["datastore"]["clusters"].values.each do |cluster|
+              cluster["backend"] = "elasticsearch"
+            end
+
+            config
+          end
+
+          # Note: we are careful to avoid asserting on exact versions here, since we don't specify any in this test and
+          # we want to be able to update `tested_datastore_versions.yaml` without breaking this test.
+          expect(output).to include(*%w[
+            rake elasticsearch:local:boot
+            rake elasticsearch:local:daemon
+            rake elasticsearch:local:halt
+          ])
+
+          expect(output).to exclude("opensearch")
+        end
+      end
+
+      context "when the local config file configures an `opensearch` backend" do
+        it "defines opensearch tasks" do
+          output = run_rake_with_yaml_changes "-T" do |config|
+            config["datastore"]["clusters"].values.each do |cluster|
+              cluster["backend"] = "opensearch"
+            end
+
+            config
+          end
+
+          # Note: we are careful to avoid asserting on exact versions here, since we don't specify any in this test and
+          # we want to be able to update `tested_datastore_versions.yaml` without breaking this test.
+          expect(output).to include(*%w[
+            rake opensearch:local:boot
+            rake opensearch:local:daemon
+            rake opensearch:local:halt
+          ])
+
+          expect(output).to exclude("elasticsearch")
+        end
       end
 
       it "defines a task which indexes locally" do
@@ -226,6 +262,24 @@ module ElasticGraph
             t.output = output
 
             yield t if block_given?
+          end
+        end
+      end
+
+      def run_rake_with_yaml_changes(*cli_args)
+        base_yaml = ::YAML.load((config_dir / "settings" / "development.yaml").read, aliases: true)
+        updated_yaml = yield base_yaml
+
+        ::Dir.mktmpdir do |tmp_dir|
+          ::Dir.chdir(tmp_dir) do
+            ::File.write("local.yaml", ::YAML.dump(updated_yaml))
+
+            run_rake(*cli_args) do
+              RakeTasks.new(
+                local_config_yaml: "local.yaml",
+                path_to_schema: config_dir / "schema.rb"
+              )
+            end
           end
         end
       end

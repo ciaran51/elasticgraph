@@ -77,6 +77,10 @@ configure_local_rake_tasks = ->(tasks) do
     batch.concat(sponsors = Array.new(10) { FactoryBot.build(:sponsor) })
     batch.concat(Array.new(10) { FactoryBot.build(:team, sponsors: sponsors.sample(rand(3))) })
   end
+
+  tested_datastore_versions = ::YAML.load_file(::File.expand_path("config/tested_datastore_versions.yaml", __dir__))
+  tasks.elasticsearch_versions = tested_datastore_versions.fetch("elasticsearch")
+  tasks.opensearch_versions = tested_datastore_versions.fetch("opensearch")
 end
 
 ElasticGraph::Local::RakeTasks.new(

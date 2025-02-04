@@ -37,6 +37,9 @@ module ElasticGraph
       @local_datastore_port: ::Integer?
       def local_datastore_port: () -> ::Integer
 
+      @local_cluster_backends: ::Set[::String]?
+      def local_cluster_backends: () -> ::Set[::String]
+
       @local_config: ::Hash[::String, untyped]?
       def local_config: () -> ::Hash[::String, untyped]
     end
