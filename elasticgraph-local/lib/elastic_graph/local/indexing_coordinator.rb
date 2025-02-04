@@ -29,8 +29,7 @@ module ElasticGraph
         publishing_threads = Array.new(PARALLELISM) { new_publishing_thread(batch_queue) }
 
         num_batches.times do
-          batch = [] # : ::Array[::Hash[::String, untyped]]
-          @fake_data_batch_generator.call(batch)
+          batch = @fake_data_batch_generator.call
           @output.puts "Generated batch of #{batch.size} documents..."
           batch_queue << batch
         end

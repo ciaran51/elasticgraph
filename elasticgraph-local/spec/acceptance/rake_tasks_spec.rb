@@ -130,8 +130,8 @@ module ElasticGraph
 
               yield t if block_given?
 
-              t.define_fake_data_batch_for(:widgets) do |batch|
-                batch.concat(Array.new(batch_size) { build(:widget) })
+              t.define_fake_data_batch_for(:widgets) do
+                Array.new(batch_size) { build(:widget) }
               end
             end
           end

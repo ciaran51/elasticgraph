@@ -50,7 +50,7 @@ configure_local_rake_tasks = ->(tasks) do
   tasks.env_port_mapping = {test: test_port}
   tasks.output = schema_def_output
 
-  tasks.define_fake_data_batch_for(:widgets) do |batch|
+  tasks.define_fake_data_batch_for(:widgets) do
     require "rspec/core" # the factories file expects RSpec to be loaded, so load it.
 
     # spec_support is not a full-fledged gem and is not on the load path, so we have to
@@ -58,6 +58,7 @@ configure_local_rake_tasks = ->(tasks) do
     $LOAD_PATH.unshift ::File.join(__dir__, "spec_support", "lib")
     require "elastic_graph/spec_support/factories"
 
+    batch = []
     batch.concat(manufacturers = Array.new(10) { FactoryBot.build(:manufacturer) })
     batch.concat(electrical_parts = Array.new(10) { FactoryBot.build(:electrical_part, manufacturer: manufacturers.sample) })
     batch.concat(mechanical_parts = Array.new(10) { FactoryBot.build(:mechanical_part, manufacturer: manufacturers.sample) })
@@ -76,6 +77,7 @@ configure_local_rake_tasks = ->(tasks) do
 
     batch.concat(sponsors = Array.new(10) { FactoryBot.build(:sponsor) })
     batch.concat(Array.new(10) { FactoryBot.build(:team, sponsors: sponsors.sample(rand(3))) })
+    batch
   end
 
   tested_datastore_versions = ::YAML.load_file(::File.expand_path("config/tested_datastore_versions.yaml", __dir__))

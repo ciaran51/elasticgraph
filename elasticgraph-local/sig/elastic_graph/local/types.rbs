@@ -1,5 +1,5 @@
 module ElasticGraph
   module Local
-    type fakeDataBatchGenerator =  ^(::Array[::Hash[::String, untyped]]) -> void
+    type fakeDataBatchGenerator =  ^() -> ::Array[::Hash[::String, untyped]]
   end
 end
