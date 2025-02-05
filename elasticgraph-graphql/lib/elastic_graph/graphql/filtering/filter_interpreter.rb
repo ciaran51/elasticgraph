@@ -118,7 +118,12 @@ module ElasticGraph
           if sub_filter[:bool].key?(:must_not)
             # Pull clauses up to current bool_node to remove negation
             sub_filter[:bool][:must_not].each do |negated_clause|
-              negated_clause[:bool].each { |k, v| bool_node[k].concat(v) }
+              negated_clause_bool = negated_clause[:bool]
+              # `minimum_should_match` is not a list like the other clauses, and needs to be handled separately.
+              negated_clause_bool.except(:minimum_should_match).each { |k, v| bool_node[k].concat(v) }
+              if (min_should_match = negated_clause_bool[:minimum_should_match])
+                bool_node[:minimum_should_match] = min_should_match
+              end
             end
           end
 
