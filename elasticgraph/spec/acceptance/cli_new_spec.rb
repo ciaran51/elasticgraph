@@ -64,7 +64,7 @@ module ElasticGraph
           1. cd musical_artists
           2. Run `bundle exec rake boot_locally` to try it out in your browser.
           3. Run `bundle exec rake -T` to view other available tasks.
-          4. Customize your new project as needed.
+          4. Customize your new project as needed. (Search for `TODO` to find things that need updating.)
       EOS
 
       # Verify that all ERB templates rendered properly. If any files had ERB template tags (e.g. `<%= foo %>`)
@@ -158,7 +158,7 @@ module ElasticGraph
     def override_gemfile_to_use_local_elasticgraph_gems
       allow(::ElasticGraph).to receive(:setup_env).and_wrap_original do |original|
         original.call&.with(
-          gemfile_elasticgraph_details_code_snippet: %([git: "file://#{CommonSpecHelpers::REPO_ROOT}"])
+          gemfile_elasticgraph_details_code_snippet: %([path: "#{CommonSpecHelpers::REPO_ROOT}"])
         )
       end
     end

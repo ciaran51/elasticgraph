@@ -72,7 +72,7 @@ module ElasticGraph
           1. cd #{app_path}
           2. Run `bundle exec rake boot_locally` to try it out in your browser.
           3. Run `bundle exec rake -T` to view other available tasks.
-          4. Customize your new project as needed.
+          4. Customize your new project as needed. (Search for `TODO` to find things that need updating.)
       INSTRUCTIONS
     end
   end
