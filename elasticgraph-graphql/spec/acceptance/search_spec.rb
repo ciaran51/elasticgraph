@@ -84,18 +84,28 @@ module ElasticGraph
         expect(list_widget_currencies(filter: {primary_continent: {equal_to_any_of: ["North America"]}})).to eq(unfiltered_widget_currencies)
         expect_to_have_routed_to_shards_with("main", ["widget_currencies_rollover__*", "North America"])
 
-        filter = {
-          options: {
-            any_of: [
-              {size: {equal_to_any_of: [enum_value(:MEDIUM)]}},
-              {
-                size: {equal_to_any_of: [enum_value(:SMALL)]},
-                color: {equal_to_any_of: [enum_value(:BLUE)]}
-              }
-            ]
+        options_any_of_filter = [
+          {size: {equal_to_any_of: [enum_value(:MEDIUM)]}},
+          {
+            size: {equal_to_any_of: [enum_value(:SMALL)]},
+            color: {equal_to_any_of: [enum_value(:BLUE)]}
           }
-        }
-        widgets = list_widgets_with(<<~EOS, order_by: [:amount_cents_ASC], filter: filter)
+        ]
+        widgets = list_widgets_with(<<~EOS, order_by: [:amount_cents_ASC], filter: {options: {any_of: options_any_of_filter}})
+          #{case_correctly("amount_cents")}
+          tags
+          fees {
+            currency
+            #{case_correctly("amount_cents")}
+          }
+        EOS
+
+        expect(widgets).to match([
+          string_hash_of(widget1, :id, :amount_cents, :tags, :fees),
+          string_hash_of(widget3, :id, :amount_cents, :tags, :fees)
+        ])
+
+        widgets = list_widgets_with(<<~EOS, order_by: [:amount_cents_ASC], filter: {options: {not: {not: {any_of: options_any_of_filter}}}})
           #{case_correctly("amount_cents")}
           tags
           fees {
@@ -161,6 +171,15 @@ module ElasticGraph
         expect(widgets).to match([
           string_hash_of(widget2, :id, :amount_cents),
           string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        # Verify we can use the `not` filter operator correctly
+        widgets = list_widgets_with(:amount_cents,
+          filter: {options: {not: {not: {color: {equal_to_any_of: [enum_value(:BLUE)]}}}}},
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to match([
+          string_hash_of(widget1, :id, :amount_cents)
         ])
 
         widgets = list_widgets_with(:amount_cents,
@@ -319,6 +338,12 @@ module ElasticGraph
           string_hash_of(widget2, :id, :amount_cents),
           string_hash_of(widget1, :id, :amount_cents)
         ])
+
+        # Test `not: {not: {any_of: []}}` results in no matching documents
+        widgets = list_widgets_with(:amount_cents,
+          filter: {not: {not: {any_of: []}}})
+
+        expect(widgets).to match([])
 
         # Test `not: {any_of: [emptyPredicate]}` results in no matching documents
         widgets = list_widgets_with(:amount_cents,

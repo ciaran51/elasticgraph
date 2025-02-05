@@ -1340,6 +1340,20 @@ module ElasticGraph
 
           expect(body_for_inner_not).to eq(body_for_outer_not).and query_datastore_with(always_false_condition)
         end
+
+        it "can double negate an `any_of`" do
+          inner_filter = {
+            "any_of" => [
+              {"age" => {"equal_to_any_of" => [25, 30]}},
+              {"height" => {"gt" => 10}}
+            ]
+          }
+
+          query1 = new_query(filter: {"not" => {"not" => inner_filter}})
+          query2 = new_query(filter: inner_filter)
+
+          expect(datastore_body_of(query1)).to eq(datastore_body_of(query2))
+        end
       end
 
       describe "behavior of empty/null filter values" do
