@@ -8,7 +8,7 @@ datastore:
       url: http://localhost:9293
       settings: {}
   index_definitions:
-    # TODO: replace this `artists:` key with your dataset's name (e.g. `customers:`)
+    # TODO: replace the `artists:` and `venues:` keys with the indices from your dataset
     artists: &main_index_settings
       # elasticgraph-local relies on the cluster being named "main".
       query_cluster: "main"

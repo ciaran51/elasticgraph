@@ -1,3 +1,4 @@
+# TODO: remove or replace this query when you replace the artist schema.
 query ListArtistAlbums {
   artists {
     nodes {

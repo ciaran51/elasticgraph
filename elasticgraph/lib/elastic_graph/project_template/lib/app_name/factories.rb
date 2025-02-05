@@ -2,6 +2,7 @@ require "factory_bot"
 require "faker"
 require_relative "shared_factories"
 
+# TODO: replace the artist/album/tour/venue factories with your own.
 FactoryBot.define do
   factory :artist, parent: :indexed_type_base do
     __typename { "Artist" }

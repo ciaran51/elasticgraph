@@ -1,3 +1,4 @@
+# TODO: replace this file with one that defines the schema for your own dataset.
 ElasticGraph.define_schema do |schema|
   schema.object_type "Artist" do |t|
     t.field "id", "ID"
