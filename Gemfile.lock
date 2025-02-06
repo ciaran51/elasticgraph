@@ -203,9 +203,9 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ansi (1.5.0)
-    apollo-federation (3.8.5)
-      google-protobuf (~> 3.22)
-      graphql (>= 1.10.14)
+    apollo-federation (3.10.0)
+      google-protobuf (< 5)
+      graphql
     ast (2.4.2)
     attr_extras (7.1.0)
     aws-eventstream (1.3.0)
@@ -287,8 +287,12 @@ GEM
       flatware (= 2.3.4)
       rspec (>= 3.6)
     forwardable-extended (2.6.0)
-    google-protobuf (3.25.6)
-    google-protobuf (3.25.6-arm64-darwin)
+    google-protobuf (4.29.3)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.29.3-arm64-darwin)
+      bigdecimal
+      rake (>= 13)
     graphql (2.4.9)
       base64
       fiber-storage
