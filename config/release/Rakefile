@@ -10,6 +10,7 @@
 # That's why we get the project root from git instead of using `__dir__`.
 project_root = `git rev-parse --show-toplevel`.strip
 
+require "bundler"
 require "gem/release"
 require "#{project_root}/elasticgraph-support/lib/elastic_graph/version"
 require "#{project_root}/script/list_eg_gems"
@@ -19,6 +20,13 @@ task :bump_version, [:version] do |_, args|
   version = args.fetch(:version)
   ::Dir.chdir(project_root) do
     sh "bundle exec gem bump elasticgraph-support --file #{project_root}/elasticgraph-support/lib/elastic_graph/version.rb -v #{version} -m 'Release v#{version}.'"
+
+    # We also want to commit an update to `Gemfile.lock` as part of the version bump.
+    ::Bundler.with_unbundled_env do
+      sh "bundle install"
+      sh "git add Gemfile.lock"
+      sh "git commit --amend --no-edit"
+    end
   end
 end
 
