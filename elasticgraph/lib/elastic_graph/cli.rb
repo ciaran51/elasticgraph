@@ -31,8 +31,8 @@ module ElasticGraph
       new_app_path = ::File.join(::Dir.pwd, app_path)
       app_name = ::File.basename(new_app_path)
 
-      unless app_name.match?(/\A[a-z_]+\z/)
-        raise ::Thor::Error, "App name must be in `snake_case` form but was not: `#{app_name}`."
+      unless app_name.match?(/\A[a-z][a-z0-9_]+\z/)
+        raise ::Thor::Error, "App name must start with a letter and be in `snake_case` form but was not: `#{app_name}`."
       end
 
       unless VALID_DATASTORES.include?(options[:datastore])
