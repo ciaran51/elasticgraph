@@ -14,32 +14,32 @@ module ElasticGraph
     it "initializes a new ElasticGraph project" do
       override_gemfile_to_use_local_elasticgraph_gems
 
-      output = run_new("musical_artists")
+      output = run_new("musical_artists1")
 
       expect(output.lines.first(18).join).to eq <<~EOS
-        Creating a new OpenSearch ElasticGraph project called 'musical_artists' at: #{::Dir.pwd}/musical_artists
-              create  musical_artists
-              create  musical_artists/.gitignore
-              create  musical_artists/.standard.yml
-              create  musical_artists/Gemfile
-              create  musical_artists/README.md
-              create  musical_artists/Rakefile
-              create  musical_artists/config/queries/example_client/FindArtist.graphql
-              create  musical_artists/config/queries/example_client/ListArtistAlbums.graphql
-              create  musical_artists/config/schema.rb
-              create  musical_artists/config/schema/artists.rb
-              create  musical_artists/config/settings/local.yaml
-              create  musical_artists/spec/project_spec.rb
-              create  musical_artists/lib/musical_artists
-              create  musical_artists/lib/musical_artists/factories.rb
-              create  musical_artists/lib/musical_artists/fake_data_batch_generator.rb
-              create  musical_artists/lib/musical_artists/shared_factories.rb
-                 run  bundle install from "./musical_artists"
+        Creating a new OpenSearch ElasticGraph project called 'musical_artists1' at: #{::Dir.pwd}/musical_artists1
+              create  musical_artists1
+              create  musical_artists1/.gitignore
+              create  musical_artists1/.standard.yml
+              create  musical_artists1/Gemfile
+              create  musical_artists1/README.md
+              create  musical_artists1/Rakefile
+              create  musical_artists1/config/queries/example_client/FindArtist.graphql
+              create  musical_artists1/config/queries/example_client/ListArtistAlbums.graphql
+              create  musical_artists1/config/schema.rb
+              create  musical_artists1/config/schema/artists.rb
+              create  musical_artists1/config/settings/local.yaml
+              create  musical_artists1/spec/project_spec.rb
+              create  musical_artists1/lib/musical_artists1
+              create  musical_artists1/lib/musical_artists1/factories.rb
+              create  musical_artists1/lib/musical_artists1/fake_data_batch_generator.rb
+              create  musical_artists1/lib/musical_artists1/shared_factories.rb
+                 run  bundle install from "./musical_artists1"
       EOS
 
       bundle_exec_rake_line = output.lines.index { |l| l =~ /bundle exec rake/ }
       expect(output.lines[bundle_exec_rake_line..(bundle_exec_rake_line + 16)].join).to eq <<~EOS
-                 run  bundle exec rake schema_artifacts:dump query_registry:dump_variables:all build from "./musical_artists"
+                 run  bundle exec rake schema_artifacts:dump query_registry:dump_variables:all build from "./musical_artists1"
         Dumped schema artifact to `config/schema/artifacts/datastore_config.yaml`.
         Dumped schema artifact to `config/schema/artifacts/json_schemas.yaml`.
         Dumped schema artifact to `config/schema/artifacts/json_schemas_by_version/v1.yaml`.
@@ -59,9 +59,9 @@ module ElasticGraph
       EOS
 
       expect(output.lines.last(6).join).to eq <<~EOS
-        Successfully bootstrapped 'musical_artists' as a new OpenSearch ElasticGraph project.
+        Successfully bootstrapped 'musical_artists1' as a new OpenSearch ElasticGraph project.
         Next steps:
-          1. cd musical_artists
+          1. cd musical_artists1
           2. Run `bundle exec rake boot_locally` to try it out in your browser.
           3. Run `bundle exec rake -T` to view other available tasks.
           4. Customize your new project as needed. (Search for `TODO` to find things that need updating.)
@@ -70,10 +70,10 @@ module ElasticGraph
       # Verify that all ERB templates rendered properly. If any files had ERB template tags (e.g. `<%= foo %>`)
       # but were not named with the proper `.tt` file extension, then thor would copy them without rendering them
       # as ERB. This would catch it.
-      expect(all_committed_code_in("musical_artists")).to exclude("<%", "%>")
+      expect(all_committed_code_in("musical_artists1")).to exclude("<%", "%>")
 
       # Verify that the only TODO comments in the project comte from our template, not from our generated artifacts.
-      expect(todo_comments_in("musical_artists").join("\n")).to eq(todo_comments_in(CLI.source_root).join("\n"))
+      expect(todo_comments_in("musical_artists1").join("\n")).to eq(todo_comments_in(CLI.source_root).join("\n"))
     end
 
     it "aborts if given an invalid datastore option" do
@@ -84,29 +84,41 @@ module ElasticGraph
       )
     end
 
-    it "requires the app name to be in snake_case form" do
+    it "requires the app name to be in snake_case form, starting with a letter" do
       expect {
         ::ElasticGraph::CLI.start(["new", "musical-artists"])
       }.to fail_with(
-        a_string_including("App name must be in `snake_case` form but was not: `musical-artists`.")
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `musical-artists`.")
       )
 
       expect {
         ::ElasticGraph::CLI.start(["new", "musicalArtists"])
       }.to fail_with(
-        a_string_including("App name must be in `snake_case` form but was not: `musicalArtists`.")
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `musicalArtists`.")
       )
 
       expect {
         ::ElasticGraph::CLI.start(["new", "MusicalArtists"])
       }.to fail_with(
-        a_string_including("App name must be in `snake_case` form but was not: `MusicalArtists`.")
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `MusicalArtists`.")
       )
 
       expect {
         ::ElasticGraph::CLI.start(["new", "Musical-Artists"])
       }.to fail_with(
-        a_string_including("App name must be in `snake_case` form but was not: `Musical-Artists`.")
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `Musical-Artists`.")
+      )
+
+      expect {
+        ::ElasticGraph::CLI.start(["new", "_musical_artists"])
+      }.to fail_with(
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `_musical_artists`.")
+      )
+
+      expect {
+        ::ElasticGraph::CLI.start(["new", "1musical_artists"])
+      }.to fail_with(
+        a_string_including("App name must start with a letter and be in `snake_case` form but was not: `1musical_artists`.")
       )
     end
 
