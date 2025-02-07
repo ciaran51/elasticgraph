@@ -1946,7 +1946,7 @@ scripts:
 
         // No timestamp values matched the params, so return `false`.
         return false;
-  update_index_data_d577eb4b07ee3c53b59f2f6d6c7b2413:
+  update_index_data_38ea36e5b48fc1566d4142e9fc44b12e:
     context: update
     script:
       lang: painless
@@ -1991,7 +1991,6 @@ scripts:
         // clusters, we need to keep using it.
         //
         // Later, after the old script is no longer used by any clusters, we'll stop using `__sourceVersions`.
-        // TODO: switch to `__versions` when we no longer need to maintain compatibility with the old version of the script.
         Number _versionForSourceType = source.get("__sourceVersions")?.get(params.sourceType)?.get(sourceId);
         Number _versionForRelationship = relationshipVersionsMap.get(sourceId);
 

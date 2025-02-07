@@ -125,7 +125,7 @@ module ElasticGraph
   #
   # Note: this constant is automatically kept up-to-date by our `schema_artifacts:dump` rake task.
   # @private
-  INDEX_DATA_UPDATE_SCRIPT_ID = "update_index_data_d577eb4b07ee3c53b59f2f6d6c7b2413"
+  INDEX_DATA_UPDATE_SCRIPT_ID = "update_index_data_38ea36e5b48fc1566d4142e9fc44b12e"
 
   # The id of the old version of the update data script before ElasticGraph v0.9. For now, we are maintaining
   # backwards compatibility with how it recorded event versions, and we have test coverage for that which relies

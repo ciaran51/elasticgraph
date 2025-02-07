@@ -38,7 +38,6 @@ if (previousSourceIdsForRelationship.size() > 0) {
 // clusters, we need to keep using it.
 //
 // Later, after the old script is no longer used by any clusters, we'll stop using `__sourceVersions`.
-// TODO: switch to `__versions` when we no longer need to maintain compatibility with the old version of the script.
 Number _versionForSourceType = source.get("__sourceVersions")?.get(params.sourceType)?.get(sourceId);
 Number _versionForRelationship = relationshipVersionsMap.get(sourceId);
 
