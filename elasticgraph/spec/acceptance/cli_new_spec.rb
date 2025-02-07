@@ -71,6 +71,9 @@ module ElasticGraph
       # but were not named with the proper `.tt` file extension, then thor would copy them without rendering them
       # as ERB. This would catch it.
       expect(all_committed_code_in("musical_artists")).to exclude("<%", "%>")
+
+      # Verify that the only TODO comments in the project comte from our template, not from our generated artifacts.
+      expect(todo_comments_in("musical_artists").join("\n")).to eq(todo_comments_in(CLI.source_root).join("\n"))
     end
 
     it "aborts if given an invalid datastore option" do
@@ -165,6 +168,14 @@ module ElasticGraph
 
     def all_committed_code_in(dir)
       ::Dir.chdir(dir) { `git ls-files -z | xargs -0 cat` }
+    end
+
+    def todo_comments_in(dir)
+      ::Dir.chdir(dir) do
+        `git grep TODO`.split("\n").map do |match|
+          match.sub(/^[^:]+:\s*/, "")
+        end
+      end
     end
   end
 end
