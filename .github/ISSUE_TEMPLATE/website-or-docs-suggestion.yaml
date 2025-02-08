@@ -1,0 +1,31 @@
+name: Website or Documentation Suggestion
+about: For issues and suggestions for https://block.github.io/elasticgraph/
+title: "[Website] <Title Here>"
+labels: ["good first issue", "help wanted", "website"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this suggestion form!
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggest an improvement
+      description: A clear and concise description of what you'd like to see improved.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL of the impacted page
+      description: Provide the URL of the page you'd like to see improved, if your suggestion is for an existing page.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Please provide screenshots if your suggestion relates to how the site looks.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context that you feel is relevant about the problem here.
