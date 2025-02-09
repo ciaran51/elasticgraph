@@ -45,7 +45,7 @@ module ElasticGraph
             [type] + schema_def_state.factory.build_relay_pagination_types(type.name, support_pagination: false) do |t|
               # Record metadata that is necessary for elasticgraph-graphql to correctly recognize and handle
               # this sub-aggregation correctly.
-              t.runtime_metadata_overrides = {elasticgraph_category: :nested_sub_aggregation_connection}
+              t.override_runtime_metadata(elasticgraph_category: :nested_sub_aggregation_connection)
             end
           end
 
@@ -225,7 +225,7 @@ module ElasticGraph
 
             # Record metadata that is necessary for elasticgraph-graphql to correctly recognize and handle
             # this indexed aggregation type correctly.
-            t.runtime_metadata_overrides = {source_type: name, elasticgraph_category: :indexed_aggregation}
+            t.override_runtime_metadata(source_type: name, elasticgraph_category: :indexed_aggregation)
           end
         end
 
