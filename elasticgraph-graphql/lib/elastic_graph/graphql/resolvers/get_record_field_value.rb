@@ -19,10 +19,6 @@ module ElasticGraph
           @schema_element_names = schema_element_names
         end
 
-        def can_resolve?(field:, object:)
-          object.is_a?(DatastoreResponse::Document) || object.is_a?(::Hash)
-        end
-
         def resolve(field:, object:, args:, context:, lookahead:)
           field_name = field.name_in_index.to_s
           data =

@@ -2665,11 +2665,19 @@ index_definitions_by_name:
 object_types_by_name:
   Address:
     graphql_fields_by_name:
+      full_address:
+        resolver: get_record_field_value
+      geo_location:
+        resolver: get_record_field_value
       manufacturer:
         relation:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      shapes:
+        resolver: get_record_field_value
+      timestamps:
+        resolver: get_record_field_value
     index_definition_names:
     - addresses
     update_targets:
@@ -2760,6 +2768,10 @@ object_types_by_name:
         resolver: object
       timestamps:
         resolver: object
+  AddressTimestamps:
+    graphql_fields_by_name:
+      created_at:
+        resolver: get_record_field_value
   AddressTimestampsAggregatedValues:
     graphql_fields_by_name:
       created_at:
@@ -2768,6 +2780,12 @@ object_types_by_name:
     graphql_fields_by_name:
       created_at:
         resolver: object
+  Affiliations:
+    graphql_fields_by_name:
+      sponsorships_nested:
+        resolver: get_record_field_value
+      sponsorships_object:
+        resolver: get_record_field_value
   AffiliationsAggregatedValues:
     graphql_fields_by_name:
       sponsorships_object:
@@ -2793,8 +2811,16 @@ object_types_by_name:
     graphql_fields_by_name:
       count:
         name_in_index: __counts
+  Company:
+    graphql_fields_by_name:
+      name:
+        resolver: get_record_field_value
+      stock_ticker:
+        resolver: get_record_field_value
   Component:
     graphql_fields_by_name:
+      created_at:
+        resolver: get_record_field_value
       dollar_widget:
         relation:
           additional_filter:
@@ -2805,6 +2831,10 @@ object_types_by_name:
           direction: in
           foreign_key: component_ids
         resolver: nested_relationships
+      id:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
       part_aggregations:
         relation:
           direction: out
@@ -2815,6 +2845,10 @@ object_types_by_name:
           direction: out
           foreign_key: part_ids
         resolver: nested_relationships
+      position:
+        resolver: get_record_field_value
+      tags:
+        resolver: get_record_field_value
       widget:
         relation:
           direction: in
@@ -2825,8 +2859,17 @@ object_types_by_name:
           direction: in
           foreign_key: component_ids
         resolver: nested_relationships
+      widget_cost:
+        resolver: get_record_field_value
+      widget_name:
+        resolver: get_record_field_value
+      widget_size:
+        resolver: get_record_field_value
+      widget_tags:
+        resolver: get_record_field_value
       widget_workspace_id:
         name_in_index: widget_workspace_id3
+        resolver: get_record_field_value
       widgets:
         relation:
           direction: in
@@ -2950,6 +2993,12 @@ object_types_by_name:
       widget_workspace_id:
         name_in_index: widget_workspace_id3
         resolver: object
+  CurrencyDetails:
+    graphql_fields_by_name:
+      symbol:
+        resolver: get_record_field_value
+      unit:
+        resolver: get_record_field_value
   CurrencyDetailsAggregatedValues:
     graphql_fields_by_name:
       symbol:
@@ -3044,11 +3093,19 @@ object_types_by_name:
           direction: in
           foreign_key: part_ids
         resolver: nested_relationships
+      created_at:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
       manufacturer:
         relation:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      name:
+        resolver: get_record_field_value
+      voltage:
+        resolver: get_record_field_value
     index_definition_names:
     - electrical_parts
     update_targets:
@@ -3169,8 +3226,16 @@ object_types_by_name:
     graphql_fields_by_name:
       latitude:
         name_in_index: lat
+        resolver: get_record_field_value
       longitude:
         name_in_index: lon
+        resolver: get_record_field_value
+  GeoShape:
+    graphql_fields_by_name:
+      coordinates:
+        resolver: get_record_field_value
+      type:
+        resolver: get_record_field_value
   IDListFilterInput:
     graphql_fields_by_name:
       count:
@@ -3210,6 +3275,14 @@ object_types_by_name:
     graphql_fields_by_name:
       count:
         name_in_index: __counts
+  Inventor:
+    graphql_fields_by_name:
+      name:
+        resolver: get_record_field_value
+      nationality:
+        resolver: get_record_field_value
+      stock_ticker:
+        resolver: get_record_field_value
   InventorAggregatedValues:
     graphql_fields_by_name:
       name:
@@ -3328,6 +3401,10 @@ object_types_by_name:
           direction: in
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      created_at:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
       manufactured_part_aggregations:
         relation:
           direction: in
@@ -3338,6 +3415,8 @@ object_types_by_name:
           direction: in
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      name:
+        resolver: get_record_field_value
     index_definition_names:
     - manufacturers
     update_targets:
@@ -3432,11 +3511,19 @@ object_types_by_name:
           direction: in
           foreign_key: part_ids
         resolver: nested_relationships
+      created_at:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
       manufacturer:
         relation:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      material:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
     index_definition_names:
     - mechanical_parts
     update_targets:
@@ -3527,6 +3614,12 @@ object_types_by_name:
         resolver: object
       name:
         resolver: object
+  Money:
+    graphql_fields_by_name:
+      amount_cents:
+        resolver: get_record_field_value
+      currency:
+        resolver: get_record_field_value
   MoneyAggregatedValues:
     graphql_fields_by_name:
       amount_cents:
@@ -3554,8 +3647,13 @@ object_types_by_name:
           direction: in
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      amount_cents:
+        resolver: get_record_field_value
       amount_cents2:
         name_in_index: amount_cents
+        resolver: get_record_field_value
+      amounts:
+        resolver: get_record_field_value
       component_aggregations:
         relation:
           direction: out
@@ -3566,14 +3664,36 @@ object_types_by_name:
           direction: out
           foreign_key: component_ids
         resolver: nested_relationships
+      cost:
+        resolver: get_record_field_value
+      cost_currency_introduced_on:
+        resolver: get_record_field_value
+      cost_currency_name:
+        resolver: get_record_field_value
+      cost_currency_primary_continent:
+        resolver: get_record_field_value
+      cost_currency_symbol:
+        resolver: get_record_field_value
+      cost_currency_unit:
+        resolver: get_record_field_value
+      created_at:
+        resolver: get_record_field_value
       created_at2:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at2_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
+      created_at_time_of_day:
+        resolver: get_record_field_value
+      created_on:
+        resolver: get_record_field_value
       created_on_legacy:
         name_in_index: created_on
+        resolver: get_record_field_value
       dollar_widget:
         relation:
           additional_filter:
@@ -3584,6 +3704,12 @@ object_types_by_name:
           direction: in
           foreign_key: component_ids
         resolver: nested_relationships
+      fees:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
+      inventor:
+        resolver: get_record_field_value
       manufactured_part_aggregations:
         relation:
           direction: in
@@ -3599,6 +3725,18 @@ object_types_by_name:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      material:
+        resolver: get_record_field_value
+      metadata:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      name_text:
+        resolver: get_record_field_value
+      named_inventor:
+        resolver: get_record_field_value
+      options:
+        resolver: get_record_field_value
       part_aggregations:
         relation:
           direction: out
@@ -3609,10 +3747,26 @@ object_types_by_name:
           direction: out
           foreign_key: part_ids
         resolver: nested_relationships
+      position:
+        resolver: get_record_field_value
+      release_dates:
+        resolver: get_record_field_value
+      release_timestamps:
+        resolver: get_record_field_value
       size:
         name_in_index: options.size
+        resolver: get_record_field_value
+      tags:
+        resolver: get_record_field_value
       the_options:
         name_in_index: the_opts
+        resolver: get_record_field_value
+      voltage:
+        resolver: get_record_field_value
+      weight_in_ng:
+        resolver: get_record_field_value
+      weight_in_ng_str:
+        resolver: get_record_field_value
       widget:
         relation:
           direction: in
@@ -3623,8 +3777,17 @@ object_types_by_name:
           direction: in
           foreign_key: component_ids
         resolver: nested_relationships
+      widget_cost:
+        resolver: get_record_field_value
+      widget_name:
+        resolver: get_record_field_value
+      widget_size:
+        resolver: get_record_field_value
+      widget_tags:
+        resolver: get_record_field_value
       widget_workspace_id:
         name_in_index: widget_workspace_id3
+        resolver: get_record_field_value
       widgets:
         relation:
           direction: in
@@ -3637,6 +3800,9 @@ object_types_by_name:
         resolver: nested_relationships
       workspace_id:
         name_in_index: workspace_id2
+        resolver: get_record_field_value
+      workspace_name:
+        resolver: get_record_field_value
   NamedEntityAggregatedValues:
     graphql_fields_by_name:
       amount_cents:
@@ -3880,6 +4046,14 @@ object_types_by_name:
         resolver: object
       workspace_name:
         resolver: object
+  NamedInventor:
+    graphql_fields_by_name:
+      name:
+        resolver: get_record_field_value
+      nationality:
+        resolver: get_record_field_value
+      stock_ticker:
+        resolver: get_record_field_value
   NamedInventorAggregatedValues:
     graphql_fields_by_name:
       name:
@@ -3928,11 +4102,21 @@ object_types_by_name:
           direction: in
           foreign_key: part_ids
         resolver: nested_relationships
+      created_at:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
       manufacturer:
         relation:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      material:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      voltage:
+        resolver: get_record_field_value
   PartAggregatedValues:
     graphql_fields_by_name:
       created_at:
@@ -3999,6 +4183,24 @@ object_types_by_name:
         resolver: object
       voltage:
         resolver: object
+  Person:
+    graphql_fields_by_name:
+      name:
+        resolver: get_record_field_value
+      nationality:
+        resolver: get_record_field_value
+  Player:
+    graphql_fields_by_name:
+      affiliations:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      nicknames:
+        resolver: get_record_field_value
+      seasons_nested:
+        resolver: get_record_field_value
+      seasons_object:
+        resolver: get_record_field_value
   PlayerAggregatedValues:
     graphql_fields_by_name:
       affiliations:
@@ -4025,6 +4227,14 @@ object_types_by_name:
     graphql_fields_by_name:
       count:
         name_in_index: __counts
+  PlayerSeason:
+    graphql_fields_by_name:
+      awards:
+        resolver: get_record_field_value
+      games_played:
+        resolver: get_record_field_value
+      year:
+        resolver: get_record_field_value
   PlayerSeasonAggregatedValues:
     graphql_fields_by_name:
       awards:
@@ -4047,6 +4257,12 @@ object_types_by_name:
     graphql_fields_by_name:
       count:
         name_in_index: __counts
+  Position:
+    graphql_fields_by_name:
+      x:
+        resolver: get_record_field_value
+      "y":
+        resolver: get_record_field_value
   PositionAggregatedValues:
     graphql_fields_by_name:
       x:
@@ -4145,6 +4361,10 @@ object_types_by_name:
           direction: in
           foreign_key: current_players_object.affiliations.sponsorships_object.sponsor_id
         resolver: nested_relationships
+      id:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
     index_definition_names:
     - sponsors
     update_targets:
@@ -4221,6 +4441,12 @@ object_types_by_name:
     graphql_fields_by_name:
       name:
         resolver: object
+  Sponsorship:
+    graphql_fields_by_name:
+      annual_total:
+        resolver: get_record_field_value
+      sponsor_id:
+        resolver: get_record_field_value
   SponsorshipAggregatedValues:
     graphql_fields_by_name:
       annual_total:
@@ -4265,8 +4491,43 @@ object_types_by_name:
         name_in_index: __counts
   Team:
     graphql_fields_by_name:
+      country_code:
+        resolver: get_record_field_value
+      current_name:
+        resolver: get_record_field_value
+      current_players_nested:
+        resolver: get_record_field_value
+      current_players_object:
+        resolver: get_record_field_value
+      details:
+        resolver: get_record_field_value
+      forbes_valuation_moneys_nested:
+        resolver: get_record_field_value
+      forbes_valuation_moneys_object:
+        resolver: get_record_field_value
+      forbes_valuations:
+        resolver: get_record_field_value
+      formed_on:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
+      league:
+        resolver: get_record_field_value
       nested_fields:
         name_in_index: the_nested_fields
+        resolver: get_record_field_value
+      nested_fields2:
+        resolver: get_record_field_value
+      past_names:
+        resolver: get_record_field_value
+      seasons_nested:
+        resolver: get_record_field_value
+      seasons_object:
+        resolver: get_record_field_value
+      stadium_location:
+        resolver: get_record_field_value
+      won_championships_at:
+        resolver: get_record_field_value
     index_definition_names:
     - teams
     update_targets:
@@ -4450,6 +4711,12 @@ object_types_by_name:
         resolver: object
       total_edge_count:
         resolver: object
+  TeamDetails:
+    graphql_fields_by_name:
+      count:
+        resolver: get_record_field_value
+      uniform_colors:
+        resolver: get_record_field_value
   TeamDetailsAggregatedValues:
     graphql_fields_by_name:
       count:
@@ -4504,8 +4771,13 @@ object_types_by_name:
         resolver: object
   TeamNestedFields:
     graphql_fields_by_name:
+      current_players:
+        resolver: get_record_field_value
+      forbes_valuation_moneys:
+        resolver: get_record_field_value
       seasons:
         name_in_index: the_seasons
+        resolver: get_record_field_value
   TeamNestedFieldsFilterInput:
     graphql_fields_by_name:
       seasons:
@@ -4576,16 +4848,23 @@ object_types_by_name:
         resolver: object
   TeamRecord:
     graphql_fields_by_name:
+      first_win_on:
+        resolver: get_record_field_value
       first_win_on_legacy:
         name_in_index: first_win_on
+        resolver: get_record_field_value
       last_win_on:
         name_in_index: last_win_date
+        resolver: get_record_field_value
       last_win_on_legacy:
         name_in_index: last_win_date
+        resolver: get_record_field_value
       losses:
         name_in_index: loss_count
+        resolver: get_record_field_value
       wins:
         name_in_index: win_count
+        resolver: get_record_field_value
   TeamRecordAggregatedValues:
     graphql_fields_by_name:
       first_win_on:
@@ -4652,12 +4931,29 @@ object_types_by_name:
         resolver: object
   TeamSeason:
     graphql_fields_by_name:
+      count:
+        resolver: get_record_field_value
+      notes:
+        resolver: get_record_field_value
+      players_nested:
+        resolver: get_record_field_value
+      players_object:
+        resolver: get_record_field_value
       record:
         name_in_index: the_record
+        resolver: get_record_field_value
+      started_at:
+        resolver: get_record_field_value
       started_at_legacy:
         name_in_index: started_at
+        resolver: get_record_field_value
+      won_games_at:
+        resolver: get_record_field_value
       won_games_at_legacy:
         name_in_index: won_games_at
+        resolver: get_record_field_value
+      year:
+        resolver: get_record_field_value
   TeamSeasonAggregatedValues:
     graphql_fields_by_name:
       count:
@@ -4849,8 +5145,13 @@ object_types_by_name:
         resolver: object
   Widget:
     graphql_fields_by_name:
+      amount_cents:
+        resolver: get_record_field_value
       amount_cents2:
         name_in_index: amount_cents
+        resolver: get_record_field_value
+      amounts:
+        resolver: get_record_field_value
       component_aggregations:
         relation:
           direction: out
@@ -4861,18 +5162,68 @@ object_types_by_name:
           direction: out
           foreign_key: component_ids
         resolver: nested_relationships
+      cost:
+        resolver: get_record_field_value
+      cost_currency_introduced_on:
+        resolver: get_record_field_value
+      cost_currency_name:
+        resolver: get_record_field_value
+      cost_currency_primary_continent:
+        resolver: get_record_field_value
+      cost_currency_symbol:
+        resolver: get_record_field_value
+      cost_currency_unit:
+        resolver: get_record_field_value
+      created_at:
+        resolver: get_record_field_value
       created_at2:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at2_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
+      created_at_time_of_day:
+        resolver: get_record_field_value
+      created_on:
+        resolver: get_record_field_value
       created_on_legacy:
         name_in_index: created_on
+        resolver: get_record_field_value
+      fees:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
+      inventor:
+        resolver: get_record_field_value
+      metadata:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      name_text:
+        resolver: get_record_field_value
+      named_inventor:
+        resolver: get_record_field_value
+      options:
+        resolver: get_record_field_value
+      release_dates:
+        resolver: get_record_field_value
+      release_timestamps:
+        resolver: get_record_field_value
       size:
         name_in_index: options.size
+        resolver: get_record_field_value
+      tags:
+        resolver: get_record_field_value
       the_options:
         name_in_index: the_opts
+        resolver: get_record_field_value
+      weight_in_ng:
+        resolver: get_record_field_value
+      weight_in_ng_str:
+        resolver: get_record_field_value
       workspace:
         relation:
           direction: in
@@ -4880,6 +5231,9 @@ object_types_by_name:
         resolver: nested_relationships
       workspace_id:
         name_in_index: workspace_id2
+        resolver: get_record_field_value
+      workspace_name:
+        resolver: get_record_field_value
     index_definition_names:
     - widgets
     update_targets:
@@ -5127,8 +5481,29 @@ object_types_by_name:
         resolver: object
   WidgetCurrency:
     graphql_fields_by_name:
+      details:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
+      introduced_on:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      nested_fields:
+        resolver: get_record_field_value
+      oldest_widget_created_at:
+        resolver: get_record_field_value
+      primary_continent:
+        resolver: get_record_field_value
+      widget_fee_currencies:
+        resolver: get_record_field_value
       widget_names:
         name_in_index: widget_names2
+        resolver: get_record_field_value
+      widget_options:
+        resolver: get_record_field_value
+      widget_tags:
+        resolver: get_record_field_value
     index_definition_names:
     - widget_currencies
     update_targets:
@@ -5260,6 +5635,10 @@ object_types_by_name:
       widget_name:
         name_in_index: widget_names2
         resolver: object
+  WidgetCurrencyNestedFields:
+    graphql_fields_by_name:
+      max_widget_cost:
+        resolver: get_record_field_value
   WidgetCurrencyNestedFieldsAggregatedValues:
     graphql_fields_by_name:
       max_widget_cost:
@@ -5366,6 +5745,12 @@ object_types_by_name:
         resolver: object
       workspace_name:
         resolver: object
+  WidgetOptionSets:
+    graphql_fields_by_name:
+      colors:
+        resolver: get_record_field_value
+      sizes:
+        resolver: get_record_field_value
   WidgetOptionSetsAggregatedValues:
     graphql_fields_by_name:
       colors:
@@ -5374,8 +5759,13 @@ object_types_by_name:
         resolver: object
   WidgetOptions:
     graphql_fields_by_name:
+      color:
+        resolver: get_record_field_value
+      size:
+        resolver: get_record_field_value
       the_size:
         name_in_index: the_sighs
+        resolver: get_record_field_value
   WidgetOptionsAggregatedValues:
     graphql_fields_by_name:
       color:
@@ -5400,8 +5790,13 @@ object_types_by_name:
         resolver: object
   WidgetOrAddress:
     graphql_fields_by_name:
+      amount_cents:
+        resolver: get_record_field_value
       amount_cents2:
         name_in_index: amount_cents
+        resolver: get_record_field_value
+      amounts:
+        resolver: get_record_field_value
       component_aggregations:
         relation:
           direction: out
@@ -5412,23 +5807,81 @@ object_types_by_name:
           direction: out
           foreign_key: component_ids
         resolver: nested_relationships
+      cost:
+        resolver: get_record_field_value
+      cost_currency_introduced_on:
+        resolver: get_record_field_value
+      cost_currency_name:
+        resolver: get_record_field_value
+      cost_currency_primary_continent:
+        resolver: get_record_field_value
+      cost_currency_symbol:
+        resolver: get_record_field_value
+      cost_currency_unit:
+        resolver: get_record_field_value
+      created_at:
+        resolver: get_record_field_value
       created_at2:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at2_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
       created_at_legacy:
         name_in_index: created_at
+        resolver: get_record_field_value
+      created_at_time_of_day:
+        resolver: get_record_field_value
+      created_on:
+        resolver: get_record_field_value
       created_on_legacy:
         name_in_index: created_on
+        resolver: get_record_field_value
+      fees:
+        resolver: get_record_field_value
+      full_address:
+        resolver: get_record_field_value
+      geo_location:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
+      inventor:
+        resolver: get_record_field_value
       manufacturer:
         relation:
           direction: out
           foreign_key: manufacturer_id
         resolver: nested_relationships
+      metadata:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      name_text:
+        resolver: get_record_field_value
+      named_inventor:
+        resolver: get_record_field_value
+      options:
+        resolver: get_record_field_value
+      release_dates:
+        resolver: get_record_field_value
+      release_timestamps:
+        resolver: get_record_field_value
+      shapes:
+        resolver: get_record_field_value
       size:
         name_in_index: options.size
+        resolver: get_record_field_value
+      tags:
+        resolver: get_record_field_value
       the_options:
         name_in_index: the_opts
+        resolver: get_record_field_value
+      timestamps:
+        resolver: get_record_field_value
+      weight_in_ng:
+        resolver: get_record_field_value
+      weight_in_ng_str:
+        resolver: get_record_field_value
       workspace:
         relation:
           direction: in
@@ -5436,6 +5889,9 @@ object_types_by_name:
         resolver: nested_relationships
       workspace_id:
         name_in_index: workspace_id2
+        resolver: get_record_field_value
+      workspace_name:
+        resolver: get_record_field_value
   WidgetOrAddressAggregatedValues:
     graphql_fields_by_name:
       amount_cents:
@@ -5658,6 +6114,13 @@ object_types_by_name:
       workspace_name:
         resolver: object
   WidgetWorkspace:
+    graphql_fields_by_name:
+      id:
+        resolver: get_record_field_value
+      name:
+        resolver: get_record_field_value
+      widget:
+        resolver: get_record_field_value
     index_definition_names:
     - widget_workspaces
     update_targets:
@@ -5761,6 +6224,12 @@ object_types_by_name:
         resolver: object
       widget:
         resolver: object
+  WorkspaceWidget:
+    graphql_fields_by_name:
+      created_at:
+        resolver: get_record_field_value
+      id:
+        resolver: get_record_field_value
   WorkspaceWidgetAggregatedValues:
     graphql_fields_by_name:
       created_at:
