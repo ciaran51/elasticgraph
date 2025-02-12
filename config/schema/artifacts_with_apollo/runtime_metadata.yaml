@@ -4076,6 +4076,10 @@ object_types_by_name:
         resolver: object
   Query:
     graphql_fields_by_name:
+      _entities:
+        resolver: apollo_entities
+      _service:
+        resolver: apollo_service
       address_aggregations:
         resolver: list_records
       addresses:
