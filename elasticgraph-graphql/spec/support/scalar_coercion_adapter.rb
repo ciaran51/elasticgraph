@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/support/graphql_formatter"
-require "forwardable"
+require "elastic_graph/support/hash_util"
 require "graphql"
 
 # Provides test harness support for testing scalar coercion adapters. Makes
@@ -16,10 +16,21 @@ require "graphql"
 # point of view.
 RSpec.shared_context "scalar coercion adapter support" do |scalar_type_name, schema_definition: nil|
   before(:context) do
-    normal_graphql_adapter = build_graphql(schema_definition: schema_definition, clients_by_name: {}).schema.send(:resolver)
-    @test_adapter = ScalarCoercionAdapterTestGraphQLAdapter.new(normal_graphql_adapter)
+    normal_graphql_adapter = build_graphql(schema_definition: schema_definition, clients_by_name: {}).graphql_adapter
+    @test_resolver = ScalarCoercionAdapterTestResolver.new
 
-    @graphql = build_graphql(graphql_adapter: @test_adapter, clients_by_name: {}, schema_definition: lambda do |schema|
+    test_adapter = ElasticGraph::Support::HashUtil.deep_merge(
+      normal_graphql_adapter,
+      {
+        "Query" => {
+          "echo" => ->(object, args, context) {
+            @test_resolver.call(object, args, context)
+          }
+        }
+      }
+    )
+
+    @graphql = build_graphql(graphql_adapter: test_adapter, clients_by_name: {}, schema_definition: lambda do |schema|
       schema_definition&.call(schema)
       schema.raw_sdl <<~EOS
         type Query {
@@ -36,18 +47,18 @@ RSpec.shared_context "scalar coercion adapter support" do |scalar_type_name, sch
   end
 
   def execute_query_with_variable_value(value)
-    @test_adapter.return_value = nil
+    @test_resolver.return_value = nil
     @graphql.graphql_query_executor.execute(@query, variables: {value: value}).to_h
   end
 
   def execute_query_with_inline_query_value(value)
-    @test_adapter.return_value = nil
+    @test_resolver.return_value = nil
     query = "query { echo#{ElasticGraph::Support::GraphQLFormatter.format_args(arg: value)} }"
     @graphql.graphql_query_executor.execute(query).to_h
   end
 
   def execute_query_returning(value)
-    @test_adapter.return_value = value
+    @test_resolver.return_value = value
     @graphql.graphql_query_executor.execute(@query).to_h
   end
 
@@ -56,14 +67,14 @@ RSpec.shared_context "scalar coercion adapter support" do |scalar_type_name, sch
 
     expect(response).not_to include("errors")
     expect(response).to eq({"data" => {"echo" => nil}})
-    expect(@test_adapter.last_arg_value).to eq(as)
+    expect(@test_resolver.last_arg_value).to eq(as)
 
     unless only_test_variable
       response = execute_query_with_inline_query_value(value)
 
       expect(response).not_to include("errors")
       expect(response).to eq({"data" => {"echo" => nil}})
-      expect(@test_adapter.last_arg_value).to eq(as)
+      expect(@test_resolver.last_arg_value).to eq(as)
     end
   end
 
@@ -114,22 +125,10 @@ RSpec.shared_context "scalar coercion adapter support" do |scalar_type_name, sch
   end
 end
 
-# An GraphQL adapter meant to be used in place of a real EG adapter
-# just so it can replace the `call` logic with something super simple
-# that (1) returns a specific value and (2) records the arg value
-# that got passed to `call`.
-#
-# It wraps a real adapter in order to delegate `coerce_input` and `coerce_result` to it.
-class ScalarCoercionAdapterTestGraphQLAdapter
-  extend ::Forwardable
+class ScalarCoercionAdapterTestResolver
   attr_accessor :return_value, :last_arg_value
-  def_delegators :@wrapped_graphql_adapter, :coerce_input, :coerce_result
 
-  def initialize(wrapped_graphql_adapter)
-    @wrapped_graphql_adapter = wrapped_graphql_adapter
-  end
-
-  def call(parent_type, field, object, args, context)
+  def call(object, args, context)
     self.last_arg_value = args[:arg]
     return_value
   end

@@ -88,26 +88,14 @@ module ElasticGraph
     def schema
       @schema ||= begin
         require "elastic_graph/graphql/schema"
-
         Schema.new(
           graphql_schema_string: graphql_schema_string,
           config: config,
           runtime_metadata: runtime_metadata,
           index_definitions_by_graphql_type: @datastore_core.index_definitions_by_graphql_type,
-          graphql_gem_plugins: graphql_gem_plugins
-        ) do |schema|
-          @graphql_adapter || begin
-            @schema = schema # assign this so that `#schema` returns the schema when `datastore_query_adapters` is called below
-            require "elastic_graph/graphql/resolvers/graphql_adapter"
-            Resolvers::GraphQLAdapter.new(
-              schema: schema,
-              datastore_query_builder: datastore_query_builder,
-              datastore_query_adapters: datastore_query_adapters,
-              runtime_metadata: runtime_metadata,
-              named_resolvers: named_graphql_resolvers
-            )
-          end
-        end
+          graphql_gem_plugins: graphql_gem_plugins,
+          graphql_adapter: graphql_adapter
+        )
       end
     end
 
@@ -150,6 +138,27 @@ module ElasticGraph
           # We pass `preload: true` because the way we handle the schema depends on it being preloaded.
           ::GraphQL::Schema::Visibility => {preload: true}
         }
+      end
+    end
+
+    def graphql_adapter
+      @graphql_adapter ||= begin
+        require "elastic_graph/graphql/resolvers/graphql_adapter_builder"
+        Resolvers::GraphQLAdapterBuilder.new(
+          named_resolvers: named_graphql_resolvers,
+          query_adapter: resolver_query_adapter,
+          runtime_metadata: runtime_metadata
+        ).build
+      end
+    end
+
+    def resolver_query_adapter
+      @resolver_query_adapter ||= begin
+        require "elastic_graph/graphql/resolvers/query_adapter"
+        Resolvers::QueryAdapter.new(
+          datastore_query_builder: datastore_query_builder,
+          datastore_query_adapters: datastore_query_adapters
+        )
       end
     end
 
