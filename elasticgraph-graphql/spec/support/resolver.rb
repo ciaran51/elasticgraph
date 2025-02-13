@@ -24,6 +24,7 @@ module ResolverHelperMethods
         query: nil,
         schema: graphql.schema.graphql_schema,
         values: {
+          elastic_graph_schema: graphql.schema,
           schema_element_names: graphql.runtime_metadata.schema_element_names,
           dataloader: dataloader,
           elastic_graph_query_tracker: query_details_tracker,
