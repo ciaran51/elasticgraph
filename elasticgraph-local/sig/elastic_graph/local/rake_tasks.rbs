@@ -34,8 +34,8 @@ module ElasticGraph
       def define_docker_tasks_for_version: (::String, ::Symbol, ::String, port: ::Integer, version: ::String, env: ::String, ready_log_line: ::Regexp) -> void
       def define_other_tasks: () -> void
 
-      @local_datastore_port: ::Integer?
-      def local_datastore_port: () -> ::Integer
+      @local_datastore_url: ::String?
+      def local_datastore_url: () -> ::String
 
       @local_cluster_backends: ::Set[::String]?
       def local_cluster_backends: () -> ::Set[::String]
