@@ -142,9 +142,9 @@ module ElasticGraph
 
           call_graphql_query(<<~QUERY, timeout_in_ms: long_timeout_seconds * 1000)
             query {
-              widgets { edges { node {
-                components { edges { node { id } } }
-              } } }
+              widgets { nodes {
+                components { nodes { id name } }
+              } }
             }
           QUERY
 

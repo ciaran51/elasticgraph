@@ -198,6 +198,56 @@ module ElasticGraph
           expect(response.total_document_count).to eq 0
         end
 
+        describe ".synthesize_from_ids" do
+          it "creates a response matching the structure from the datastore using the given index and ids" do
+            response = SearchResponse.synthesize_from_ids("widgets", %w[abc def ghi])
+
+            expect(response.raw_data).to eq({
+              "took" => 0,
+              "timed_out" => false,
+              "_shards" => {
+                "total" => 0,
+                "successful" => 0,
+                "skipped" => 0,
+                "failed" => 0
+              },
+              "hits" => {
+                "total" => {
+                  "value" => 3,
+                  "relation" => "eq"
+                },
+                "max_score" => nil,
+                "hits" => [
+                  {
+                    "_index" => "widgets",
+                    "_type" => "_doc",
+                    "_id" => "abc",
+                    "_score" => nil,
+                    "_source" => {"id" => "abc"},
+                    "sort" => ["abc"]
+                  },
+                  {
+                    "_index" => "widgets",
+                    "_type" => "_doc",
+                    "_id" => "def",
+                    "_score" => nil,
+                    "_source" => {"id" => "def"},
+                    "sort" => ["def"]
+                  },
+                  {
+                    "_index" => "widgets",
+                    "_type" => "_doc",
+                    "_id" => "ghi",
+                    "_score" => nil,
+                    "_source" => {"id" => "ghi"},
+                    "sort" => ["ghi"]
+                  }
+                ]
+              }
+            })
+          end
+        end
+
         def raw_data_with_docs(count)
           documents = raw_data.fetch("hits").fetch("hits").first(count)
           raw_data.merge("hits" => raw_data.fetch("hits").merge("hits" => documents))

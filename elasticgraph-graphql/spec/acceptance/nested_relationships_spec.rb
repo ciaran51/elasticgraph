@@ -64,6 +64,200 @@ module ElasticGraph
           )
         end
 
+        it "avoids unneeded datastore queries when the client just requests the `id` from a relationship with an outbound foreign key", :expect_search_routing do
+          widget1_component_ids = [
+            component1.fetch(:id),
+            component2.fetch(:id),
+            component4.fetch(:id)
+          ]
+
+          # Test a relates_to_many case (Widget.components) with `id_ASC` sorting.
+          expect {
+            results = query_widgets_and_component_ids(component_args: {order_by: [:id_ASC]})
+
+            expect(results).to eq [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => widget1_component_ids.sort.map { |id| {"id" => id} }
+                }
+              },
+              {
+                "id" => widget2.fetch(:id),
+                "components" => {
+                  "nodes" => [
+                    string_hash_of(component3, :id)
+                  ]
+                }
+              }
+            ]
+          }.to query_datastore("main", 1).time
+
+          # Test a relates_to_many case (Widget.components) with `id_DESC` sorting.
+          expect {
+            results = query_widgets_and_component_ids(component_args: {order_by: [:id_DESC]})
+
+            expect(results).to eq [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => widget1_component_ids.sort.reverse.map { |id| {"id" => id} }
+                }
+              },
+              {
+                "id" => widget2.fetch(:id),
+                "components" => {
+                  "nodes" => [
+                    string_hash_of(component3, :id)
+                  ]
+                }
+              }
+            ]
+          }.to query_datastore("main", 1).time
+
+          # Test a relates_to_many case (Widget.components) with default (non-id) sorting--it has to make 2 queries.
+          expect {
+            results = query_widgets_and_component_ids
+
+            expect(results).to eq [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => widget1_component_ids.map { |id| {"id" => id} }
+                }
+              },
+              {
+                "id" => widget2.fetch(:id),
+                "components" => {
+                  "nodes" => [
+                    string_hash_of(component3, :id)
+                  ]
+                }
+              }
+            ]
+          }.to query_datastore("main", 2).times
+
+          # Test a relates_to_many case (Widget.components) with additional requested fields--it has to make 2 queries.
+          expect {
+            results = query_widgets_and_component_ids(other_component_fields: ["name"], component_args: {order_by: [:id_ASC]})
+
+            expect(results).to eq [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [
+                    string_hash_of(component1, :id, :name),
+                    string_hash_of(component2, :id, :name),
+                    string_hash_of(component4, :id, :name)
+                  ].sort_by { |hash| hash.fetch("id") }
+                }
+              },
+              {
+                "id" => widget2.fetch(:id),
+                "components" => {
+                  "nodes" => [
+                    string_hash_of(component3, :id, :name)
+                  ]
+                }
+              }
+            ]
+          }.to query_datastore("main", 2).time
+
+          # Test a relates_to_many case (Widget.components) with pagination
+          expect {
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: {
+                order_by: [:id_ASC],
+                first: 1,
+                after: nil
+              }
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.min}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => true,
+                    case_correctly("end_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+
+            # Fetch page 2...
+            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly("end_cursor"))
+            expect(cursor).to match(/\w+/)
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: {
+                order_by: [:id_ASC],
+                first: 1,
+                after: cursor
+              }
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.sort[1]}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => true,
+                    case_correctly("end_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+
+            # Fetch page 3...
+            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly("end_cursor"))
+            expect(cursor).to match(/\w+/)
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: {
+                order_by: [:id_ASC],
+                first: 1,
+                after: cursor
+              }
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.max}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => false,
+                    case_correctly("end_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+          }.to query_datastore("main", 3).times
+
+          # Test a relates_to_one case (ElectricalPart.manufacturer)
+          expect {
+            results = query_electrical_parts_and_manufacturer_ids
+
+            expect(results).to eq [
+              {
+                "id" => part2.fetch(:id),
+                "manufacturer" => string_hash_of(manufacturer1, :id)
+              },
+              {
+                "id" => part1.fetch(:id),
+                "manufacturer" => string_hash_of(manufacturer1, :id)
+              }
+            ]
+          }.to query_datastore("main", 1).time
+        end
+
         it "supports loading bi-directional relationships, starting from either end", :expect_search_routing do
           component_args_without_not = {filter: {name: {equal_to_any_of: %w[comp1 comp2 comp3]}}}
           component_args_with_not = {filter: {name: {not: {equal_to_any_of: %w[comp4]}}}}
@@ -292,6 +486,48 @@ module ElasticGraph
           QUERY
         end
 
+        def query_widgets_and_component_ids(widget_args: {}, component_args: {}, other_component_fields: [], request_page_info: false)
+          page_info_fields = <<~EOS
+            page_info {
+              has_next_page
+              end_cursor
+            }
+          EOS
+
+          call_graphql_query(<<~QUERY).dig("data", "widgets", "nodes")
+            query {
+              widgets#{graphql_args(widget_args)} {
+                nodes {
+                  id
+                  components#{graphql_args(component_args)} {
+                    nodes {
+                      id
+                      #{other_component_fields.join("\n")}
+                    }
+
+                    #{page_info_fields if request_page_info}
+                  }
+                }
+              }
+            }
+          QUERY
+        end
+
+        def query_electrical_parts_and_manufacturer_ids
+          call_graphql_query(<<~QUERY).dig("data", case_correctly("electrical_parts"), "nodes")
+            query {
+              electrical_parts {
+                nodes {
+                  id
+                  manufacturer {
+                    id
+                  }
+                }
+              }
+            }
+          QUERY
+        end
+
         def query_components_and_dollar_widgets(component_args: {})
           call_graphql_query(<<~QUERY).dig("data", "components")
             query {
@@ -441,6 +677,7 @@ module ElasticGraph
         end
       end
     end
+
     def query_widget_pagination_info(widget_args: {})
       call_graphql_query(<<~QUERY).dig("data", "widgets")
         query {
