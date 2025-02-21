@@ -21,7 +21,9 @@ module ElasticGraph
         types_to_keep = referenced_type_names(initial_type_names, original_json_schema["$defs"])
 
         # The .select will preserve the sort order of the original hash
+        # standard:disable Style/HashSlice -- https://github.com/soutaro/steep/issues/1503
         pruned_defs = original_json_schema["$defs"].select { |k, _v| types_to_keep.include?(k) }
+        # standard:enable Style/HashSlice
 
         original_json_schema.merge("$defs" => pruned_defs)
       end
@@ -31,7 +33,7 @@ module ElasticGraph
       def self.referenced_type_names(source_type_names, original_defs)
         return Set.new if source_type_names.empty?
 
-        referenced_type_defs = original_defs.select { |k, _| source_type_names.include?(k) }
+        referenced_type_defs = original_defs.slice(*source_type_names)
         ref_names = collect_ref_names(referenced_type_defs)
 
         referenced_type_names(ref_names, original_defs) + source_type_names
