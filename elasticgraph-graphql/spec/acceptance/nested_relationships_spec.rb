@@ -163,83 +163,25 @@ module ElasticGraph
             ]
           }.to query_datastore("main", 2).time
 
-          # Test a relates_to_many case (Widget.components) with pagination
-          expect {
-            results = query_widgets_and_component_ids(
-              request_page_info: true,
-              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
-              component_args: {
-                order_by: [:id_ASC],
-                first: 1,
-                after: nil
-              }
-            )
+          # Test a relates_to_many case (Widget.components) with ascending forwards pagination
+          paginate_widgets_and_component_ids(backwards: false, first_page: :min, last_page: :max) do |cursor|
+            {order_by: [:id_ASC], first: 1, after: cursor}
+          end
 
-            expect(results).to match [
-              {
-                "id" => widget1.fetch(:id),
-                "components" => {
-                  "nodes" => [{"id" => widget1_component_ids.min}],
-                  case_correctly("page_info") => {
-                    case_correctly("has_next_page") => true,
-                    case_correctly("end_cursor") => /\w+/
-                  }
-                }
-              }
-            ]
+          # Test a relates_to_many case (Widget.components) with descending forwards pagination
+          paginate_widgets_and_component_ids(backwards: false, first_page: :max, last_page: :min) do |cursor|
+            {order_by: [:id_DESC], first: 1, after: cursor}
+          end
 
-            # Fetch page 2...
-            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly("end_cursor"))
-            expect(cursor).to match(/\w+/)
-            results = query_widgets_and_component_ids(
-              request_page_info: true,
-              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
-              component_args: {
-                order_by: [:id_ASC],
-                first: 1,
-                after: cursor
-              }
-            )
+          # Test a relates_to_many case (Widget.components) with ascending backwards pagination
+          paginate_widgets_and_component_ids(backwards: true, first_page: :max, last_page: :min) do |cursor|
+            {order_by: [:id_ASC], last: 1, before: cursor}
+          end
 
-            expect(results).to match [
-              {
-                "id" => widget1.fetch(:id),
-                "components" => {
-                  "nodes" => [{"id" => widget1_component_ids.sort[1]}],
-                  case_correctly("page_info") => {
-                    case_correctly("has_next_page") => true,
-                    case_correctly("end_cursor") => /\w+/
-                  }
-                }
-              }
-            ]
-
-            # Fetch page 3...
-            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly("end_cursor"))
-            expect(cursor).to match(/\w+/)
-            results = query_widgets_and_component_ids(
-              request_page_info: true,
-              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
-              component_args: {
-                order_by: [:id_ASC],
-                first: 1,
-                after: cursor
-              }
-            )
-
-            expect(results).to match [
-              {
-                "id" => widget1.fetch(:id),
-                "components" => {
-                  "nodes" => [{"id" => widget1_component_ids.max}],
-                  case_correctly("page_info") => {
-                    case_correctly("has_next_page") => false,
-                    case_correctly("end_cursor") => /\w+/
-                  }
-                }
-              }
-            ]
-          }.to query_datastore("main", 3).times
+          # Test a relates_to_many case (Widget.components) with descending backwards pagination
+          paginate_widgets_and_component_ids(backwards: true, first_page: :min, last_page: :max) do |cursor|
+            {order_by: [:id_DESC], last: 1, before: cursor}
+          end
 
           # Test a relates_to_one case (ElectricalPart.manufacturer)
           expect {
@@ -441,6 +383,86 @@ module ElasticGraph
           super
         end
 
+        def paginate_widgets_and_component_ids(backwards:, first_page:, last_page:)
+          cursor_field = backwards ? "start_cursor" : "end_cursor"
+          widget1_component_ids = [
+            component1.fetch(:id),
+            component2.fetch(:id),
+            component4.fetch(:id)
+          ]
+
+          expect {
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: yield(nil)
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.public_send(first_page)}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => !backwards,
+                    case_correctly("has_previous_page") => backwards,
+                    case_correctly("end_cursor") => /\w+/,
+                    case_correctly("start_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+
+            # Fetch page 2...
+            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly(cursor_field))
+            expect(cursor).to match(/\w+/)
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: yield(cursor)
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.sort[1]}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => true,
+                    case_correctly("has_previous_page") => true,
+                    case_correctly("end_cursor") => /\w+/,
+                    case_correctly("start_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+
+            # Fetch page 3...
+            cursor = results.dig(0, "components", case_correctly("page_info"), case_correctly(cursor_field))
+            expect(cursor).to match(/\w+/)
+            results = query_widgets_and_component_ids(
+              request_page_info: true,
+              widget_args: {filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}}},
+              component_args: yield(cursor)
+            )
+
+            expect(results).to match [
+              {
+                "id" => widget1.fetch(:id),
+                "components" => {
+                  "nodes" => [{"id" => widget1_component_ids.public_send(last_page)}],
+                  case_correctly("page_info") => {
+                    case_correctly("has_next_page") => backwards,
+                    case_correctly("has_previous_page") => !backwards,
+                    case_correctly("end_cursor") => /\w+/,
+                    case_correctly("start_cursor") => /\w+/
+                  }
+                }
+              }
+            ]
+          }.to query_datastore("main", 3).times
+        end
+
         def query_all_relationship_levels_from_widgets(component_args: {}, part_args: {})
           call_graphql_query(<<~QUERY).dig("data", "widgets")
             query {
@@ -490,7 +512,9 @@ module ElasticGraph
           page_info_fields = <<~EOS
             page_info {
               has_next_page
+              has_previous_page
               end_cursor
+              start_cursor
             }
           EOS
 
