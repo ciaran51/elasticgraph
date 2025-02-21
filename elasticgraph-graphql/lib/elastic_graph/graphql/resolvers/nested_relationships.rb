@@ -67,14 +67,16 @@ module ElasticGraph
           # If the client is requesting any fields besides `id`, we can't do this.
           return nil unless (query.requested_fields - ONLY_ID).empty?
 
+          pagination = query.document_paginator.to_datastore_body
+          search_after = pagination.dig(:search_after, 0)
           ids = Array(id_or_ids)
 
           sorted_ids =
-            case query.sort.dig(0, "id", "order")
+            case pagination.dig(:sort, 0, "id", "order")
             when "asc"
-              ids.sort
+              ids.sort.select { |id| search_after.nil? || id > search_after }
             when "desc"
-              ids.sort.reverse
+              ids.sort.reverse.select { |id| search_after.nil? || id < search_after }
             else
               if ids.size < 2
                 ids
@@ -86,19 +88,9 @@ module ElasticGraph
               end
             end
 
-          pagination = query.document_paginator.to_datastore_body
-          ids =
-            if (search_after = pagination.dig(:search_after, 0))
-              sorted_ids
-                .select { |id| id > search_after }
-                .first(pagination.fetch(:size))
-            else
-              sorted_ids.first(pagination.fetch(:size))
-            end
-
           DatastoreResponse::SearchResponse.synthesize_from_ids(
             query.search_index_expression,
-            ids,
+            sorted_ids.first(pagination.fetch(:size)),
             decoded_cursor_factory: query.send(:decoded_cursor_factory)
           )
         end
