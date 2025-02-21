@@ -44,7 +44,7 @@ module ElasticGraph
                     "version" => 10,
                     "amount_cents" => 300,
                     "name" => "HuaweiP Smart",
-                    "created_at" => "2019-06-03T22 =>46 =>01Z",
+                    "created_at" => "2019-06-03T22:46:01Z",
                     "options" => {
                       "size" => "MEDIUM",
                       "color" => "GREEN"
@@ -65,7 +65,7 @@ module ElasticGraph
                     "version" => 10,
                     "amount_cents" => 300,
                     "name" => "HuaweiP Smart",
-                    "created_at" => "2019-06-03T22 =>46 =>01Z",
+                    "created_at" => "2019-06-03T22:46:01Z",
                     "options" => {
                       "size" => "MEDIUM",
                       "color" => "GREEN"
@@ -86,7 +86,7 @@ module ElasticGraph
                     "version" => 7,
                     "amount_cents" => 200,
                     "name" => "Samsung Galaxy S9",
-                    "created_at" => "2019-06-18T04 =>01 =>51Z",
+                    "created_at" => "2019-06-18T04:01:51Z",
                     "options" => {
                       "size" => "LARGE",
                       "color" => "BLUE"
