@@ -307,7 +307,9 @@ module ElasticGraph
           end
 
         circular_reference_sets = referenced_types_by_source_type
+          # standard:disable Style/HashSlice -- https://github.com/rubocop/rubocop/issues/13885
           .select { |source_type, referenced_types| referenced_types.include?(source_type) }
+          # standard:enable Style/HashSlice
           .values
           .uniq
 
