@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/graphql/resolvers/relay_connection"
+require "elastic_graph/graphql/datastore_response/search_response"
 
 module ElasticGraph
   class GraphQL
@@ -30,6 +31,7 @@ module ElasticGraph
           log_warning = ->(**options) { log_field_problem_warning(field: field, **options) }
           join = field.relation_join
           id_or_ids = join.extract_id_or_ids_from(object, log_warning)
+
           filters = [
             build_filter(join.filter_id_field_name, nil, join.foreign_key_nested_paths, Array(id_or_ids)),
             join.additional_filter
@@ -41,7 +43,9 @@ module ElasticGraph
             when nil, []
               join.blank_value
             else
-              initial_response = QuerySource.execute_one(query, for_context: context)
+              initial_response = try_synthesize_response_from_ids(field, id_or_ids, query) ||
+                QuerySource.execute_one(query, for_context: context)
+
               join.normalize_documents(initial_response) do |problem|
                 log_warning.call(document: {"id" => id_or_ids}, problem: "got #{problem} from the datastore search query")
               end
@@ -51,6 +55,53 @@ module ElasticGraph
         end
 
         private
+
+        ONLY_ID = ["id"]
+
+        # When a client requests only the `id` from a nested relationship, and we already have those ids,
+        # we want to avoid querying the datastore, and synthesize a response instead.
+        def try_synthesize_response_from_ids(field, id_or_ids, query)
+          # This optimization can only be used on a relationship with an outbound foreign key.
+          return nil if field.relation.direction == :in
+
+          # If the client is requesting any fields besides `id`, we can't do this.
+          return nil unless (query.requested_fields - ONLY_ID).empty?
+
+          ids = Array(id_or_ids)
+
+          sorted_ids =
+            case query.sort.dig(0, "id", "order")
+            when "asc"
+              ids.sort
+            when "desc"
+              ids.sort.reverse
+            else
+              if ids.size < 2
+                ids
+              else
+                # The client is sorting by something other than `id` and we have multiple ids.
+                # We aren't able to determine the correct order for the ids, so we can't synthesize
+                # a response.
+                return nil
+              end
+            end
+
+          pagination = query.document_paginator.to_datastore_body
+          ids =
+            if (search_after = pagination.dig(:search_after, 0))
+              sorted_ids
+                .select { |id| id > search_after }
+                .first(pagination.fetch(:size))
+            else
+              sorted_ids.first(pagination.fetch(:size))
+            end
+
+          DatastoreResponse::SearchResponse.synthesize_from_ids(
+            query.search_index_expression,
+            ids,
+            decoded_cursor_factory: query.send(:decoded_cursor_factory)
+          )
+        end
 
         def log_field_problem_warning(field:, document:, problem:)
           id = document.fetch("id", "<no id>")

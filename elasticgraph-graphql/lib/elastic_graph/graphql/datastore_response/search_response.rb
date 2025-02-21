@@ -57,6 +57,40 @@ module ElasticGraph
           )
         end
 
+        def self.synthesize_from_ids(index, ids, decoded_cursor_factory: DecodedCursor::Factory::Null)
+          hits = ids.map do |id|
+            {
+              "_index" => index,
+              "_type" => "_doc",
+              "_id" => id,
+              "_score" => nil,
+              "_source" => {"id" => id},
+              "sort" => [id]
+            }
+          end
+
+          raw_data = {
+            "took" => 0,
+            "timed_out" => false,
+            "_shards" => {
+              "total" => 0,
+              "successful" => 0,
+              "skipped" => 0,
+              "failed" => 0
+            },
+            "hits" => {
+              "total" => {
+                "value" => ids.size,
+                "relation" => "eq"
+              },
+              "max_score" => nil,
+              "hits" => hits
+            }
+          }
+
+          build(raw_data, decoded_cursor_factory: decoded_cursor_factory)
+        end
+
         # Benign empty response that can be used in place of datastore response errors as needed.
         RAW_EMPTY = {"hits" => {"hits" => [], "total" => {"value" => 0}}}.freeze
         EMPTY = build(RAW_EMPTY)

@@ -723,8 +723,12 @@ module ElasticGraph
         # we override `resolve` (defined in the `resolver support` shared context) in order
         # to enforce that no `resolve` call ever queries the datastore more than once, as part
         # of preventing N+1 queries.
-        # Also, we force `id` as a requested field here since the specs rely on it always being requested.
-        def resolve(*args, requested_fields: ["id"], **options)
+        #
+        # Also, we force `id` and `created_at` as requested fields here since:
+        #
+        # * The specs rely on `id` always being requested.
+        # * We need to request more than just `id` to avoid the synthesizing of a datastore response based just on the ids.
+        def resolve(*args, requested_fields: ["id", "created_at"], **options)
           result = nil
 
           # Perform any cached calls to the datastore to happen before our `query_datastore`
