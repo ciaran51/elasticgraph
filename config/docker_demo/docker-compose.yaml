@@ -6,7 +6,7 @@ networks:
 services:
   opensearch:
     build:
-      context: ./elasticgraph-local/lib/elastic_graph/local/opensearch/.
+      context: ../../elasticgraph-local/lib/elastic_graph/local/opensearch/.
       dockerfile: Dockerfile
       args:
         VERSION: 2.18.0
@@ -40,7 +40,7 @@ services:
     - 9200:9200
   dashboards:
     build:
-      context: ./elasticgraph-local/lib/elastic_graph/local/opensearch/.
+      context: ../../elasticgraph-local/lib/elastic_graph/local/opensearch/.
       dockerfile: UI-Dockerfile
       args:
         VERSION: ${OPENSEARCH_VERSION}
@@ -52,8 +52,8 @@ services:
     - 5601:5601
   elasticgraph:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: config/docker_demo/Dockerfile
       args:
         container_name: elasticgraph-${ENV}
     environment:
