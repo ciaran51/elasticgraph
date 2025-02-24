@@ -1,0 +1,1 @@
+../../../../../elasticgraph/lib/elastic_graph/project_template/config/schema/artists.rb.tt
