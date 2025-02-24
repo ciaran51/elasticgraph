@@ -1,0 +1,17 @@
+# Mac OS X file.
+**/.DS_Store
+
+# Git
+**/.git
+
+# Documentation and License files
+**/*.md
+**/*.txt
+
+# Ignore log and temp files.
+**/log
+**/tmp
+
+# Ignore spec and signature files.
+**/spec
+**/sig

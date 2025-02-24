@@ -5,6 +5,9 @@ FROM ruby:${RUBY_VERSION}
 
 WORKDIR /app
 
+# Avoid "fatal: not a git repository (or any of the parent directories): .git"
+RUN git init
+
 # Copy the minimal Gemfile and local ElasticGraph gems that we need.
 COPY config/docker_demo/Gemfile .
 COPY elasticgraph elasticgraph

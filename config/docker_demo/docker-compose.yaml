@@ -1,7 +1,7 @@
 ---
 networks:
   default:
-    name: opensearch
+    name: elasticgraph-docker-demo
     external: false
 services:
   opensearch:
