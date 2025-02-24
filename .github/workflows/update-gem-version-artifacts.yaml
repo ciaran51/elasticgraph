@@ -30,6 +30,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@2a18b06812b0e15bb916e1df298d3e740422c47e # v1.203.0
         with:
+          ruby-version: "3.4"
           bundler-cache: true
 
       - name: Update RBS collection
