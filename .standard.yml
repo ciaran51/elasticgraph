@@ -12,6 +12,10 @@ ignore:
     # We don't want the standard comment header to be required on project template files,
     # as they don't need to be on the end files of an ElasticGraph project.
     - ElasticGraph/RequireStandardCommentHeader
+  - "config/site/examples/music/schema/artists.rb":
+    # This file is a symlink of the `artists.rb` file from the project template, and we can't include the
+    # standard header in it without adding it to the project template, which we don't want to do.
+    - ElasticGraph/RequireStandardCommentHeader
   - "**/*.rb":
     # This cop forces syntax that steep does not yet support. (e.g. `def foo(**); bar(**); end`)
     # Once steep supports that, we can stop ignoring this one.
