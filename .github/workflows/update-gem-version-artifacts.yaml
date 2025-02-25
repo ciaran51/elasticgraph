@@ -34,10 +34,16 @@ jobs:
           bundler-cache: true
 
       - name: Update RBS collection
-        run: bundle exec rbs collection update
+        run: |
+          bundle exec rbs collection update
+          git status
+          git diff
 
       - name: Update gem version constraints
-        run: script/update_gem_constraints
+        run: |
+          script/update_gem_constraints
+          git status
+          git diff
 
       - name: Commit and push if changed
         run: |
