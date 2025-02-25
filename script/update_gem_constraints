@@ -64,8 +64,12 @@ class DependencyUpdater
 
   def run_bundle_install
     puts "\nRunning bundle install..."
-    system("bundle install")
+    success = system("bundle install")
     puts # Add a blank line after bundle install output
+
+    unless success
+      abort "\e[31mError: bundle install failed\e[0m"
+    end
   end
 
   def display_changes
