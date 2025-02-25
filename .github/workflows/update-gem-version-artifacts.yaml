@@ -23,7 +23,7 @@ jobs:
       - name: Checkout Git Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.workflow_run.head_branch }}
           # Use the PAT for checkout to ensure proper permissions
           token: ${{ secrets.PAT_FOR_PUSHING_AND_TRIGGERING_CI }}
 
@@ -49,5 +49,5 @@ jobs:
 
             # Push using the PAT
             git remote set-url origin "https://x-access-token:${{ secrets.PAT_FOR_PUSHING_AND_TRIGGERING_CI }}@github.com/${{ github.repository }}.git"
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${{ github.event.workflow_run.head_branch }}
           fi
