@@ -1,13 +1,13 @@
 name: Update Gem Version Artifacts
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_run:
+    workflows: ["Dependabot PR Check"]
+    types:
+      - completed
 
 jobs:
   update-dependencies:
-    # Only run on Dependabot PRs
-    if: ${{ github.actor == 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     # The 'permissions' here apply to the GITHUB_TOKEN, but we'll actually be pushing with the PAT
     permissions:
