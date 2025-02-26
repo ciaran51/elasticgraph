@@ -24,7 +24,7 @@ module ElasticGraph
 
         expect(metadata.graphql_fields_by_name).to eq({
           "parent" => graphql_field_with(
-            name_in_index: nil,
+            name_in_index: "parent",
             relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
               foreign_key: "parent_id",
               direction: :out,
@@ -45,7 +45,6 @@ module ElasticGraph
         end
 
         expected_relation_field = graphql_field_with(
-          name_in_index: nil,
           relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
             foreign_key: "parent_id",
             direction: :in,
@@ -55,8 +54,8 @@ module ElasticGraph
         )
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "children" => expected_relation_field,
-          "child_aggregations" => expected_relation_field
+          "children" => expected_relation_field.with(name_in_index: "children"),
+          "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations")
         })
       end
 
@@ -80,7 +79,6 @@ module ElasticGraph
         end
 
         expected_relation_field = graphql_field_with(
-          name_in_index: nil,
           relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
             foreign_key: "parent_id",
             direction: :in,
@@ -90,9 +88,9 @@ module ElasticGraph
         )
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "children" => expected_relation_field,
-          "child_aggregations" => expected_relation_field,
-          "parent" => expected_relation_field
+          "children" => expected_relation_field.with(name_in_index: "children"),
+          "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
+          "parent" => expected_relation_field.with(name_in_index: "parent")
         })
       end
 
@@ -116,7 +114,6 @@ module ElasticGraph
         end
 
         expected_relation_field = graphql_field_with(
-          name_in_index: nil,
           relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
             foreign_key: "parent_id",
             direction: :in,
@@ -126,9 +123,9 @@ module ElasticGraph
         )
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "children" => expected_relation_field,
-          "child_aggregations" => expected_relation_field,
-          "parent" => expected_relation_field
+          "children" => expected_relation_field.with(name_in_index: "children"),
+          "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
+          "parent" => expected_relation_field.with(name_in_index: "parent")
         })
       end
 
@@ -161,7 +158,6 @@ module ElasticGraph
         end
 
         expected_relation_field = graphql_field_with(
-          name_in_index: nil,
           relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
             foreign_key: "parent_id",
             direction: :in,
@@ -175,9 +171,9 @@ module ElasticGraph
         )
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "children" => expected_relation_field,
-          "child_aggregations" => expected_relation_field,
-          "parent" => expected_relation_field
+          "children" => expected_relation_field.with(name_in_index: "children"),
+          "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
+          "parent" => expected_relation_field.with(name_in_index: "parent")
         })
       end
 
@@ -242,7 +238,6 @@ module ElasticGraph
           end
 
           expected_relation_field = graphql_field_with(
-            name_in_index: nil,
             relation: SchemaArtifacts::RuntimeMetadata::Relation.new(
               foreign_key: "players.affiliations.sponsorships.sponsor_id",
               direction: :in,
@@ -251,8 +246,8 @@ module ElasticGraph
             )
           )
           expect(metadata.graphql_fields_by_name).to eq({
-            "affiliated_teams" => expected_relation_field,
-            "affiliated_team_aggregations" => expected_relation_field
+            "affiliated_teams" => expected_relation_field.with(name_in_index: "affiliated_teams"),
+            "affiliated_team_aggregations" => expected_relation_field.with(name_in_index: "affiliated_team_aggregations")
           })
         end
       end

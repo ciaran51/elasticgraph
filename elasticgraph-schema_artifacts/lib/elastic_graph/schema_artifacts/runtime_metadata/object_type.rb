@@ -50,8 +50,9 @@ module ElasticGraph
             UpdateTarget.from_hash(update_target_hash)
           end || []
 
-          graphql_fields_by_name = hash[GRAPHQL_FIELDS_BY_NAME]&.transform_values do |field_hash|
-            GraphQLField.from_hash(field_hash)
+          graphql_fields_by_name = hash[GRAPHQL_FIELDS_BY_NAME]&.to_h do |name, field_hash|
+            field_hash = field_hash.merge(GraphQLField::NAME_IN_INDEX => name) unless field_hash[GraphQLField::NAME_IN_INDEX]
+            [name, GraphQLField.from_hash(field_hash)]
           end || {}
 
           new(
@@ -65,10 +66,16 @@ module ElasticGraph
         end
 
         def to_dumpable_hash
+          dumped_graphql_fields_by_name =
+            HashDumper.dump_hash(graphql_fields_by_name.to_h do |name, field|
+              field = field.with(name_in_index: nil) if field.name_in_index == name
+              [name, field]
+            end, &:to_dumpable_hash)
+
           {
             # Keys here are ordered alphabetically; please keep them that way.
             ELASTICGRAPH_CATEGORY => elasticgraph_category&.to_s,
-            GRAPHQL_FIELDS_BY_NAME => HashDumper.dump_hash(graphql_fields_by_name, &:to_dumpable_hash),
+            GRAPHQL_FIELDS_BY_NAME => dumped_graphql_fields_by_name,
             GRAPHQL_ONLY_RETURN_TYPE => graphql_only_return_type ? true : nil,
             INDEX_DEFINITION_NAMES => index_definition_names,
             SOURCE_TYPE => source_type,
