@@ -197,8 +197,6 @@ module ElasticGraph
               "configure an alternate name for the `#{name}` operator."
           end
 
-          options = {name_in_index: nil}.merge(options) if graphql_only
-
           field_factory.call(
             name: name,
             type: type,

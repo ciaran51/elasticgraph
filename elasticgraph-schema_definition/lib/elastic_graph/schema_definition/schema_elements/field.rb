@@ -140,7 +140,7 @@ module ElasticGraph
             legacy_grouping_schema: legacy_grouping_schema
           )
 
-          if name != name_in_index && name_in_index&.include?(".") && !graphql_only
+          if name != name_in_index && name_in_index.include?(".") && !graphql_only
             raise Errors::SchemaError, "#{self} has an invalid `name_in_index`: #{name_in_index.inspect}. Only `graphql_only: true` fields can have a `name_in_index` that references a child field."
           end
 

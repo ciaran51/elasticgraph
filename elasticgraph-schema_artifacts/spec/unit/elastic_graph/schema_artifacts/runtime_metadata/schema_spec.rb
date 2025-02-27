@@ -59,7 +59,7 @@ module ElasticGraph
                     relation: nil
                   ),
                   "parent" => GraphQLField.new(
-                    name_in_index: nil,
+                    name_in_index: "parent",
                     computation_detail: nil,
                     relation: Relation.new(
                       foreign_key: "grandparents.parents.some_id",
@@ -69,7 +69,7 @@ module ElasticGraph
                     )
                   ),
                   "sum" => GraphQLField.new(
-                    name_in_index: nil,
+                    name_in_index: "sum",
                     computation_detail: ComputationDetail.new(
                       empty_bucket_value: 0,
                       function: :sum

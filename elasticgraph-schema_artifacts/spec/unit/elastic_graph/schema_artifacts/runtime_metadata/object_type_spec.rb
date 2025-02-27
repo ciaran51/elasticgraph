@@ -62,6 +62,25 @@ module ElasticGraph
           expect(type.graphql_only_return_type).to eq true
           expect(type.to_dumpable_hash).to include("graphql_only_return_type" => true)
         end
+
+        it "omits `name_in_index` from dumped GraphQL fields when it matches the GraphQL field name" do
+          relation = relation_with(foreign_key: "other_id")
+          type = object_type_with(
+            graphql_fields_by_name: {
+              "foo1" => graphql_field_with(name_in_index: "foo1", relation: relation),
+              "foo2" => graphql_field_with(name_in_index: "foo2_in_index", relation: relation)
+            }
+          )
+
+          dumped = type.to_dumpable_hash
+
+          expect(dumped.fetch("graphql_fields_by_name").transform_values(&:compact)).to eq({
+            "foo1" => {"relation" => relation.to_dumpable_hash},
+            "foo2" => {"relation" => relation.to_dumpable_hash, "name_in_index" => "foo2_in_index"}
+          })
+
+          expect(ObjectType.from_hash(dumped)).to eq(type)
+        end
       end
     end
   end
