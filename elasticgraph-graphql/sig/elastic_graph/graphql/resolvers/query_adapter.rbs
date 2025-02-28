@@ -1,0 +1,38 @@
+module ElasticGraph
+  class GraphQL
+    module Resolvers
+      class QueryAdapter
+        @datastore_query_builder: DatastoreQuery::Builder
+        @datastore_query_adapters: ::Array[_QueryAdapter]
+
+        def initialize: (
+          datastore_query_builder: DatastoreQuery::Builder,
+          datastore_query_adapters: ::Array[_QueryAdapter]
+        ) -> void
+
+        def build_query_from: (
+          field: Schema::Field,
+          args: ::Hash[::String, untyped],
+          lookahead: ::GraphQL::Execution::Lookahead,
+          context: ::GraphQL::Query::Context
+        ) -> DatastoreQuery
+
+        private
+
+        def cache_key_for: (
+          Schema::Field,
+          ::Hash[::String, untyped],
+          ::GraphQL::Execution::Lookahead,
+        ) -> ::Array[untyped]
+
+        def build_new_query_from: (
+          Schema::Field,
+          ::Hash[::String, untyped],
+          ::GraphQL::Execution::Lookahead,
+          ::GraphQL::Query::Context,
+          ::Integer
+        ) -> DatastoreQuery
+      end
+    end
+  end
+end
