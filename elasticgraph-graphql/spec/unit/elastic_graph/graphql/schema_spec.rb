@@ -153,19 +153,15 @@ module ElasticGraph
           end
         end
 
-        it "finds an enum_value when given a type and enum_value name strings" do
+        it "finds an enum_value when given a type and enum_value name" do
           expect(schema.enum_value_named("ColorSpace", "rgb")).to be_a GraphQL::Schema::EnumValue
         end
 
-        it "finds an enum_value when given a type and enum_value name symbols" do
-          expect(schema.enum_value_named("ColorSpace", :rgb)).to be_a GraphQL::Schema::EnumValue
-        end
-
         it "consistently returns the same enum_value_object" do
-          enum_value1 = schema.enum_value_named("ColorSpace", :rgb)
-          enum_value2 = schema.enum_value_named("ColorSpace", :rgb)
+          enum_value1 = schema.enum_value_named("ColorSpace", "rgb")
+          enum_value2 = schema.enum_value_named("ColorSpace", "rgb")
           enum_value3 = schema.enum_value_named("ColorSpace", "rgb")
-          other_field = schema.enum_value_named("ColorSpace", :srgb)
+          other_field = schema.enum_value_named("ColorSpace", "srgb")
 
           expect(enum_value2).to be(enum_value1)
           expect(enum_value3).to be(enum_value1)
@@ -174,19 +170,19 @@ module ElasticGraph
 
         it "raises an error when the type cannot be found" do
           expect {
-            schema.enum_value_named("ColorType", :name)
+            schema.enum_value_named("ColorType", "name")
           }.to raise_error(Errors::NotFoundError, /ColorSpace/)
         end
 
         it "raises an error when the enum value cannot be found, suggesting a correction if it can find one" do
           expect {
-            schema.enum_value_named("ColorSpace", :srg)
+            schema.enum_value_named("ColorSpace", "srg")
           }.to raise_error(Errors::NotFoundError, a_string_including("ColorSpace", "srg", "Possible alternatives", "srgb"))
         end
 
         it "raises an error when the enum value cannot be found, with no suggestions if not close to any enum value name" do
           expect {
-            schema.enum_value_named("ColorSpace", :foo)
+            schema.enum_value_named("ColorSpace", "foo")
           }.to raise_error(Errors::NotFoundError, a_string_including("ColorSpace", "foo").and(excluding("Possible alternatives")))
         end
       end

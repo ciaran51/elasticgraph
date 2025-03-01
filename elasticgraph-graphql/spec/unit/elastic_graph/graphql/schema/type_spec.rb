@@ -473,17 +473,10 @@ module ElasticGraph
           end
 
           it "returns the same enum_value object returns by schema's `enum_value_named` method" do
-            from_type = schema.type_named("ColorSpace").enum_value_named(:rgb)
-            from_schema = schema.enum_value_named("ColorSpace", :rgb)
+            from_type = schema.type_named("ColorSpace").enum_value_named("rgb")
+            from_schema = schema.enum_value_named("ColorSpace", "rgb")
 
             expect(from_schema).to be_a(EnumValue).and be(from_type)
-          end
-
-          it "supports the enum_value being named with a string or symbol" do
-            from_string = schema.type_named("ColorSpace").enum_value_named("rgb")
-            from_symbol = schema.type_named("ColorSpace").enum_value_named(:rgb)
-
-            expect(from_symbol).to be_a(EnumValue).and be(from_string)
           end
         end
 

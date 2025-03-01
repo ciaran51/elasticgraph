@@ -168,7 +168,7 @@ module ElasticGraph
           when ::Array
             value.map { |v| to_datastore_value(v) }
           when Schema::EnumValue
-            value.name.to_s
+            value.name
           else
             value
           end

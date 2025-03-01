@@ -132,7 +132,7 @@ module ElasticGraph
 
           it "returns a list of datastore sort clauses when passed an array" do
             field = schema.field_named("Query", "photos")
-            sort_clauses = field.sort_clauses_for([:pixel_count_DESC, :created_at_ms_DESC])
+            sort_clauses = field.sort_clauses_for(["pixel_count_DESC", "created_at_ms_DESC"])
 
             expect(sort_clauses).to eq([
               {"pixel_count" => {"order" => "desc"}},
@@ -142,7 +142,7 @@ module ElasticGraph
 
           it "returns a list of a single datastore sort clause when passed a scalar" do
             field = schema.field_named("Query", "photos")
-            sort_clauses = field.sort_clauses_for(:pixel_count_DESC)
+            sort_clauses = field.sort_clauses_for("pixel_count_DESC")
 
             expect(sort_clauses).to eq([{"pixel_count" => {"order" => "desc"}}])
           end
@@ -151,7 +151,7 @@ module ElasticGraph
             field = schema.field_named("Query", "photos")
 
             expect {
-              field.sort_clauses_for(:bogus_DESC)
+              field.sort_clauses_for("bogus_DESC")
             }.to raise_error(Errors::NotFoundError, a_string_including("No enum value named bogus_DESC"))
           end
 
@@ -176,7 +176,7 @@ module ElasticGraph
             field = schema.field_named("Query", "photos")
 
             expect {
-              field.sort_clauses_for(:invalid_photo_sort_DESC)
+              field.sort_clauses_for("invalid_photo_sort_DESC")
             }.to raise_error(Errors::SchemaError, a_string_including("sort_field", "invalid_photo_sort_DESC"))
           end
 

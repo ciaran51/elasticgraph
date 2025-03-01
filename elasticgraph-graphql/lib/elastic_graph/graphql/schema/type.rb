@@ -122,7 +122,7 @@ module ElasticGraph
         end
 
         def enum_value_named(enum_value_name)
-          @enum_values_by_name[enum_value_name.to_s]
+          @enum_values_by_name[enum_value_name]
         end
 
         def coerce_result(result)
@@ -226,7 +226,7 @@ module ElasticGraph
           graphql_enum_value = @graphql_type.values.fetch(enum_value_name)
 
           EnumValue.new(
-            name: graphql_enum_value.graphql_name.to_sym,
+            name: graphql_enum_value.graphql_name,
             type: self,
             runtime_metadata: @enum_runtime_metadata&.values_by_name&.dig(enum_value_name)
           )
