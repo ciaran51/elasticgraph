@@ -192,7 +192,7 @@ module ElasticGraph
 
                 Aggregation::Computation.new(
                   source_field_path: field_path,
-                  computed_index_field_name: computed_field.name_in_index.to_s,
+                  computed_index_field_name: computed_field.name_in_index,
                   detail: computation_detail
                 )
               end

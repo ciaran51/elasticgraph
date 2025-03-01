@@ -22,7 +22,7 @@ module ElasticGraph
 
           new(
             name_in_graphql_query: ast_node.alias || ast_node.name,
-            name_in_index: field&.name_in_index&.to_s
+            name_in_index: field&.name_in_index
           )
         end
       end

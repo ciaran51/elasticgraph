@@ -114,7 +114,7 @@ module ElasticGraph
         end
 
         def field_named(field_name)
-          @fields_by_name.fetch(field_name.to_s)
+          @fields_by_name.fetch(field_name)
         rescue KeyError => e
           msg = "No field named #{field_name} (on type #{name}) could be found"
           msg += "; Possible alternatives: [#{e.corrections.join(", ").delete('"')}]." if e.corrections.any?

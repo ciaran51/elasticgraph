@@ -37,7 +37,7 @@ module ElasticGraph
           when ::Hash
             filter_object.to_h do |key, value|
               field = parent_type.field_named(key)
-              [field.name_in_index.to_s, convert(field.type.unwrap_fully, value)]
+              [field.name_in_index, convert(field.type.unwrap_fully, value)]
             end
           when ::Array
             filter_object.map { |value| convert(parent_type, value) }

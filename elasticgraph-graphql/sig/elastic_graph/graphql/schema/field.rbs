@@ -5,8 +5,8 @@ module ElasticGraph
       class Field
         attr_reader description: ::String
         attr_reader schema: Schema
-        attr_reader name: ::Symbol
-        attr_reader name_in_index: ::Symbol
+        attr_reader name: ::String
+        attr_reader name_in_index: ::String
         attr_reader parent_type: Type
         attr_reader type: Type
         attr_reader graphql_field: ::GraphQL::Schema::Field
