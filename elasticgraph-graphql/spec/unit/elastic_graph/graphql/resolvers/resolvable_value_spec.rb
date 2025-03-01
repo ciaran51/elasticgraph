@@ -150,7 +150,7 @@ module ElasticGraph
               birth_date: birth_date
             )
 
-            [person, build_graphql(element_names).schema.field_named(:Person, field)]
+            [person, build_graphql(element_names).schema.field_named("Person", field)]
           end
 
           def build_graphql(element_names)

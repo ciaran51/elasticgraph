@@ -44,14 +44,10 @@ module ElasticGraph
           expect(schema.type_named("Color")).to be_a GraphQL::Schema::Type
         end
 
-        it "finds a type by symbol name" do
-          expect(schema.type_named(:Color)).to be_a GraphQL::Schema::Type
-        end
-
         it "consistently returns the same type object" do
           color1 = schema.type_named("Color")
           color2 = schema.type_named("Color")
-          color3 = schema.type_named(:Color)
+          color3 = schema.type_named("Color")
           query = schema.type_named("Query")
 
           expect(color2).to be(color1)
@@ -85,8 +81,8 @@ module ElasticGraph
           end
 
           expect(schema.defined_types).to all be_a Schema::Type
-          expect(schema.defined_types.map(&:name)).to include(:Options, :Color, :Query)
-            .and exclude(:Int, :Float, :Boolean, :String, :ID)
+          expect(schema.defined_types.map(&:name)).to include("Options", "Color", "Query")
+            .and exclude("Int", "Float", "Boolean", "String", "ID")
         end
       end
 
@@ -99,8 +95,8 @@ module ElasticGraph
           end
 
           expect(schema.indexed_document_types).to contain_exactly(
-            schema.type_named(:Person),
-            schema.type_named(:Widget)
+            schema.type_named("Person"),
+            schema.type_named("Widget")
           )
         end
       end
@@ -109,8 +105,8 @@ module ElasticGraph
         it "returns the type stored in the named index" do
           schema = schema_with_indices("Person" => "people", "Widget" => "widgets")
 
-          expect(schema.document_type_stored_in("people")).to eq(schema.type_named(:Person))
-          expect(schema.document_type_stored_in("widgets")).to eq(schema.type_named(:Widget))
+          expect(schema.document_type_stored_in("people")).to eq(schema.type_named("Person"))
+          expect(schema.document_type_stored_in("widgets")).to eq(schema.type_named("Widget"))
         end
 
         it "raises an exception if given an unrecognizd index name" do
@@ -162,14 +158,14 @@ module ElasticGraph
         end
 
         it "finds an enum_value when given a type and enum_value name symbols" do
-          expect(schema.enum_value_named(:ColorSpace, :rgb)).to be_a GraphQL::Schema::EnumValue
+          expect(schema.enum_value_named("ColorSpace", :rgb)).to be_a GraphQL::Schema::EnumValue
         end
 
         it "consistently returns the same enum_value_object" do
-          enum_value1 = schema.enum_value_named(:ColorSpace, :rgb)
-          enum_value2 = schema.enum_value_named(:ColorSpace, :rgb)
+          enum_value1 = schema.enum_value_named("ColorSpace", :rgb)
+          enum_value2 = schema.enum_value_named("ColorSpace", :rgb)
           enum_value3 = schema.enum_value_named("ColorSpace", "rgb")
-          other_field = schema.enum_value_named(:ColorSpace, :srgb)
+          other_field = schema.enum_value_named("ColorSpace", :srgb)
 
           expect(enum_value2).to be(enum_value1)
           expect(enum_value3).to be(enum_value1)
@@ -178,19 +174,19 @@ module ElasticGraph
 
         it "raises an error when the type cannot be found" do
           expect {
-            schema.enum_value_named(:ColorType, :name)
+            schema.enum_value_named("ColorType", :name)
           }.to raise_error(Errors::NotFoundError, /ColorSpace/)
         end
 
         it "raises an error when the enum value cannot be found, suggesting a correction if it can find one" do
           expect {
-            schema.enum_value_named(:ColorSpace, :srg)
+            schema.enum_value_named("ColorSpace", :srg)
           }.to raise_error(Errors::NotFoundError, a_string_including("ColorSpace", "srg", "Possible alternatives", "srgb"))
         end
 
         it "raises an error when the enum value cannot be found, with no suggestions if not close to any enum value name" do
           expect {
-            schema.enum_value_named(:ColorSpace, :foo)
+            schema.enum_value_named("ColorSpace", :foo)
           }.to raise_error(Errors::NotFoundError, a_string_including("ColorSpace", "foo").and(excluding("Possible alternatives")))
         end
       end
@@ -213,14 +209,14 @@ module ElasticGraph
             end
 
             it "finds a field when given type and field name symbols" do
-              expect(field_named(:Color, :blue)).to be_a GraphQL::Schema::Field
+              expect(field_named("Color", :blue)).to be_a GraphQL::Schema::Field
             end
 
             it "consistently returns the same field object" do
-              field1 = field_named(:Color, :red)
-              field2 = field_named(:Color, :red)
+              field1 = field_named("Color", :red)
+              field2 = field_named("Color", :red)
               field3 = field_named("Color", "red")
-              other_field = field_named(:Color, :blue)
+              other_field = field_named("Color", :blue)
 
               expect(field2).to be(field1)
               expect(field3).to be(field1)
@@ -229,19 +225,19 @@ module ElasticGraph
 
             it "raises an error when the type part of the given field name cannot be found" do
               expect {
-                field_named(:Person, :name)
+                field_named("Person", :name)
               }.to raise_error(Errors::NotFoundError, /Person/)
             end
 
             it "raises an error when the field part of the given field name cannot be found, suggesting a correction if possible" do
               expect {
-                field_named(:Color, :gren)
+                field_named("Color", :gren)
               }.to raise_error(Errors::NotFoundError, a_string_including("Color", "gren", "Possible alternatives", "green"))
             end
 
             it "raises an error when the field part of the given field name cannot be found, with no suggestions if not close to any field names" do
               expect {
-                field_named(:Color, :purple)
+                field_named("Color", :purple)
               }.to raise_error(Errors::NotFoundError, a_string_including("Color", "purple").and(excluding("Possible alternatives")))
             end
 

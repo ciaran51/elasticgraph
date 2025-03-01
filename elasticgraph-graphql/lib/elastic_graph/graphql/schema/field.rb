@@ -47,7 +47,7 @@ module ElasticGraph
           # when those types are accessed in a Query. We don't really want to mutate the fields on the
           # built-in types by adding `:lookahead` so it's best to avoid setting that extra on the built
           # in types.
-          if @graphql_field.respond_to?(:extras) && !BUILT_IN_TYPE_NAMES.include?(parent_type.name.to_s)
+          if @graphql_field.respond_to?(:extras) && !BUILT_IN_TYPE_NAMES.include?(parent_type.name)
             @graphql_field.extras([:lookahead])
           end
         end

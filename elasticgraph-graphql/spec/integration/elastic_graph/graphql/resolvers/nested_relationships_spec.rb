@@ -45,14 +45,14 @@ module ElasticGraph
           let(:component1) { build(:component) }
 
           it "wraps the datastore response in a relay connection adapter when the field is a relay connection field" do
-            result = resolve(:Widget, :components, {"component_ids" => [component1.fetch(:id)]})
+            result = resolve("Widget", :components, {"component_ids" => [component1.fetch(:id)]})
 
             expect(result).to be_a RelayConnection::GenericAdapter
           end
 
           it "wraps the datastore response in a relay connection adapter when the foreign key field is missing" do
             expect {
-              result = resolve(:Widget, :components, {"name" => "a"})
+              result = resolve("Widget", :components, {"name" => "a"})
 
               expect(result).to be_a(RelayConnection::GenericAdapter)
               expect(result.edges).to be_empty
@@ -115,38 +115,38 @@ module ElasticGraph
             end
 
             it "loads the relationship and respects defaultSort" do
-              result = resolve_nodes(:Widget, :components, {"component_ids" => [component1.fetch(:id), component2.fetch(:id)]})
+              result = resolve_nodes("Widget", :components, {"component_ids" => [component1.fetch(:id), component2.fetch(:id)]})
 
               expect(result.map { |c| c.fetch("id") }).to eq([component2.fetch(:id), component1.fetch(:id)])
             end
 
             it "respects a list of `order_by` options, supporting ascending and descending sorts" do
-              result = resolve_nodes(:Widget, :components,
+              result = resolve_nodes("Widget", :components,
                 {"component_ids" => [component2.fetch(:id), component3.fetch(:id), component1.fetch(:id)]},
                 order_by: ["created_at_ASC"])
               expect(result.map { |c| c.fetch("id") }).to eq([component1.fetch(:id), component2.fetch(:id), component3.fetch(:id)])
 
-              result = resolve_nodes(:Widget, :components,
+              result = resolve_nodes("Widget", :components,
                 {"component_ids" => [component2.fetch(:id), component3.fetch(:id), component1.fetch(:id)]},
                 order_by: ["created_at_DESC"])
               expect(result.map { |c| c.fetch("id") }).to eq([component3.fetch(:id), component2.fetch(:id), component1.fetch(:id)])
             end
 
             it "tolerates not finding some ids" do
-              result = resolve_nodes(:Widget, :components, {"component_ids" => [component1.fetch(:id), build(:component).fetch(:id)]})
+              result = resolve_nodes("Widget", :components, {"component_ids" => [component1.fetch(:id), build(:component).fetch(:id)]})
 
               expect(result.map { |c| c.fetch("id") }).to contain_exactly(component1.fetch(:id))
             end
 
             it "returns an empty list when given a blank list of ids" do
-              result = resolve_nodes(:Widget, :components, {"component_ids" => []})
+              result = resolve_nodes("Widget", :components, {"component_ids" => []})
 
               expect(result).to be_empty
             end
 
             it "returns a list of a single record (and logs a warning) when the foreign key field is a scalar instead of a list" do
               expect {
-                result = resolve_nodes(:Widget, :components, {"component_ids" => component1.fetch(:id), "id" => "123"})
+                result = resolve_nodes("Widget", :components, {"component_ids" => component1.fetch(:id), "id" => "123"})
 
                 expect(result.map { |c| c.fetch("id") }).to contain_exactly(component1.fetch(:id))
               }.to log a_string_including("Widget(id: 123).components", "component_ids: scalar instead of a list")
@@ -154,21 +154,21 @@ module ElasticGraph
 
             it "returns an empty list (and logs a warning) when the foreign key field is missing" do
               expect {
-                result = resolve_nodes(:Widget, :components, {"name" => "a"})
+                result = resolve_nodes("Widget", :components, {"name" => "a"})
 
                 expect(result).to be_empty
               }.to log a_string_including("Widget(id: <no id>).components", "component_ids is missing from the document")
             end
 
             it "returns a list of records matching additional filter conditions" do
-              result = resolve_nodes(:Component, :dollar_widgets, {"id" => component1.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
+              result = resolve_nodes("Component", :dollar_widgets, {"id" => component1.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
 
               expect(result.map { |c| c.fetch("id") }).to contain_exactly(widget1.fetch(:id))
               expect(result.map { |c| c.fetch("cost").fetch("amount_cents") }).to contain_exactly(100)
             end
 
             it "returns an empty list when records with matching conditions are not found" do
-              result = resolve_nodes(:Component, :dollar_widgets, {"id" => component3.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
+              result = resolve_nodes("Component", :dollar_widgets, {"id" => component3.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
 
               expect(result).to be_empty
             end
@@ -180,19 +180,19 @@ module ElasticGraph
             end
 
             it "loads the relationship" do
-              result = resolve(:Component, :widget, {"id" => component1.fetch(:id)})
+              result = resolve("Component", :widget, {"id" => component1.fetch(:id)})
 
               expect(result.fetch("id")).to eq widget1.fetch(:id)
             end
 
             it "tolerates not finding the id" do
-              result = resolve(:Component, :widget, {"id" => build(:component).fetch(:id)})
+              result = resolve("Component", :widget, {"id" => build(:component).fetch(:id)})
 
               expect(result).to eq nil
             end
 
             it "returns nil when given a nil id" do
-              result = resolve(:Component, :widget, {"id" => nil})
+              result = resolve("Component", :widget, {"id" => nil})
 
               expect(result).to eq nil
             end
@@ -200,7 +200,7 @@ module ElasticGraph
             it "returns one record (and logs a warning) when querying the datastore produces a list of records instead of a single one" do
               expect {
                 # Note: inclusion of nested field `cost.amount_cents` is necessary to exercise an edge case that originally resulted in an exception.
-                result = resolve(:Component, :widget, {"id" => component2.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
+                result = resolve("Component", :widget, {"id" => component2.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
 
                 expect(result.fetch("id")).to eq(widget1.fetch(:id)).or eq(widget2.fetch(:id))
                 expect(result.fetch("cost").fetch("amount_cents")).to eq(widget1.fetch(:cost).fetch(:amount_cents)).or eq(widget2.fetch(:cost).fetch(:amount_cents))
@@ -210,7 +210,7 @@ module ElasticGraph
             it "returns one record (and logs a warning) when the id field is a list instead of a scalar" do
               ids = [component1.fetch(:id), component3.fetch(:id)]
               expect {
-                result = resolve(:Component, :widget, {"id" => ids})
+                result = resolve("Component", :widget, {"id" => ids})
 
                 expect(result.fetch("id")).to eq(widget1.fetch(:id)).or eq(widget3.fetch(:id))
               }.to log a_string_including("Component(id: #{ids}).widget", "id: list of more than one item instead of a scalar")
@@ -218,21 +218,21 @@ module ElasticGraph
 
             it "returns nil (and logs a warning) when the id field is missing" do
               expect {
-                result = resolve(:Component, :widget, {"name" => "foo"})
+                result = resolve("Component", :widget, {"name" => "foo"})
 
                 expect(result).to eq nil
               }.to log a_string_including("Component(id: <no id>).widget", "id is missing from the document")
             end
 
             it "returns one record matching additional filter conditions" do
-              result = resolve(:Component, :dollar_widget, {"id" => component1.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
+              result = resolve("Component", :dollar_widget, {"id" => component1.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
 
               expect(result.fetch("id")).to eq(widget1.fetch(:id))
               expect(result.fetch("cost").fetch("amount_cents")).to eq(widget1.fetch(:cost).fetch(:amount_cents))
             end
 
             it "returns nil when a record with matching conditions is not found" do
-              result = resolve(:Component, :dollar_widget, {"id" => component3.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
+              result = resolve("Component", :dollar_widget, {"id" => component3.fetch(:id)}, requested_fields: ["id", "cost.amount_cents"])
 
               expect(result).to eq nil
             end
@@ -288,31 +288,31 @@ module ElasticGraph
             end
 
             it "loads the relationship and respects defaultSort" do
-              result = resolve_nodes(:Manufacturer, :manufactured_parts, {"id" => manufacturer1.fetch(:id)})
+              result = resolve_nodes("Manufacturer", :manufactured_parts, {"id" => manufacturer1.fetch(:id)})
 
               expect(result.map { |c| c.fetch("id") }).to eq([part2.fetch(:id), part1.fetch(:id)])
             end
 
             it "respects a list of `order_by` options, supporting ascending and descending sorts" do
-              result = resolve_nodes(:Manufacturer, :manufactured_parts,
+              result = resolve_nodes("Manufacturer", :manufactured_parts,
                 {"id" => manufacturer1.fetch(:id)},
                 order_by: ["created_at_ASC"])
               expect(result.map { |c| c.fetch("id") }).to eq([part1.fetch(:id), part2.fetch(:id)])
 
-              result = resolve_nodes(:Manufacturer, :manufactured_parts,
+              result = resolve_nodes("Manufacturer", :manufactured_parts,
                 {"id" => manufacturer1.fetch(:id)},
                 order_by: ["created_at_DESC"])
               expect(result.map { |c| c.fetch("id") }).to eq([part2.fetch(:id), part1.fetch(:id)])
             end
 
             it "tolerates not finding records for the given id" do
-              result = resolve_nodes(:Manufacturer, :manufactured_parts, {"id" => build(:manufacturer).fetch(:id)})
+              result = resolve_nodes("Manufacturer", :manufactured_parts, {"id" => build(:manufacturer).fetch(:id)})
 
               expect(result).to be_empty
             end
 
             it "returns an empty list when given a nil id" do
-              result = resolve_nodes(:Manufacturer, :manufactured_parts, {"id" => nil})
+              result = resolve_nodes("Manufacturer", :manufactured_parts, {"id" => nil})
 
               expect(result).to be_empty
             end
@@ -320,7 +320,7 @@ module ElasticGraph
             it "returns one of the two lists of matches (and logs a warning) when the id field is a list instead of a scalar" do
               ids = [manufacturer1.fetch(:id), manufacturer2.fetch(:id)]
               expect {
-                result = resolve_nodes(:Manufacturer, :manufactured_parts, {"id" => ids})
+                result = resolve_nodes("Manufacturer", :manufactured_parts, {"id" => ids})
 
                 expect(result.map { |c| c.fetch("id") }).to contain_exactly(part1.fetch(:id), part2.fetch(:id)).or eq([part3.fetch(:id)])
               }.to log a_string_including("Manufacturer(id: #{ids}).manufactured_parts", "id: list of more than one item instead of a scalar")
@@ -328,7 +328,7 @@ module ElasticGraph
 
             it "returns an empty list (and logs a warning) when the id field is missing" do
               expect {
-                result = resolve_nodes(:Manufacturer, :manufactured_parts, {"name" => "foo"})
+                result = resolve_nodes("Manufacturer", :manufactured_parts, {"name" => "foo"})
 
                 expect(result).to be_empty
               }.to log a_string_including("Manufacturer(id: <no id>).manufactured_parts", "id is missing from the document")
@@ -343,19 +343,19 @@ module ElasticGraph
             end
 
             it "loads the relationship" do
-              result = resolve(:ElectricalPart, :manufacturer, {"manufacturer_id" => manufacturer1.fetch(:id)})
+              result = resolve("ElectricalPart", :manufacturer, {"manufacturer_id" => manufacturer1.fetch(:id)})
 
               expect(result.fetch("id")).to eq manufacturer1.fetch(:id)
             end
 
             it "tolerates not finding a record the given id" do
-              result = resolve(:ElectricalPart, :manufacturer, {"manufacturer_id" => build(:manufacturer).fetch(:id)})
+              result = resolve("ElectricalPart", :manufacturer, {"manufacturer_id" => build(:manufacturer).fetch(:id)})
 
               expect(result).to eq nil
             end
 
             it "returns nil when given a nil id" do
-              result = resolve(:ElectricalPart, :manufacturer, {"manufacturer_id" => nil})
+              result = resolve("ElectricalPart", :manufacturer, {"manufacturer_id" => nil})
 
               expect(result).to eq nil
             end
@@ -363,7 +363,7 @@ module ElasticGraph
             it "returns one of the referenced documents (and logs a warning) when the foreign key field is a list instead of a scalar" do
               expect {
                 manufacturer_ids = [manufacturer1.fetch(:id), manufacturer2.fetch(:id)]
-                result = resolve(:ElectricalPart, :manufacturer, {"id" => "123", "manufacturer_id" => manufacturer_ids})
+                result = resolve("ElectricalPart", :manufacturer, {"id" => "123", "manufacturer_id" => manufacturer_ids})
 
                 expect(result.fetch("id")).to eq(manufacturer1.fetch(:id)).or eq(manufacturer2.fetch(:id))
               }.to log a_string_including("Part(id: 123).manufacturer", "manufacturer_id: list of more than one item instead of a scalar")
@@ -371,7 +371,7 @@ module ElasticGraph
 
             it "returns nil (and logs a warning) when the foreign key field is missing" do
               expect {
-                result = resolve(:ElectricalPart, :manufacturer, {"id" => "123"})
+                result = resolve("ElectricalPart", :manufacturer, {"id" => "123"})
 
                 expect(result).to eq nil
               }.to log a_string_including("Part(id: 123).manufacturer", "manufacturer_id is missing from the document")
@@ -442,38 +442,38 @@ module ElasticGraph
             end
 
             it "loads the relationship and respects defaultSort" do
-              result = resolve_nodes(:Component, :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]})
+              result = resolve_nodes("Component", :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]})
 
               expect(result.map { |c| c.fetch("id") }).to eq([part2.fetch(:id), part1.fetch(:id)])
             end
 
             it "respects a list of `order_by` options, supporting ascending and descending sorts" do
-              result = resolve_nodes(:Component, :parts,
+              result = resolve_nodes("Component", :parts,
                 {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
                 order_by: ["created_at_ASC"])
               expect(result.map { |c| c.fetch("id") }).to eq([part1.fetch(:id), part2.fetch(:id)])
 
-              result = resolve_nodes(:Component, :parts,
+              result = resolve_nodes("Component", :parts,
                 {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
                 order_by: ["created_at_DESC"])
               expect(result.map { |c| c.fetch("id") }).to eq([part2.fetch(:id), part1.fetch(:id)])
             end
 
             it "tolerates not finding some ids" do
-              result = resolve_nodes(:Component, :parts, {"part_ids" => [part1.fetch(:id), build(:part).fetch(:id)]})
+              result = resolve_nodes("Component", :parts, {"part_ids" => [part1.fetch(:id), build(:part).fetch(:id)]})
 
               expect(result.map { |c| c.fetch("id") }).to contain_exactly(part1.fetch(:id))
             end
 
             it "returns an empty list when given a blank list of ids" do
-              result = resolve_nodes(:Component, :parts, {"part_ids" => []})
+              result = resolve_nodes("Component", :parts, {"part_ids" => []})
 
               expect(result).to be_empty
             end
 
             it "returns a list of the matching document (and logs a warning) when the foreign key field is a scalar instead of a list" do
               expect {
-                result = resolve_nodes(:Component, :parts, {"id" => "123", "part_ids" => part1.fetch(:id)})
+                result = resolve_nodes("Component", :parts, {"id" => "123", "part_ids" => part1.fetch(:id)})
 
                 expect(result.map { |p| p.fetch("id") }).to eq [part1.fetch(:id)]
               }.to log a_string_including("Component(id: 123).parts", "part_ids: scalar instead of a list")
@@ -481,21 +481,21 @@ module ElasticGraph
 
             it "returns an empty list" do
               expect {
-                result = resolve_nodes(:Component, :parts, {"id" => "123"})
+                result = resolve_nodes("Component", :parts, {"id" => "123"})
 
                 expect(result).to be_empty
               }.to log a_string_including("Component(id: 123).parts", "part_ids is missing from the document")
             end
 
             it "supports filtering on a non-id field" do
-              results = resolve_nodes(:Component, :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
+              results = resolve_nodes("Component", :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
                 filter: {name: {equal_to_any_of: ["p1", "p4"]}})
 
               expect(results.map { |c| c.fetch("id") }).to contain_exactly(part1.fetch(:id))
             end
 
             it "supports filtering on id" do
-              results = resolve_nodes(:Component, :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
+              results = resolve_nodes("Component", :parts, {"part_ids" => [part1.fetch(:id), part2.fetch(:id)]},
                 filter: {id: {equal_to_any_of: [part1.fetch(:id), part4.fetch(:id)]}})
 
               expect(results.map { |c| c.fetch("id") }).to contain_exactly(part1.fetch(:id))
@@ -508,27 +508,27 @@ module ElasticGraph
             end
 
             it "loads the relationship and supports defaultSort" do
-              result = resolve_nodes(:ElectricalPart, :components, {"id" => part1.fetch(:id)})
+              result = resolve_nodes("ElectricalPart", :components, {"id" => part1.fetch(:id)})
 
               expect(result.map { |c| c.fetch("id") }).to eq([component2.fetch(:id), component1.fetch(:id)])
             end
 
             it "respects a list of `order_by` options, supporting ascending and descending sorts" do
-              result = resolve_nodes(:ElectricalPart, :components, {"id" => part1.fetch(:id)}, order_by: ["created_at_ASC"])
+              result = resolve_nodes("ElectricalPart", :components, {"id" => part1.fetch(:id)}, order_by: ["created_at_ASC"])
               expect(result.map { |c| c.fetch("id") }).to eq([component1.fetch(:id), component2.fetch(:id)])
 
-              result = resolve_nodes(:ElectricalPart, :components, {"id" => part1.fetch(:id)}, order_by: ["created_at_DESC"])
+              result = resolve_nodes("ElectricalPart", :components, {"id" => part1.fetch(:id)}, order_by: ["created_at_DESC"])
               expect(result.map { |c| c.fetch("id") }).to eq([component2.fetch(:id), component1.fetch(:id)])
             end
 
             it "tolerates not finding records for the given id" do
-              result = resolve_nodes(:ElectricalPart, :components, {"id" => build(:part).fetch(:id)})
+              result = resolve_nodes("ElectricalPart", :components, {"id" => build(:part).fetch(:id)})
 
               expect(result).to be_empty
             end
 
             it "returns an empty list when given a nil id" do
-              result = resolve_nodes(:ElectricalPart, :components, {"id" => nil})
+              result = resolve_nodes("ElectricalPart", :components, {"id" => nil})
 
               expect(result).to be_empty
             end
@@ -536,7 +536,7 @@ module ElasticGraph
             it "returns one of the two lists of matches (and logs a warning) when the id field is a list instead of a scalar" do
               ids = [part1.fetch(:id), part2.fetch(:id)]
               expect {
-                result = resolve_nodes(:ElectricalPart, :components, {"id" => ids})
+                result = resolve_nodes("ElectricalPart", :components, {"id" => ids})
 
                 expect(result.map { |c| c.fetch("id") }).to \
                   contain_exactly(component1.fetch(:id), component2.fetch(:id)).or \
@@ -546,14 +546,14 @@ module ElasticGraph
 
             it "returns an empty list (and logs a warning) when the id field is missing" do
               expect {
-                result = resolve_nodes(:ElectricalPart, :components, {"name" => "foo"})
+                result = resolve_nodes("ElectricalPart", :components, {"name" => "foo"})
 
                 expect(result).to be_empty
               }.to log a_string_including("ElectricalPart(id: <no id>).components", "id is missing from the document")
             end
 
             it "supports filtering on a non-id field" do
-              results = resolve_nodes(:ElectricalPart, :components, {"id" => part1.fetch(:id)},
+              results = resolve_nodes("ElectricalPart", :components, {"id" => part1.fetch(:id)},
                 filter: {name: {equal_to_any_of: ["c1", "c4"]}})
 
               expect(results.map { |c| c.fetch("id") }).to contain_exactly(component1.fetch(:id))
@@ -562,7 +562,7 @@ module ElasticGraph
             it "supports filtering on id", :expect_search_routing do
               component_ids = [component1.fetch(:id), component4.fetch(:id)]
 
-              results = resolve_nodes(:ElectricalPart, :components, {"id" => part1.fetch(:id)},
+              results = resolve_nodes("ElectricalPart", :components, {"id" => part1.fetch(:id)},
                 filter: {id: {equal_to_any_of: component_ids}})
 
               expect(results.map { |c| c.fetch("id") }).to contain_exactly(component1.fetch(:id))
@@ -607,19 +607,19 @@ module ElasticGraph
             end
 
             it "loads the relationship" do
-              result = resolve(:Address, :manufacturer, {"manufacturer_id" => manufacturer1.fetch(:id)})
+              result = resolve("Address", :manufacturer, {"manufacturer_id" => manufacturer1.fetch(:id)})
 
               expect(result.fetch("id")).to eq manufacturer1.fetch(:id)
             end
 
             it "tolerates not finding a record for the given id" do
-              result = resolve(:Address, :manufacturer, {"manufacturer_id" => build(:manufacturer).fetch(:id)})
+              result = resolve("Address", :manufacturer, {"manufacturer_id" => build(:manufacturer).fetch(:id)})
 
               expect(result).to eq nil
             end
 
             it "returns nil when given a nil id" do
-              result = resolve(:Address, :manufacturer, {"manufacturer_id" => nil})
+              result = resolve("Address", :manufacturer, {"manufacturer_id" => nil})
 
               expect(result).to eq nil
             end
@@ -627,7 +627,7 @@ module ElasticGraph
             it "returns one of the referenced documents (and logs a warning) when the foreign key field is a list instead of a scalar" do
               expect {
                 manufacturer_ids = [manufacturer1.fetch(:id), manufacturer2.fetch(:id)]
-                result = resolve(:Address, :manufacturer, {"id" => "123", "manufacturer_id" => manufacturer_ids})
+                result = resolve("Address", :manufacturer, {"id" => "123", "manufacturer_id" => manufacturer_ids})
 
                 expect(result.fetch("id")).to eq(manufacturer1.fetch(:id)).or eq(manufacturer2.fetch(:id))
               }.to log a_string_including("Address(id: 123).manufacturer", "manufacturer_id: list of more than one item instead of a scalar")
@@ -635,7 +635,7 @@ module ElasticGraph
 
             it "returns nil (and logs a warning) when the foreign key field is missing" do
               expect {
-                result = resolve(:Address, :manufacturer, {"id" => "123"})
+                result = resolve("Address", :manufacturer, {"id" => "123"})
 
                 expect(result).to eq nil
               }.to log a_string_including("Address(id: 123).manufacturer", "manufacturer_id is missing from the document")
@@ -648,26 +648,26 @@ module ElasticGraph
             end
 
             it "loads the relationship" do
-              result = resolve(:Manufacturer, :address, {"id" => manufacturer1.fetch(:id)})
+              result = resolve("Manufacturer", :address, {"id" => manufacturer1.fetch(:id)})
 
               expect(result.fetch("id")).to eq address1.fetch(:id)
             end
 
             it "tolerates not finding a record for the given id" do
-              result = resolve(:Manufacturer, :address, {"id" => build(:manufacturer).fetch(:id)})
+              result = resolve("Manufacturer", :address, {"id" => build(:manufacturer).fetch(:id)})
 
               expect(result).to eq nil
             end
 
             it "returns nil when given a nil id" do
-              result = resolve(:Manufacturer, :address, {"id" => nil})
+              result = resolve("Manufacturer", :address, {"id" => nil})
 
               expect(result).to eq nil
             end
 
             it "returns one of the matching records (and logs a warning) when querying the datastore produces a list of records instead of a single one" do
               expect {
-                result = resolve(:Manufacturer, :address, {"id" => manufacturer2.fetch(:id)})
+                result = resolve("Manufacturer", :address, {"id" => manufacturer2.fetch(:id)})
 
                 expect(result.fetch("id")).to eq(address2.fetch(:id)).or eq(address3.fetch(:id))
               }.to log a_string_including("Manufacturer(id: #{manufacturer2.fetch(:id)}).address", "got list of more than one item instead of a scalar from the datastore search query")
@@ -676,7 +676,7 @@ module ElasticGraph
             it "returns one of the matching records (and logs a warning) when the id field is a list instead of a scalar" do
               ids = [manufacturer1.fetch(:id), manufacturer3.fetch(:id)]
               expect {
-                result = resolve(:Manufacturer, :address, {"id" => ids})
+                result = resolve("Manufacturer", :address, {"id" => ids})
 
                 expect(result.fetch("id")).to eq(address1.fetch(:id)).or eq(address4.fetch(:id))
               }.to log a_string_including("Manufacturer(id: #{ids}).address", "id: list of more than one item instead of a scalar")
@@ -684,7 +684,7 @@ module ElasticGraph
 
             it "returns nil (and logs a warning) when the id field is missing" do
               expect {
-                result = resolve(:Manufacturer, :address, {"name" => "foo"})
+                result = resolve("Manufacturer", :address, {"name" => "foo"})
 
                 expect(result).to eq nil
               }.to log a_string_including("Manufacturer(id: <no id>).address", "id is missing from the document")
@@ -707,13 +707,13 @@ module ElasticGraph
             end
 
             it "loads the relationship from a nested field in an object list" do
-              result = resolve_nodes(:Sponsor, :affiliated_teams_from_object, {"id" => sponsor1.fetch(:id)}, requested_fields: ["id"])
+              result = resolve_nodes("Sponsor", :affiliated_teams_from_object, {"id" => sponsor1.fetch(:id)}, requested_fields: ["id"])
 
               expect(result.map { |t| t.fetch("id") }).to contain_exactly(team1.fetch(:id), team2.fetch(:id))
             end
 
             it "loads the relationship from a nested field in a nested list" do
-              result = resolve_nodes(:Sponsor, :affiliated_teams_from_nested, {"id" => sponsor1.fetch(:id)}, requested_fields: ["id"])
+              result = resolve_nodes("Sponsor", :affiliated_teams_from_nested, {"id" => sponsor1.fetch(:id)}, requested_fields: ["id"])
 
               expect(result.map { |t| t.fetch("id") }).to contain_exactly(team1.fetch(:id), team2.fetch(:id))
             end

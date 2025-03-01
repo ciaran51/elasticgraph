@@ -3,7 +3,7 @@ module ElasticGraph
     class Schema
       # Note: this is a partial signature definition (`type.rb` is ignored in `Steepfile`)
       class Type
-        attr_reader name: ::Symbol
+        attr_reader name: ::String
         attr_reader fields_by_name: ::Hash[::String, Field]
         attr_reader elasticgraph_category: SchemaArtifacts::RuntimeMetadata::elasticGraphCategory?
         attr_reader graphql_type: ::GraphQL::Schema::_Type

@@ -63,7 +63,7 @@ module ElasticGraph
             response = DatastoreResponse::SearchResponse.build(build_response_hash([hit_for(300, "w1")]))
 
             graphql = build_graphql(schema_artifacts: schema_artifacts)
-            field = graphql.schema.field_named(:Query, field_name)
+            field = graphql.schema.field_named("Query", field_name)
             context = {schema_element_names: graphql.runtime_metadata.schema_element_names}
 
             lookahead = ::GraphQL::Execution::Lookahead.new(

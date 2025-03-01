@@ -16,7 +16,7 @@ module ElasticGraph
           let(:graphql) { build_graphql }
 
           it "wraps the datastore response in a relay connection adapter when the field is a relay connection field" do
-            expect(resolve(:Query, :widgets)).to be_a RelayConnection::GenericAdapter
+            expect(resolve("Query", :widgets)).to be_a RelayConnection::GenericAdapter
           end
         end
 
@@ -32,10 +32,10 @@ module ElasticGraph
           end
 
           it "respects a list of `order_by` options, supporting ascending and descending sorts" do
-            results = resolve_nodes(:Query, :widgets, order_by: ["amount_cents_DESC", "created_at_ASC"])
+            results = resolve_nodes("Query", :widgets, order_by: ["amount_cents_DESC", "created_at_ASC"])
             expect(results.map { |r| r.fetch("id") }).to eq ["w2", "w3", "w1"]
 
-            results = resolve_nodes(:Query, :widgets, order_by: ["amount_cents_ASC", "created_at_DESC"])
+            results = resolve_nodes("Query", :widgets, order_by: ["amount_cents_ASC", "created_at_DESC"])
             expect(results.map { |r| r.fetch("id") }).to eq ["w1", "w3", "w2"]
           end
         end
@@ -53,28 +53,28 @@ module ElasticGraph
           end
 
           it "supports filtering by a list of one value" do
-            results = resolve_nodes(:Query, :widgets, filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}})
+            results = resolve_nodes("Query", :widgets, filter: {id: {equal_to_any_of: [widget1.fetch(:id)]}})
             expect(results.map { |r| r.fetch("id") }).to contain_exactly(widget1.fetch(:id))
 
-            results = resolve_nodes(:Query, :widgets, filter: {name: {equal_to_any_of: ["w2"]}})
+            results = resolve_nodes("Query", :widgets, filter: {name: {equal_to_any_of: ["w2"]}})
             expect(results.map { |r| r.fetch("id") }).to contain_exactly(widget2a.fetch(:id), widget2b.fetch(:id))
           end
 
           it "supports filtering by a list of multiple values" do
-            results = resolve_nodes(:Query, :widgets, filter: {id: {equal_to_any_of: [widget1.fetch(:id), widget3.fetch(:id)]}})
+            results = resolve_nodes("Query", :widgets, filter: {id: {equal_to_any_of: [widget1.fetch(:id), widget3.fetch(:id)]}})
             expect(results.map { |r| r.fetch("id") }).to contain_exactly(widget1.fetch(:id), widget3.fetch(:id))
 
-            results = resolve_nodes(:Query, :widgets, filter: {name: {equal_to_any_of: ["w2", "w1"]}})
+            results = resolve_nodes("Query", :widgets, filter: {name: {equal_to_any_of: ["w2", "w1"]}})
             expect(results.map { |r| r.fetch("id") }).to contain_exactly(widget1.fetch(:id), widget2a.fetch(:id), widget2b.fetch(:id))
           end
 
           it "supports default sort" do
-            results = resolve_nodes(:Query, :widgets, filter: {id: {equal_to_any_of: ["w3", "w2b", "w1"]}})
+            results = resolve_nodes("Query", :widgets, filter: {id: {equal_to_any_of: ["w3", "w2b", "w1"]}})
             expect(results.map { |r| r.fetch("id") }).to eq([widget3.fetch(:id), widget2b.fetch(:id), widget1.fetch(:id)])
           end
 
           it "supports combining filters on more than one field" do
-            results = resolve_nodes(:Query, :widgets, filter: {
+            results = resolve_nodes("Query", :widgets, filter: {
               name: {equal_to_any_of: ["w2", "w3"]},
               amount_cents: {equal_to_any_of: [100, 400]}
             })
