@@ -43,7 +43,9 @@ module ElasticGraph
               end
 
               schema.on_root_query_type do |t|
-                t.field "person", "Person"
+                t.field "person", "Person" do |f|
+                  f.resolver = :list_records
+                end
               end
             end
           end

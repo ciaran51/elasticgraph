@@ -32,6 +32,7 @@ module ElasticGraph
               t.field "red", "Int"
               t.field "green", "Int"
               t.field "blue", "Int"
+              t.field "float", "Float"  # so the Float type exists
               t.index "alt_colors"
             end
 
@@ -42,7 +43,6 @@ module ElasticGraph
 
             s.on_built_in_types do |type|
               if type.name == "Query"
-                type.field "float", "Float"  # so the Float type exists
                 type.field "colors", "[Color!]!" do |f|
                   f.argument "args", "ColorArgs"
                   f.resolver = :list_records
@@ -182,7 +182,9 @@ module ElasticGraph
           self.schema_artifacts = generate_schema_artifacts do |schema|
             schema.on_root_query_type do |t|
               t.default_graphql_resolver = nil
-              t.field "foo", "Int"
+              t.field "foo", "Int" do |f|
+                f.resolver = :list_records
+              end
             end
           end
 
@@ -194,11 +196,11 @@ module ElasticGraph
 
           expect {
             execute_expecting_no_errors(query_string)
-          }.to raise_error(a_string_including("Can't resolve field foo on nil"))
+          }.to raise_error(a_string_including("Query is invalid, since it contains no `search_index_definitions`."))
             .and log a_string_including(
               "Query Foo[1] for client (anonymous) failed with an exception[2]",
               query_string.to_s,
-              "KeyError: Can't resolve field foo on nil"
+              "ElasticGraph::Errors::SearchFailedError: Query is invalid, since it contains no `search_index_definitions`."
             )
         end
 
