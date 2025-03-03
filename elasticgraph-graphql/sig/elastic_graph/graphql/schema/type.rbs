@@ -17,7 +17,7 @@ module ElasticGraph
         def embedded_object?: () -> bool
         def indexed_document?: () -> bool
         def indexed_aggregation?: () -> bool
-        def enum_value_named: (::String | ::Symbol) -> EnumValue
+        def enum_value_named: (::String) -> EnumValue
       end
     end
   end

@@ -18,7 +18,7 @@ module ElasticGraph
             s.enum_type "ColorSpace" do |t|
               t.value "rgb"
             end
-          end.enum_value_named("ColorSpace", :rgb)
+          end.enum_value_named("ColorSpace", "rgb")
 
           expect(enum_value.inspect).to eq "#<ElasticGraph::GraphQL::Schema::EnumValue ColorSpace.rgb>"
         end
@@ -29,9 +29,9 @@ module ElasticGraph
               s.enum_type "ColorSpace" do |t|
                 t.value "rgb"
               end
-            end.enum_value_named("ColorSpace", :rgb)
+            end.enum_value_named("ColorSpace", "rgb")
 
-            expect(enum_value.name).to eq :rgb
+            expect(enum_value.name).to eq "rgb"
           end
         end
 
