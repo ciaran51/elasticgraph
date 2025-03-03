@@ -213,7 +213,7 @@ module ElasticGraph
             elsif !field.type.object?
               case field.type.name
               # Legacy date grouping API
-              when :Date
+              when "Date"
                 legacy_date_histogram_groupings_from(
                   field_path: field_path,
                   node: node,
@@ -221,7 +221,7 @@ module ElasticGraph
                   get_offset: ->(args) { args[element_names.offset_days]&.then { |days| "#{days}d" } }
                 )
               # Legacy datetime grouping API
-              when :DateTime
+              when "DateTime"
                 legacy_date_histogram_groupings_from(
                   field_path: field_path,
                   node: node,

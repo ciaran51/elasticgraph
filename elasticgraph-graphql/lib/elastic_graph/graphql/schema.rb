@@ -74,7 +74,7 @@ module ElasticGraph
       # get type objects for wrapped types, but you need to get it from a field object of that
       # type.
       def type_named(type_name)
-        @types_by_name.fetch(type_name.to_s)
+        @types_by_name.fetch(type_name)
       rescue KeyError => e
         msg = "No type named #{type_name} could be found"
         msg += "; Possible alternatives: [#{e.corrections.join(", ").delete('"')}]." if e.corrections.any?
@@ -109,7 +109,7 @@ module ElasticGraph
       end
 
       def to_s
-        "#<#{self.class.name} 0x#{__id__.to_s(16)} indexed_document_types=#{indexed_document_types.map(&:name).sort.to_s.delete(":")}>"
+        "#<#{self.class.name} 0x#{__id__.to_s(16)} indexed_document_types=[#{indexed_document_types.map(&:name).sort.join(", ")}]>"
       end
       alias_method :inspect, :to_s
 

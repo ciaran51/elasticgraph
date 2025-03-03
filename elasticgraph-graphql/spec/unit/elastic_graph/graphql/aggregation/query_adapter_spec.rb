@@ -24,7 +24,7 @@ module ElasticGraph
 
         shared_examples_for "a query selecting nodes under aggregations" do |before_nodes:, after_nodes:|
           it "can build an aggregations object with 2 computations and no groupings" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -53,7 +53,7 @@ module ElasticGraph
             end
 
             it "respects the override in the generated aggregation hash" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -76,7 +76,7 @@ module ElasticGraph
           end
 
           it "can build an ungrouped aggregation hash from nested query fields" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -105,7 +105,7 @@ module ElasticGraph
             end
 
             it "respects the override in the generated aggregation hash" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -135,7 +135,7 @@ module ElasticGraph
             end
 
             it "can build sub-aggregations" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -169,7 +169,7 @@ module ElasticGraph
 
             it "uses the injected grouping adapter on sub-aggregations" do
               build_sub_agg = lambda do |adapter|
-                aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY, sub_aggregation_grouping_adapter: adapter)
+                aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY, sub_aggregation_grouping_adapter: adapter)
                   query {
                     team_aggregations {
                       #{before_nodes}
@@ -204,7 +204,7 @@ module ElasticGraph
 
             it "determines it needs the doc count error if `upper_bound` or `exact_value` are requested, but not if `approximate_value` is requested" do
               needs_doc_count_error_by_count_field = %w[exact_value approximate_value upper_bound].to_h do |count_field|
-                aggs = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+                aggs = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                   query {
                     team_aggregations {
                       #{before_nodes}
@@ -233,7 +233,7 @@ module ElasticGraph
             end
 
             it "builds a multi-part nested `path` for a `nested` field under extra object layers" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -263,7 +263,7 @@ module ElasticGraph
             end
 
             it "supports sub-aggregation fields having an alternate `name_in_index`" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -293,7 +293,7 @@ module ElasticGraph
             end
 
             it "supports sub-aggregations of sub-aggregations" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -333,7 +333,7 @@ module ElasticGraph
             end
 
             it "can handle sub-aggregation fields of the same name under parents of a different name" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -396,7 +396,7 @@ module ElasticGraph
             end
 
             it "allows aliases to be used on a sub-aggregations field to request multiple differing sub-aggregations" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -437,7 +437,7 @@ module ElasticGraph
             end
 
             it "builds a `filter` on a sub-aggregation when present on the GraphQL query" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -465,7 +465,7 @@ module ElasticGraph
             end
 
             it "builds `groupings` at any level of sub-aggregation when `groupedBy` is present in the query at that level" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -516,7 +516,7 @@ module ElasticGraph
             end
 
             it "builds legacy date time `groupings` at any level of sub-aggregation when `groupedBy` is present in the query at that level" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -611,7 +611,7 @@ module ElasticGraph
             end
 
             it "builds `computations` at any level of sub-aggregation when `aggregated_values` is present in the query at that level" do
-              aggregations = aggregations_from_datastore_query(:Query, :team_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
                   team_aggregations {
                     #{before_nodes}
@@ -704,7 +704,7 @@ module ElasticGraph
 
               def build_sub_aggregation_query(args, default_page_size:, max_page_size:)
                 aggregations = aggregations_from_datastore_query(
-                  :Query,
+                  "Query",
                   :team_aggregations,
                   query_for(**args),
                   default_page_size: default_page_size,
@@ -742,7 +742,7 @@ module ElasticGraph
               end
 
               it "respects the `name_in_index` when parsing a filter" do
-                aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+                aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                   query {
                     widget_aggregations {
                       #{before_nodes}
@@ -776,7 +776,7 @@ module ElasticGraph
               self.schema_artifacts = generate_schema_artifacts { |schema| define_schema(schema, legacy_grouping_schema: true) }
             end
             it "can build an aggregations object with multiple groupings and computations" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -812,7 +812,7 @@ module ElasticGraph
             end
 
             it "respects the `time_zone` option" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -837,7 +837,7 @@ module ElasticGraph
             end
 
             it "respects the `offset` option" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -862,7 +862,7 @@ module ElasticGraph
             end
 
             it "supports `Date` field groupings, allowing them to have no `time_zone` argument" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -887,7 +887,7 @@ module ElasticGraph
             end
 
             it "supports `offsetDays` on `Date` field groupings" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -914,7 +914,7 @@ module ElasticGraph
 
           context "aggregations without `legacy_grouping_schema`" do
             it "can build an aggregations object with multiple groupings and computations" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -955,7 +955,7 @@ module ElasticGraph
               # Verify that the fields we request in the query below are in fact all the subfields
               expect(sub_fields_of("DateTimeGroupedBy")).to contain_exactly("as_date_time", "as_date", "as_time_of_day", "as_day_of_week")
 
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -988,7 +988,7 @@ module ElasticGraph
             end
 
             it "sets defaults correctly when `as_day_of_week` for time_zone and offset_ms" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1015,7 +1015,7 @@ module ElasticGraph
             end
 
             it "sets defaults correctly when `as_time_of_day` for time_zone and offset_ms" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1042,7 +1042,7 @@ module ElasticGraph
             end
 
             it "respects the `time_zone` option" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1069,7 +1069,7 @@ module ElasticGraph
             end
 
             it "respects the `offset` option" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1096,7 +1096,7 @@ module ElasticGraph
             end
 
             it "supports `Date` field groupings, allowing them to have no `time_zone` argument" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1126,7 +1126,7 @@ module ElasticGraph
               # Verify that the fields we request in the query below are in fact all the subfields
               expect(sub_fields_of("DateGroupedBy")).to contain_exactly("as_date", "as_day_of_week")
 
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1155,7 +1155,7 @@ module ElasticGraph
             end
 
             it "supports `offset` on `Date` field groupings" do
-              aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+              aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1183,7 +1183,7 @@ module ElasticGraph
           end
 
           it "omits grouping fields that have a `@skip(if: true)` directive" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1218,7 +1218,7 @@ module ElasticGraph
           end
 
           it "omits grouping fields that have an `@include(if: false)` directive" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1253,7 +1253,7 @@ module ElasticGraph
           end
 
           it "omits computation fields that have a `@skip(if: true)` directive" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1286,7 +1286,7 @@ module ElasticGraph
           end
 
           it "omits computation fields that have a `@include(if: true)` directive" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1319,7 +1319,7 @@ module ElasticGraph
           end
 
           it "sets `needs_doc_count` to false if the count field has a `@skip(if: true)` directive" do
-            skip_false = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+            skip_false = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1335,7 +1335,7 @@ module ElasticGraph
 
             expect(skip_false.needs_doc_count).to eq true
 
-            skip_true = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+            skip_true = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1353,7 +1353,7 @@ module ElasticGraph
           end
 
           it "sets `needs_doc_count` to false if the count field has an `@include(if: false)` directive" do
-            include_false = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+            include_false = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1369,7 +1369,7 @@ module ElasticGraph
 
             expect(include_false.needs_doc_count).to eq false
 
-            include_true = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+            include_true = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1545,7 +1545,7 @@ module ElasticGraph
           end
 
           it "supports multiple aliases on `count` since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1570,7 +1570,7 @@ module ElasticGraph
           end
 
           it "supports multiple aliases on `aggregated_values` since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1606,7 +1606,7 @@ module ElasticGraph
           end
 
           it "supports multiple aliases on subfields of `aggregated_values` since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1637,7 +1637,7 @@ module ElasticGraph
           end
 
           it "supports multiple aliases on subfields of `grouped_by` since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1665,7 +1665,7 @@ module ElasticGraph
           end
 
           it "can build an aggregations object with multiple computations and groupings (including on a nested scalar field)" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1751,7 +1751,7 @@ module ElasticGraph
           end
 
           it "does not build any groupings or computations for the aggregation `count` field" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1765,7 +1765,7 @@ module ElasticGraph
           end
 
           it "supports aliases for aggregated_values, grouped_by, and count" do
-            aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
               query {
                 widget_aggregations {
                   #{before_nodes}
@@ -1799,7 +1799,7 @@ module ElasticGraph
 
           describe "needs_doc_count" do
             it "is true when the count field is requested" do
-              aggs = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+              aggs = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1820,7 +1820,7 @@ module ElasticGraph
             end
 
             it "is false when the count field is not requested" do
-              aggs = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY).first
+              aggs = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY).first
                 query {
                   widget_aggregations {
                     #{before_nodes}
@@ -1841,7 +1841,7 @@ module ElasticGraph
         end
 
         it "works correctly when nothing under `node` is requested (e.g. just `page_info`)" do
-          aggregations = aggregations_from_datastore_query(:Query, :widget_aggregations, <<~QUERY)
+          aggregations = aggregations_from_datastore_query("Query", :widget_aggregations, <<~QUERY)
             query {
               widget_aggregations {
                 page_info {
@@ -1956,7 +1956,7 @@ module ElasticGraph
           end
 
           it "supports a single alias on every layer of nesting of a full query, since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :wa, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :wa, <<~QUERY)
               query {
                 wa: widget_aggregations {
                   e: edges {
@@ -2065,7 +2065,7 @@ module ElasticGraph
           end
 
           it "supports a single alias on every layer of nesting of a full query, since that doesn't interfere with grouping" do
-            aggregations = aggregations_from_datastore_query(:Query, :wa, <<~QUERY)
+            aggregations = aggregations_from_datastore_query("Query", :wa, <<~QUERY)
               query {
                 wa: widget_aggregations {
                   n: nodes {

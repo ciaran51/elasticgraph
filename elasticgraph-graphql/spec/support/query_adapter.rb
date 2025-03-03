@@ -113,18 +113,18 @@ module QueryAdapterSpecSupport
     end
 
     DEFAULT_SCALAR_VALUES = {
-      Int: 37,
-      Float: 37.0,
-      String: "37",
-      ID: "37",
-      Cursor: "37",
-      JsonSafeLong: 37,
-      LongString: "37",
-      Boolean: false,
-      Date: "2021-08-23",
-      DateTime: "2021-08-23T12:00:00Z",
-      DayOfWeek: "MONDAY",
-      LocalTime: "12:00:00"
+      "Int" => 37,
+      "Float" => 37.0,
+      "String" => "37",
+      "ID" => "37",
+      "Cursor" => "37",
+      "JsonSafeLong" => 37,
+      "LongString" => "37",
+      "Boolean" => false,
+      "Date" => "2021-08-23",
+      "DateTime" => "2021-08-23T12:00:00Z",
+      "DayOfWeek" => "MONDAY",
+      "LocalTime" => "12:00:00"
     }
 
     def default_scalar_value_for(type)

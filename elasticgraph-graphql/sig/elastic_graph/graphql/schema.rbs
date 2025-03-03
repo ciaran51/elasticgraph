@@ -15,8 +15,8 @@ module ElasticGraph
       ) -> void
 
       def type_from: (::GraphQL::Schema::_Type) -> Type
-      def type_named: (::String | ::Symbol) -> Type
-      def field_named: (::String | ::Symbol, ::String | ::Symbol) -> Field
+      def type_named: (::String) -> Type
+      def field_named: (::String, ::String | ::Symbol) -> Field
       def indexed_document_types: () -> ::Array[Type]
     end
   end

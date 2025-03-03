@@ -45,7 +45,7 @@ module ElasticGraph
         end
 
         def name
-          @name ||= @graphql_type.to_type_signature.to_sym
+          @name ||= @graphql_type.to_type_signature
         end
 
         # List of index definitions that should be searched for this type.
