@@ -17,7 +17,7 @@ module ElasticGraph
           @datastore_query_adapters = datastore_query_adapters
         end
 
-        def build_query_from(field:, args:, lookahead:, context: {})
+        def build_query_from(field:, args:, lookahead:, context:)
           monotonic_clock_deadline = context[:monotonic_clock_deadline]
 
           # Building an `DatastoreQuery` is not cheap; we do a lot of work to:

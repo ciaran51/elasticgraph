@@ -117,6 +117,7 @@ module GraphQL
     class Context
       attr_reader query: Query
       def []: (::Symbol | ::String) -> untyped
+      def []=: (::Symbol | ::String, untyped) -> void
       def fetch: (untyped) -> untyped
       def add_error: (ExecutionError) -> void
       def dataloader: () -> Dataloader

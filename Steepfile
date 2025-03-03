@@ -40,7 +40,6 @@ target :elasticgraph_gems do
     elasticgraph-graphql/lib/elastic_graph/graphql/resolvers/graphql_adapter.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/resolvers/list_records.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/resolvers/nested_relationships.rb
-    elasticgraph-graphql/lib/elastic_graph/graphql/resolvers/query_adapter.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema/field.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema/relation_join.rb
