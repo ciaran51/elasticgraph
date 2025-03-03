@@ -43,6 +43,7 @@ module ElasticGraph
         it "dumps the `name_in_index` of any fields" do
           metadata = object_type_metadata_for "Widget" do |s|
             s.object_type "Widget" do |t|
+              t.default_graphql_resolver = nil
               t.field "id", "ID"
               t.field "description", "String", name_in_index: "description_index"
               t.index "widgets"
@@ -77,6 +78,7 @@ module ElasticGraph
         it "honors `name_in_index` passed to `paginated_collection_field`" do
           metadata = object_types_by_name do |s|
             s.object_type "Widget" do |t|
+              t.default_graphql_resolver = nil
               t.field "id", "ID"
               t.paginated_collection_field "names", "String", name_in_index: "names2"
               t.index "widgets"
@@ -106,6 +108,7 @@ module ElasticGraph
           expect(metadata.graphql_fields_by_name).to eq({
             "description" => graphql_field_with(
               name_in_index: "description_index",
+              resolver: :get_record_field_value,
               relation: nil
             )
           })

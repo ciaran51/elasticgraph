@@ -22,7 +22,7 @@ module ElasticGraph
           end
         end
 
-        expect(metadata.graphql_fields_by_name).to eq({
+        expect(metadata.graphql_fields_by_name.slice("parent")).to eq({
           "parent" => graphql_field_with(
             name_in_index: "parent",
             resolver: :nested_relationships,
@@ -55,7 +55,7 @@ module ElasticGraph
           )
         )
 
-        expect(metadata.graphql_fields_by_name).to eq({
+        expect(metadata.graphql_fields_by_name.slice("children", "child_aggregations")).to eq({
           "children" => expected_relation_field.with(name_in_index: "children"),
           "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations")
         })
@@ -90,7 +90,7 @@ module ElasticGraph
           )
         )
 
-        expect(metadata.graphql_fields_by_name).to eq({
+        expect(metadata.graphql_fields_by_name.slice("parent", "children", "child_aggregations")).to eq({
           "children" => expected_relation_field.with(name_in_index: "children"),
           "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
           "parent" => expected_relation_field.with(name_in_index: "parent")
@@ -126,7 +126,7 @@ module ElasticGraph
           )
         )
 
-        expect(metadata.graphql_fields_by_name).to eq({
+        expect(metadata.graphql_fields_by_name.slice("parent", "children", "child_aggregations")).to eq({
           "children" => expected_relation_field.with(name_in_index: "children"),
           "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
           "parent" => expected_relation_field.with(name_in_index: "parent")
@@ -175,7 +175,7 @@ module ElasticGraph
           )
         )
 
-        expect(metadata.graphql_fields_by_name).to eq({
+        expect(metadata.graphql_fields_by_name.slice("parent", "children", "child_aggregations")).to eq({
           "children" => expected_relation_field.with(name_in_index: "children"),
           "child_aggregations" => expected_relation_field.with(name_in_index: "child_aggregations"),
           "parent" => expected_relation_field.with(name_in_index: "parent")
@@ -251,7 +251,7 @@ module ElasticGraph
               foreign_key_nested_paths: ["players", "players.affiliations.sponsorships"]
             )
           )
-          expect(metadata.graphql_fields_by_name).to eq({
+          expect(metadata.graphql_fields_by_name.slice("affiliated_teams", "affiliated_team_aggregations")).to eq({
             "affiliated_teams" => expected_relation_field.with(name_in_index: "affiliated_teams"),
             "affiliated_team_aggregations" => expected_relation_field.with(name_in_index: "affiliated_team_aggregations")
           })

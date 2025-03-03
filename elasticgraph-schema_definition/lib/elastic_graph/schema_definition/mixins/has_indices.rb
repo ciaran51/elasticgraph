@@ -26,6 +26,7 @@ module ElasticGraph
         def initialize(*args, **options)
           super(*args, **options)
           @runtime_metadata_overrides = {}
+          self.default_graphql_resolver = :get_record_field_value
           yield self
 
           # Freeze `indices` so that the indexable status of a type does not change after instantiation.
