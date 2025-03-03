@@ -6,16 +6,13 @@
 #
 # frozen_string_literal: true
 
-require "digest/md5"
-require "forwardable"
-require "graphql"
 require "elastic_graph/constants"
 require "elastic_graph/errors"
 require "elastic_graph/graphql/monkey_patches/schema_field"
 require "elastic_graph/graphql/monkey_patches/schema_object"
 require "elastic_graph/graphql/schema/field"
 require "elastic_graph/graphql/schema/type"
-require "elastic_graph/support/hash_util"
+require "graphql"
 
 module ElasticGraph
   # Wraps a GraphQL::Schema object in order to provide higher-level, more convenient APIs
@@ -37,7 +34,7 @@ module ElasticGraph
         runtime_metadata:,
         index_definitions_by_graphql_type:,
         graphql_gem_plugins:,
-        &build_resolver
+        graphql_adapter:
       )
         @element_names = runtime_metadata.schema_element_names
         @config = config
@@ -53,15 +50,13 @@ module ElasticGraph
           )
         end
 
-        @build_resolver = build_resolver
-
         # Note: as part of loading the schema, the GraphQL gem may use the resolver (such
         # when a directive has a custom scalar) so we must wait to instantiate the schema
         # as late as possible here. If we do this before initializing some of the instance
         # variables above we'll get `NoMethodError` on `nil`.
         @graphql_schema = ::GraphQL::Schema.from_definition(
           graphql_schema_string,
-          default_resolve: LazyResolverAdapter.new(method(:resolver)),
+          default_resolve: graphql_adapter,
           using: graphql_gem_plugins
         )
 
@@ -119,25 +114,6 @@ module ElasticGraph
       alias_method :inspect, :to_s
 
       private
-
-      # Adapter class to allow us to lazily load the resolver instance.
-      #
-      # Necessary because the resolver must be provided to `GraphQL::Schema.from_definition`,
-      # but the resolver logic itself depends upon the loaded schema to know how to resolve.
-      # To work around the circular dependency, we build the schema with this lazy adapter,
-      # then build the resolver with the schema, and then the lazy resolver lazily loads the resolver.
-      LazyResolverAdapter = Struct.new(:builder) do
-        def resolver
-          @resolver ||= builder.call
-        end
-
-        extend Forwardable
-        def_delegators :resolver, :call, :resolve_type, :coerce_input, :coerce_result
-      end
-
-      def resolver
-        @resolver ||= @build_resolver.call(self)
-      end
 
       def build_types_by_name
         graphql_schema.types.transform_values do |graphql_type|

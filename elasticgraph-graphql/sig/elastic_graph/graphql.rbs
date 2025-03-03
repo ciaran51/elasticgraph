@@ -13,7 +13,7 @@ module ElasticGraph
     def initialize: (
       config: Config,
       datastore_core: DatastoreCore,
-      ?graphql_adapter: Resolvers::GraphQLAdapter?,
+      ?graphql_adapter: Resolvers::graphQLAdapter?,
       ?datastore_search_router: DatastoreSearchRouter?,
       ?filter_interpreter: Filtering::FilterInterpreter?,
       ?sub_aggregation_grouping_adapter: Aggregation::groupingAdapter?,
@@ -38,6 +38,12 @@ module ElasticGraph
 
     @graphql_gem_plugins: ::Hash[::Class, ::Hash[::Symbol, untyped]]?
     def graphql_gem_plugins: () -> ::Hash[::Class, ::Hash[::Symbol, untyped]]
+
+    @graphql_adapter: Resolvers::graphQLAdapter?
+    def graphql_adapter: () -> Resolvers::graphQLAdapter
+
+    @resolver_query_adapter: Resolvers::QueryAdapter?
+    def resolver_query_adapter: () -> Resolvers::QueryAdapter
 
     @named_graphql_resolvers: ::Hash[::Symbol, Resolvers::_Resolver]?
     def named_graphql_resolvers: () -> ::Hash[::Symbol, Resolvers::_Resolver]
@@ -65,7 +71,6 @@ module ElasticGraph
     private
 
     @datastore_core: DatastoreCore
-    @graphql_adapter: Resolvers::GraphQLAdapter?
     EAGER_LOAD_QUERY: ::String
   end
 end

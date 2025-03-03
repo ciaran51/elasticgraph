@@ -10,8 +10,9 @@ module ElasticGraph
         config: Config,
         runtime_metadata: SchemaArtifacts::RuntimeMetadata::Schema,
         index_definitions_by_graphql_type: ::Hash[::String, ::Array[DatastoreCore::_IndexDefinition]],
-        graphql_gem_plugins: ::Hash[::Class, ::Hash[::Symbol, untyped]]
-      ) { (Schema) -> Resolvers::GraphQLAdapter } -> void
+        graphql_gem_plugins: ::Hash[::Class, ::Hash[::Symbol, untyped]],
+        graphql_adapter: Resolvers::graphQLAdapter
+      ) -> void
 
       def type_from: (::GraphQL::Schema::_Type) -> Type
       def type_named: (::String | ::Symbol) -> Type

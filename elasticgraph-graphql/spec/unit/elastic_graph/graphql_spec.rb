@@ -7,7 +7,6 @@
 # frozen_string_literal: true
 
 require "elastic_graph/graphql"
-require "elastic_graph/graphql/resolvers/graphql_adapter"
 
 module ElasticGraph
   RSpec.describe GraphQL do
@@ -25,6 +24,25 @@ module ElasticGraph
       end
     end
 
+    describe "#schema" do
+      it "fails to load if the resolver for any fields cannot be found" do
+        graphql = build_graphql(schema_definition: ->(schema) {
+          schema.object_type "Widget" do |t|
+            t.field "id", "ID" do |f|
+              f.resolver = :unknown
+            end
+            t.index "widgets"
+          end
+        })
+
+        expect {
+          graphql.schema
+        }.to raise_error Errors::SchemaError, a_string_including(
+          "Resolver `unknown` (for `Widget.id`) cannot be found."
+        )
+      end
+    end
+
     describe "#load_dependencies_eagerly" do
       it "loads dependencies eagerly" do
         graphql = build_graphql
@@ -38,23 +56,6 @@ module ElasticGraph
         graphql.instance_variables
           .reject { |ivar| graphql.instance_variable_get(ivar).nil? }
           .map { |ivar_name| ivar_name.to_s.delete_prefix("@").to_sym }
-      end
-    end
-
-    describe "#schema" do
-      it "uses the injected `graphql_adapter` if provided" do
-        graphql_adapter = instance_double(GraphQL::Resolvers::GraphQLAdapter).as_null_object
-
-        # Manually stub these method; otherwise we get odd warnings like this:
-        # /Users/myron/Development/sq-elasticgraph-ruby/bundle/ruby/2.7.0/gems/graphql-2.0.15/lib/graphql/schema/build_from_definition.rb:305: warning: #<Class:0x000000014c0cdad0>#coerce_result at /Users/myron/.rvm/rubies/ruby-2.7.5/lib/ruby/2.7.0/forwardable.rb:154 forwarding to private method RSpec::Mocks::InstanceVerifyingDouble#coerce_result
-        #
-        # I don't understand why are started getting these warnings but this fixes it.
-        allow(graphql_adapter).to receive(:coerce_input) { |_, value, _| value }
-        allow(graphql_adapter).to receive(:coerce_result) { |_, value, _| value }
-      end
-
-      it "uses a real normal `graphql_adapter` if none is provided" do
-        expect(build_graphql.schema.send(:resolver)).to be_a ElasticGraph::GraphQL::Resolvers::GraphQLAdapter
       end
     end
 

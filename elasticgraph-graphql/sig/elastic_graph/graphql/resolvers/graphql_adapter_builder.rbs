@@ -1,0 +1,27 @@
+module ElasticGraph
+  class GraphQL
+    module Resolvers
+      type graphQLAdapter = ::Hash[::String, untyped]
+
+      class GraphQLAdapterBuilder
+        @runtime_metadata: SchemaArtifacts::RuntimeMetadata::Schema
+        @named_resolvers: ::Hash[::Symbol, untyped]
+        @query_adapter: QueryAdapter
+
+        def initialize: (
+          runtime_metadata: SchemaArtifacts::RuntimeMetadata::Schema,
+          named_resolvers: ::Hash[::Symbol, untyped],
+          query_adapter: QueryAdapter
+        ) -> void
+
+        def build: () -> ::Hash[::String, untyped]
+
+        private
+
+        def scalar_type_hash: () -> ::Hash[::String, ::Hash[::String, ^(untyped, ::GraphQL::Query::Context) -> untyped]]
+        def object_type_hash: () -> ::Hash[::String, ::Hash[::String, ^(untyped, ::Hash[::Symbol, untyped], ::GraphQL::Query::Context) -> untyped]]
+        def resolve_type: (::Module, untyped, ::GraphQL::Query::Context) -> untyped
+      end
+    end
+  end
+end
