@@ -15,7 +15,7 @@ module ElasticGraph
       # our resolvers. Responsible for routing a resolution request to the appropriate
       # resolver.
       class GraphQLAdapter
-        def initialize(schema:, datastore_query_builder:, datastore_query_adapters:, runtime_metadata:, named_resolvers:, resolvers:)
+        def initialize(schema:, datastore_query_builder:, datastore_query_adapters:, runtime_metadata:, named_resolvers:)
           @schema = schema
           @query_adapter = QueryAdapter.new(
             datastore_query_builder: datastore_query_builder,
@@ -23,7 +23,6 @@ module ElasticGraph
           )
 
           @named_resolvers = named_resolvers
-          @resolvers = resolvers
 
           scalar_types_by_name = runtime_metadata.scalar_types_by_name
           @coercion_adapters_by_scalar_type_name = ::Hash.new do |hash, name|
@@ -47,7 +46,7 @@ module ElasticGraph
           # the GraphQL gem does to convert them to Ruby keyword args form.
           args = schema_field.args_to_schema_form(args.except(:lookahead))
 
-          resolver = resolver_for(schema_field, object) do
+          resolver = @named_resolvers.fetch(schema_field.resolver) do
             raise <<~ERROR
               No resolver yet implemented for this case.
 
@@ -102,15 +101,6 @@ module ElasticGraph
 
         def scalar_coercion_adapter_for(type)
           @coercion_adapters_by_scalar_type_name[type.graphql_name]
-        end
-
-        def resolver_for(field, object)
-          if (resolver_name = field.resolver)
-            return @named_resolvers.fetch(resolver_name)
-          end
-
-          resolver = @resolvers.find { |r| r.can_resolve?(field: field, object: object) }
-          resolver || yield
         end
       end
     end
