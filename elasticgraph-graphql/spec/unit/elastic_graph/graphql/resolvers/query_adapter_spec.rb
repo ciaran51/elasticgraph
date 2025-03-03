@@ -51,7 +51,7 @@ module ElasticGraph
         end
 
         let(:graphql) { build_graphql(schema_artifacts: schema_artifacts) }
-        let(:field) { graphql.schema.field_named("Query", :widgets) }
+        let(:field) { graphql.schema.field_named("Query", "widgets") }
         let(:query_adapter) do
           QueryAdapter.new(
             datastore_query_builder: graphql.datastore_query_builder,
@@ -87,8 +87,8 @@ module ElasticGraph
 
             context "on a union type where the subtypes have different default sorts" do
               it "consistently uses the default sort from the alphabetically first index definition" do
-                field1 = graphql.schema.field_named("Query", :widgets_or_components)
-                field2 = graphql.schema.field_named("Query", :components_or_widgets)
+                field1 = graphql.schema.field_named("Query", "widgets_or_components")
+                field2 = graphql.schema.field_named("Query", "components_or_widgets")
 
                 sort1 = build_query_from({}, field: field1).sort
                 sort2 = build_query_from({}, field: field2).sort
@@ -107,7 +107,7 @@ module ElasticGraph
 
           describe "document_pagination" do
             context "on an indexed document field" do
-              let(:field) { graphql.schema.field_named("Query", :widgets) }
+              let(:field) { graphql.schema.field_named("Query", "widgets") }
 
               it "extracts `after`" do
                 datastore_query = build_query_from({after: "ABC"})
@@ -131,7 +131,7 @@ module ElasticGraph
             end
 
             context "on an indexed aggregation field" do
-              let(:field) { graphql.schema.field_named("Query", :widget_aggregations) }
+              let(:field) { graphql.schema.field_named("Query", "widget_aggregations") }
 
               it "ignores the pagination arguments since the aggregation adapter handles them for aggregations" do
                 datastore_query = build_query_from({

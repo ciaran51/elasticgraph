@@ -150,7 +150,7 @@ module ElasticGraph
           end
 
           it "can model a scalar" do
-            type = type_for(:int)
+            type = type_for("int")
 
             expect(type.name).to eq "Int"
             expect(type).to only_satisfy_predicates(:nullable?)
@@ -159,7 +159,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable scalar" do
-            type = type_for(:non_null_int)
+            type = type_for("non_null_int")
 
             expect(type.name).to eq "Int!"
             expect(type).to only_satisfy_predicates(:non_null?)
@@ -168,7 +168,7 @@ module ElasticGraph
           end
 
           it "can model an embedded object" do
-            type = type_for(:color)
+            type = type_for("color")
 
             expect(type.name).to eq "Color"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :embedded_object?)
@@ -177,7 +177,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable embedded object" do
-            type = type_for(:non_null_color)
+            type = type_for("non_null_color")
 
             expect(type.name).to eq "Color!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :embedded_object?)
@@ -186,7 +186,7 @@ module ElasticGraph
           end
 
           it "can model a list" do
-            type = type_for(:list_of_int)
+            type = type_for("list_of_int")
 
             expect(type.name).to eq "[Int]"
             expect(type).to only_satisfy_predicates(:nullable?, :list?, :collection?)
@@ -195,7 +195,7 @@ module ElasticGraph
           end
 
           it "can model a relay connection" do
-            type = type_for(:relay_connection)
+            type = type_for("relay_connection")
 
             expect(type.name).to eq "PersonConnection"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :relay_connection?, :collection?)
@@ -204,7 +204,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable relay connection" do
-            type = type_for(:non_null_relay_connection)
+            type = type_for("non_null_relay_connection")
 
             expect(type.name).to eq "PersonConnection!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :relay_connection?, :collection?)
@@ -213,7 +213,7 @@ module ElasticGraph
           end
 
           it "can model a relay edge" do
-            type = type_for(:relay_edge)
+            type = type_for("relay_edge")
 
             expect(type.name).to eq "PersonEdge"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :relay_edge?)
@@ -222,7 +222,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable relay edge" do
-            type = type_for(:non_null_relay_edge)
+            type = type_for("non_null_relay_edge")
 
             expect(type.name).to eq "PersonEdge!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :relay_edge?)
@@ -231,7 +231,7 @@ module ElasticGraph
           end
 
           it "can model a list of non-nullable scalars" do
-            type = type_for(:list_of_non_null_int)
+            type = type_for("list_of_non_null_int")
 
             expect(type.name).to eq "[Int!]"
             expect(type).to only_satisfy_predicates(:nullable?, :list?, :collection?)
@@ -240,7 +240,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable list of scalars" do
-            type = type_for(:non_null_list_of_int)
+            type = type_for("non_null_list_of_int")
 
             expect(type.name).to eq "[Int]!"
             expect(type).to only_satisfy_predicates(:non_null?, :list?, :collection?)
@@ -249,7 +249,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable list of non-nullable scalars" do
-            type = type_for(:non_null_list_of_non_null_int)
+            type = type_for("non_null_list_of_non_null_int")
 
             expect(type.name).to eq "[Int!]!"
             expect(type).to only_satisfy_predicates(:non_null?, :list?, :collection?)
@@ -258,7 +258,7 @@ module ElasticGraph
           end
 
           it "can model an indexed type" do
-            type = type_for(:person)
+            type = type_for("person")
 
             expect(type.name).to eq "Person"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :indexed_document?)
@@ -267,7 +267,7 @@ module ElasticGraph
           end
 
           it "can model an indexed aggregation type" do
-            type = type_for(:indexed_aggregation)
+            type = type_for("indexed_aggregation")
 
             expect(type.name).to eq "PersonAggregation"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :indexed_aggregation?)
@@ -276,7 +276,7 @@ module ElasticGraph
           end
 
           it "can model a non-null indexed aggregation type" do
-            type = type_for(:non_null_indexed_aggregation)
+            type = type_for("non_null_indexed_aggregation")
 
             expect(type.name).to eq "PersonAggregation!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :indexed_aggregation?)
@@ -285,7 +285,7 @@ module ElasticGraph
           end
 
           it "can model a list of indexed aggregation type" do
-            type = type_for(:list_of_indexed_aggregation)
+            type = type_for("list_of_indexed_aggregation")
 
             expect(type.name).to eq "[PersonAggregation]"
             expect(type).to only_satisfy_predicates(:nullable?, :list?, :collection?)
@@ -294,7 +294,7 @@ module ElasticGraph
           end
 
           it "can model a non-null list of indexed aggregation type" do
-            type = type_for(:non_null_list_of_indexed_aggregation)
+            type = type_for("non_null_list_of_indexed_aggregation")
 
             expect(type.name).to eq "[PersonAggregation]!"
             expect(type).to only_satisfy_predicates(:non_null?, :list?, :collection?)
@@ -303,7 +303,7 @@ module ElasticGraph
           end
 
           it "can model a list of indexed type" do
-            type = type_for(:person_list)
+            type = type_for("person_list")
 
             expect(type.name).to eq "[Person]"
             expect(type).to only_satisfy_predicates(:nullable?, :list?, :collection?)
@@ -312,7 +312,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable indexed type" do
-            type = type_for(:non_null_person)
+            type = type_for("non_null_person")
 
             expect(type.name).to eq "Person!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :indexed_document?)
@@ -321,7 +321,7 @@ module ElasticGraph
           end
 
           it "can model a union of embedded object types" do
-            type = type_for(:attribute)
+            type = type_for("attribute")
 
             expect(type.name).to eq "Attribute"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :abstract?, :embedded_object?)
@@ -330,7 +330,7 @@ module ElasticGraph
           end
 
           it "can model an indexed union of object types" do
-            type = type_for(:indexed_attribute)
+            type = type_for("indexed_attribute")
 
             expect(type.name).to eq "IndexedAttribute"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :abstract?, :indexed_document?)
@@ -339,7 +339,7 @@ module ElasticGraph
           end
 
           it "can model a non-nullable union of embedded object types" do
-            type = type_for(:non_null_attribute)
+            type = type_for("non_null_attribute")
 
             expect(type.name).to eq "Attribute!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :abstract?, :embedded_object?)
@@ -348,7 +348,7 @@ module ElasticGraph
           end
 
           it "can model a union of indexed object types" do
-            type = type_for(:entity)
+            type = type_for("entity")
 
             expect(type.name).to eq "Entity"
             expect(type).to only_satisfy_predicates(:nullable?, :object?, :abstract?, :indexed_document?)
@@ -357,7 +357,7 @@ module ElasticGraph
           end
 
           it "can model a non-null union of indexed object types" do
-            type = type_for(:non_null_entity)
+            type = type_for("non_null_entity")
 
             expect(type.name).to eq "Entity!"
             expect(type).to only_satisfy_predicates(:non_null?, :object?, :abstract?, :indexed_document?)
@@ -366,7 +366,7 @@ module ElasticGraph
           end
 
           it "can model an enum type" do
-            type = type_for(:size)
+            type = type_for("size")
 
             expect(type.name).to eq "Size"
             expect(type).to only_satisfy_predicates(:nullable?, :enum?)
@@ -375,7 +375,7 @@ module ElasticGraph
           end
 
           it "can model a non-null enum type" do
-            type = type_for(:non_null_size)
+            type = type_for("non_null_size")
 
             expect(type.name).to eq "Size!"
             expect(type).to only_satisfy_predicates(:non_null?, :enum?)
@@ -384,7 +384,7 @@ module ElasticGraph
           end
 
           it "can model a list of enums" do
-            type = type_for(:list_of_size)
+            type = type_for("list_of_size")
 
             expect(type.name).to eq "[Size]"
             expect(type).to only_satisfy_predicates(:nullable?, :list?, :collection?)
@@ -497,17 +497,10 @@ module ElasticGraph
           end
 
           it "returns the same field object returned from the schema's `field_named` method" do
-            from_type = schema.type_named("Color").field_named(:red)
-            from_schema = schema.field_named("Color", :red)
+            from_type = schema.type_named("Color").field_named("red")
+            from_schema = schema.field_named("Color", "red")
 
             expect(from_schema).to be_a(Field).and be(from_type)
-          end
-
-          it "supports the field being named with a string or symbol" do
-            from_string = schema.type_named("Color").field_named("red")
-            from_symbol = schema.type_named("Color").field_named(:red)
-
-            expect(from_symbol).to be_a(Field).and be(from_string)
           end
         end
 

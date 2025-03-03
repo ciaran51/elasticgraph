@@ -20,7 +20,7 @@ module ElasticGraph
         end
 
         def resolve(field:, object:, args:, context:, lookahead:)
-          field_name = field.name_in_index.to_s
+          field_name = field.name_in_index
           data =
             case object
             when DatastoreResponse::Document

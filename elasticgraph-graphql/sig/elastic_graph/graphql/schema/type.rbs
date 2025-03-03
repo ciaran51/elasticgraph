@@ -9,7 +9,7 @@ module ElasticGraph
         attr_reader graphql_type: ::GraphQL::Schema::_Type
         def search_index_definitions: () -> ::Array[DatastoreCore::_IndexDefinition]
         def unwrap_fully: () -> Type
-        def field_named: (::String | ::Symbol) -> Field
+        def field_named: (::String) -> Field
         def object?: () -> bool
         def relay_connection?: () -> bool
         def abstract?: () -> bool

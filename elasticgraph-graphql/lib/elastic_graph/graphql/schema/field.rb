@@ -28,7 +28,7 @@ module ElasticGraph
           @relation = runtime_metadata&.relation
           @computation_detail = runtime_metadata&.computation_detail
           @resolver = runtime_metadata&.resolver
-          @name_in_index = runtime_metadata&.name_in_index&.to_sym || name
+          @name_in_index = runtime_metadata&.name_in_index || name
 
           # Adds the :extras required by ElasticGraph. For now, this blindly adds `:lookahead`
           # to each field so that we have access to what the child selections are, as described here:
@@ -57,7 +57,7 @@ module ElasticGraph
         end
 
         def name
-          @name ||= @graphql_field.name.to_sym
+          @name ||= @graphql_field.name
         end
 
         # Returns an object that knows how this field joins to its relation.
@@ -94,7 +94,7 @@ module ElasticGraph
           return [] if parent_type.relay_connection? || parent_type.relay_edge?
           return index_id_field_names_for_relation if relation_join
 
-          [name_in_index.to_s]
+          [name_in_index]
         end
 
         # Indicates this field should be hidden in the GraphQL schema so as to not be queryable.

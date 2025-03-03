@@ -47,40 +47,40 @@ module ElasticGraph
         shared_examples_for ResolvableValue do |person_class|
           describe "#resolve" do
             it "delegates to a method of the same name on the object" do
-              value = resolve(name: "Kristin", field: :name)
+              value = resolve(name: "Kristin", field: "name")
 
               expect(value).to eq "Kristin"
             end
 
             it "coerces the field name to its canonical form before calling the method" do
-              value = resolve(name_form: :camelCase, birth_date: "2001-03-01", field: :birthDate)
+              value = resolve(name_form: :camelCase, birth_date: "2001-03-01", field: "birthDate")
 
               expect(value).to eq "2001-03-01"
             end
 
             it "evaluates the block passed to `ResolvableValue.new` just like `Data.define` does" do
-              value = resolve(name: "John Doe", field: :first_name)
+              value = resolve(name: "John Doe", field: "first_name")
               expect(value).to eq "John"
 
-              value = resolve(name_form: :camelCase, name: "John Doe", field: :firstName)
+              value = resolve(name_form: :camelCase, name: "John Doe", field: "firstName")
               expect(value).to eq "John"
             end
 
             it "raises a clear error if the field being resolved was not defined in the schema element names" do
               expect {
-                resolve(name: "John Doe", field: :last_name)
+                resolve(name: "John Doe", field: "last_name")
               }.to raise_error(Errors::SchemaError, /last_name/)
             end
 
             it "raises an error if the field name is not in the form defined by the schema elements" do
               expect {
-                resolve(name_form: :snake_case, birth_date: "2001-03-01", field: :birthDate)
+                resolve(name_form: :snake_case, birth_date: "2001-03-01", field: "birthDate")
               }.to raise_error(Errors::SchemaError, /birthDate/)
             end
 
             it "raises a `NoMethodError` if the field being resolved is not a defined method" do
               expect {
-                resolve(name: "John Doe", field: :age)
+                resolve(name: "John Doe", field: "age")
               }.to raise_error(NoMethodError, /age/)
             end
 
@@ -88,7 +88,7 @@ module ElasticGraph
               value = resolve(
                 name: "John Does",
                 quote: "To be, or not to be",
-                field: :favorite_quote,
+                field: "favorite_quote",
                 args: {truncate_to: 5}
               )
 
@@ -100,7 +100,7 @@ module ElasticGraph
                 overrides: {truncate_to: "trunc_to"},
                 name: "John Does",
                 quote: "To be, or not to be",
-                field: :favorite_quote2,
+                field: "favorite_quote2",
                 args: {trunc_to: 5}
               )
 
@@ -112,7 +112,7 @@ module ElasticGraph
                 resolve(
                   name: "John Does",
                   quote: "To be, or not to be",
-                  field: :favorite_quote,
+                  field: "favorite_quote",
                   args: {truncate_to: 5, foo_bar_bazz: 23}
                 )
               }.to raise_error Errors::SchemaError, a_string_including("foo_bar_bazz")
@@ -123,7 +123,7 @@ module ElasticGraph
                 resolve(
                   name: "John Does",
                   quote: "To be, or not to be",
-                  field: :name,
+                  field: "name",
                   args: {truncate_to: 5}
                 )
               }.to raise_error ArgumentError

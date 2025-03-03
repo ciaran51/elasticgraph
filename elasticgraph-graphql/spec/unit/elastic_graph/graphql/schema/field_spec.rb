@@ -13,14 +13,14 @@ module ElasticGraph
   class GraphQL
     class Schema
       RSpec.describe Field, :ensure_no_orphaned_types do
-        it "exposes the name as a lowercase symbol" do
+        it "exposes the name as a lowercase string" do
           field = define_schema do |schema|
             schema.object_type "Color" do |t|
               t.field "red", "Int!"
             end
-          end.field_named("Color", :red)
+          end.field_named("Color", "red")
 
-          expect(field.name).to eq :red
+          expect(field.name).to eq "red"
         end
 
         it "exposes the parent type" do
@@ -30,7 +30,7 @@ module ElasticGraph
             end
           end
 
-          field = schema.field_named("Color", :red)
+          field = schema.field_named("Color", "red")
           expect(field.parent_type).to be schema.type_named("Color")
         end
 
@@ -39,7 +39,7 @@ module ElasticGraph
             schema.object_type "Color" do |t|
               t.field "red", "Int!"
             end
-          end.field_named("Color", :red)
+          end.field_named("Color", "red")
 
           expect(field.inspect).to eq "#<ElasticGraph::GraphQL::Schema::Field Color.red>"
         end
@@ -52,7 +52,7 @@ module ElasticGraph
               end
             end
 
-            field = schema.field_named("Color", :red)
+            field = schema.field_named("Color", "red")
 
             expect(field.type.name).to eq "Int"
             expect(field.type).to be schema.type_named("Int")
@@ -65,7 +65,7 @@ module ElasticGraph
               end
             end
 
-            field = schema.field_named("Color", :red)
+            field = schema.field_named("Color", "red")
 
             expect(field.type.name).to eq "[Int!]!"
           end
@@ -85,7 +85,7 @@ module ElasticGraph
                 t.relates_to_many "colors", "Color", via: "photo_id", dir: :in, singular: "color"
                 t.index "photos"
               end
-            end.field_named("Photo", :colors)
+            end.field_named("Photo", "colors")
 
             expect(field.relation_join).to be_a(RelationJoin).and be(field.relation_join)
           end
@@ -97,7 +97,7 @@ module ElasticGraph
               s.object_type "Color" do |t|
                 t.field "red", "Int"
               end
-            end.field_named("Color", :red)
+            end.field_named("Color", "red")
 
             expect(field.relation_join).to be(nil).and be(field.relation_join)
             expect(RelationJoin).to have_received(:from).once
@@ -110,7 +110,7 @@ module ElasticGraph
               s.object_type "Widget" do |t|
                 t.field "count", "Int"
               end
-            end.field_named("Widget", :count)
+            end.field_named("Widget", "count")
 
             expect {
               field.sort_clauses_for(:enum_value)
@@ -131,7 +131,7 @@ module ElasticGraph
           end
 
           it "returns a list of datastore sort clauses when passed an array" do
-            field = schema.field_named("Query", :photos)
+            field = schema.field_named("Query", "photos")
             sort_clauses = field.sort_clauses_for([:pixel_count_DESC, :created_at_ms_DESC])
 
             expect(sort_clauses).to eq([
@@ -141,14 +141,14 @@ module ElasticGraph
           end
 
           it "returns a list of a single datastore sort clause when passed a scalar" do
-            field = schema.field_named("Query", :photos)
+            field = schema.field_named("Query", "photos")
             sort_clauses = field.sort_clauses_for(:pixel_count_DESC)
 
             expect(sort_clauses).to eq([{"pixel_count" => {"order" => "desc"}}])
           end
 
           it "raises an error if a sort value is undefined" do
-            field = schema.field_named("Query", :photos)
+            field = schema.field_named("Query", "photos")
 
             expect {
               field.sort_clauses_for(:bogus_DESC)
@@ -173,7 +173,7 @@ module ElasticGraph
               EOS
             end
 
-            field = schema.field_named("Query", :photos)
+            field = schema.field_named("Query", "photos")
 
             expect {
               field.sort_clauses_for(:invalid_photo_sort_DESC)
@@ -181,7 +181,7 @@ module ElasticGraph
           end
 
           it "returns an empty array when given nil or []" do
-            field = schema.field_named("Query", :photos)
+            field = schema.field_named("Query", "photos")
 
             expect(field.sort_clauses_for(nil)).to eq []
             expect(field.sort_clauses_for([])).to eq []
@@ -196,7 +196,7 @@ module ElasticGraph
                 t.field "some_field", "Int"
                 t.index "photos"
               end
-            end.field_named("IntAggregatedValues", :exact_sum)
+            end.field_named("IntAggregatedValues", "exact_sum")
 
             expect(field.computation_detail).to eq(
               SchemaArtifacts::RuntimeMetadata::ComputationDetail.new(
@@ -245,7 +245,7 @@ module ElasticGraph
               schema.object_type "Photo" do |t|
                 t.field "some_field", type_name, filterable: false, aggregatable: false, groupable: false
               end
-            end.field_named("Photo", :some_field)
+            end.field_named("Photo", "some_field")
           end
         end
 
@@ -261,17 +261,17 @@ module ElasticGraph
 
           context "when a schema field is defined with a `name_in_index`" do
             it "returns the `name_in_index` value" do
-              field = schema.field_named("Person", :alt_name)
+              field = schema.field_named("Person", "alt_name")
 
-              expect(field.name_in_index).to eq(:name)
+              expect(field.name_in_index).to eq("name")
             end
           end
 
           context "when a schema field does not have a `name_in_index`" do
             it "returns the field name" do
-              field = schema.field_named("Person", :first_name)
+              field = schema.field_named("Person", "first_name")
 
-              expect(field.name_in_index).to eq(:first_name)
+              expect(field.name_in_index).to eq("first_name")
             end
           end
         end
@@ -289,7 +289,7 @@ module ElasticGraph
                   foo(camelCaseField: Int, maybe_set_to_null: String, nested: Nested): Int
                 }
               EOS
-            end.field_named("Query", :foo)
+            end.field_named("Query", "foo")
           end
 
           it "converts an args hash from the keyword args style provided by graphql gem to their form in the schema" do
@@ -372,10 +372,10 @@ module ElasticGraph
 
             schema = graphql.schema
 
-            expect(schema.field_named("WidgetConnection", :edges).index_field_names_for_resolution).to eq []
-            expect(schema.field_named("WidgetConnection", :page_info).index_field_names_for_resolution).to eq []
-            expect(schema.field_named("WidgetEdge", :node).index_field_names_for_resolution).to eq []
-            expect(schema.field_named("WidgetEdge", :cursor).index_field_names_for_resolution).to eq []
+            expect(schema.field_named("WidgetConnection", "edges").index_field_names_for_resolution).to eq []
+            expect(schema.field_named("WidgetConnection", "page_info").index_field_names_for_resolution).to eq []
+            expect(schema.field_named("WidgetEdge", "node").index_field_names_for_resolution).to eq []
+            expect(schema.field_named("WidgetEdge", "cursor").index_field_names_for_resolution).to eq []
           end
 
           def index_field_names_for(field_method, field_name, field_type, **field_args)

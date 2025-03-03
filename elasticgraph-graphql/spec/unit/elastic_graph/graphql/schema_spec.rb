@@ -208,15 +208,11 @@ module ElasticGraph
               expect(field_named("Color", "blue")).to be_a GraphQL::Schema::Field
             end
 
-            it "finds a field when given type and field name symbols" do
-              expect(field_named("Color", :blue)).to be_a GraphQL::Schema::Field
-            end
-
             it "consistently returns the same field object" do
-              field1 = field_named("Color", :red)
-              field2 = field_named("Color", :red)
+              field1 = field_named("Color", "red")
+              field2 = field_named("Color", "red")
               field3 = field_named("Color", "red")
-              other_field = field_named("Color", :blue)
+              other_field = field_named("Color", "blue")
 
               expect(field2).to be(field1)
               expect(field3).to be(field1)
@@ -225,19 +221,19 @@ module ElasticGraph
 
             it "raises an error when the type part of the given field name cannot be found" do
               expect {
-                field_named("Person", :name)
+                field_named("Person", "name")
               }.to raise_error(Errors::NotFoundError, /Person/)
             end
 
             it "raises an error when the field part of the given field name cannot be found, suggesting a correction if possible" do
               expect {
-                field_named("Color", :gren)
+                field_named("Color", "gren")
               }.to raise_error(Errors::NotFoundError, a_string_including("Color", "gren", "Possible alternatives", "green"))
             end
 
             it "raises an error when the field part of the given field name cannot be found, with no suggestions if not close to any field names" do
               expect {
-                field_named("Color", :purple)
+                field_named("Color", "purple")
               }.to raise_error(Errors::NotFoundError, a_string_including("Color", "purple").and(excluding("Possible alternatives")))
             end
 
