@@ -51,8 +51,8 @@ GraphQL input objects don't allow duplicate keys, so
 `albums: {anySatisfy: {...}, anySatisfy: {...}}` isn't supported, but `allOf`
 enables this use case.
 
-{% comment %}TODO: figure out a way to highlight this section as a warning.{% endcomment %}
-### Warning: Always Pass a List
+<div class="alert-warning" markdown="1">
+**Warning: Always Pass a List**{: .alert-title}
 
 When using `allOf` or `anyOf`, be sure to pass the sub-filters as a list. If you instead
 pass them as an object, it won't work as expected. Consider this query:
@@ -96,3 +96,4 @@ query AnyOfGotcha {
   }
 }
 {% endhighlight %}
+</div>
