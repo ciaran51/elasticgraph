@@ -25,6 +25,4 @@ The ElasticGraph platform will allow you to query your data in many different co
 
 ## Get started
 
-{% highlight shell %}
-gem install elasticgraph
-{% endhighlight %}
+Our [Getting Started guide]({% link getting-started.md %}) will help you get up and running in about 10 minutes.

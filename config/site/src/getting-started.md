@@ -4,246 +4,189 @@ title: Getting Started with ElasticGraph
 permalink: /getting-started/
 ---
 
-Welcome to ElasticGraph! This guide will help you set up ElasticGraph locally, run queries using GraphiQL, and verify the datastore using the OpenSearch Dashboard. By the end of this tutorial, you'll have a working ElasticGraph instance running on your machine.
+Welcome to ElasticGraph! This guide will help you set up ElasticGraph locally, run queries using GraphiQL, and evolve an example schema.
+By the end of this tutorial, you'll have a working ElasticGraph instance running on your machine.
 
-**Estimated Time to Complete**: Approximately 2 hours
+**Estimated Time to Complete**: Approximately 10 minutes
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
 
-- **Git**: For cloning repositories.
-- **Docker**: For running services locally.
-- **Ruby (version 3.2 or higher)** and **Bundler**: For running ElasticGraph scripts.
-- **OpenSearch and Kibana**: Included in the Docker setup.
+- **Docker** and **Docker Compose**
+- **Ruby** (version 3.3 or higher)
+- **Git**
 
-## Step 1: Clone the ElasticGraph Repository
+Confirm these are installed using your terminal:
 
-Begin by cloning the ElasticGraph project template from GitHub:
-
-{% highlight bash %}
-$ git clone <COMING SOON>!
-$ cd elasticgraph-project-template
+{% highlight shell %}
+$ ruby -v
+ruby 3.4.1 (2024-12-25 revision 48d4efcb85) +PRISM [arm64-darwin24]
+$ docker compose version
+Docker Compose version v2.32.4-desktop.1
+$ git -v
+git version 2.46.0
 {% endhighlight %}
 
-## Step 2: Run the Initialization Script
+Note: you don't need these exact versions (these are just examples). Your Ruby version does need to be 3.3.x or greater, though.
 
-We have an initialization script that sets up your ElasticGraph project with necessary configurations.
+## Step 1: Bootstrap a new ElasticGraph Project
 
 Run the following command in your terminal:
 
-{% highlight bash %}
-$ curl -sL https://raw.githubusercontent.com/<COMING-SOON>/elasticgraph-project-template/main/script/init_eg | bash -s
+{% highlight shell %}
+$ gem exec elasticgraph new path/to/project --datastore elasticsearch
+# or
+$ gem exec elasticgraph new path/to/project --datastore opensearch
 {% endhighlight %}
 
-This script will prompt you for some inputs:
+{% comment %}TODO: figure out a way to highlight this section as a note.{% endcomment %}
+Not sure whether to use Elasticsearch or OpenSearch? We recommend using whichever has better
+support in your organization. ElasticGraph works identically with both, and the choice makes
+no difference in the tutorial that follows.
 
-- **Application Name**: Choose a name for your ElasticGraph application.
-- **Dataset Name**: Decide on a name for your dataset (e.g., `customers`).
+This will:
 
-The script will:
+* Generate a project skeleton with an example schema
+* Install dependencies including the latest version of ElasticGraph itself
+* Dump schema artifacts
+* Run the build tasks (including your new project's test suite)
+* Initialize the project as a git repository
+* Commit the initial setup
 
-- Set up directory structures.
-- Copy templated files.
-- Install necessary dependencies.
+## Step 2: Boot Locally
 
-## Step 3: Define Your Schema
-
-ElasticGraph uses schemas to define the structure of your data.
-
-You can skip this part for now if you want to play with the sample schema. Otherwise, follow these steps to define your own schema:
-
-1. **Remove Sample Schema**:
-
-   Delete the sample schema file:
+The initial project skeleton comes with everything you need to run ElasticGraph locally.
+Confirm it works by running the following:
 
 {% highlight shell %}
-$ rm config/schema/people.rb
+$ cd path/to/project
+$ bundle exec boot_locally
 {% endhighlight %}
 
-2. **Create Your Schema**:
+This will:
 
-   Create a new file in `config/schema/` named after your dataset, for example, `config/schema/customers.rb`.
+* Boot the datastore (Elasticsearch or OpenSearch) using Docker
+* Configure the datastore using the dumped `datastore_config.yaml` schema artifact
+* Index some randomly generated artists/albums/tours/shows/venues data
+* Boot ElasticGraph and a [GraphiQL UI](https://github.com/graphql/graphiql)
+* [Open the GraphiQL UI](http://localhost:9393/) in your browser
 
-   Define your schema in this file. Here's a basic example:
-
-{% highlight ruby %}
-ElasticGraph.define_schema do |schema|
-  schema.json_schema_version 1
-
-  schema.object_type "Artist" do |t|
-    t.field "id", "ID"
-    t.field "name", "String"
-    t.field "lifetimeSales", "Int"
-    t.field "bio", "ArtistBio"
-
-    t.field "albums", "[Album!]!" do |f|
-      f.mapping type: "nested"
-    end
-
-    t.index "artists"
-  end
-end
-
-# ...
-{% endhighlight %}
-
-3. **Update Configuration**:
-
-   Ensure that your dataset is correctly referenced in your configuration files.
-
-   - **config/settings/lambda.yaml**:
-
-     Update or add your dataset name under the `datasets` section.
-
-## Step 4: Build and Test Your Project
-
-1. **Install Dependencies**:
-
-{% highlight bash %}
-$ bundle install
-{% endhighlight %}
-
-2. **Run Rake Tasks**:
-
-   Test your setup by running:
-
-{% highlight bash %}
-$ bundle exec rake
-{% endhighlight %}
-
-   This command runs all the default tasks to ensure everything is configured correctly.
-
-3. **Fix Any Issues**:
-
-   If you encounter errors, follow the error message prompts to fix anything that isn't set up correctly.
-
-## Step 5: Start ElasticGraph Locally
-
-With Docker running, start your local ElasticGraph instance:
-
-{% highlight bash %}
-$ bundle exec rake boot_locally
-{% endhighlight %}
-
-This command will:
-
-- Build Docker images for ElasticGraph and OpenSearch.
-- Start the services using Docker Compose.
-- Populate your dataset with fake data.
-- Launch GraphiQL in your default web browser.
-
-## Step 6: Use GraphiQL to Run Queries
-
-GraphiQL is a graphical interactive in-browser GraphQL IDE.
-
-Once GraphiQL opens in your browser, you can start running queries against your local ElasticGraph instance.
-
-### Example Query
-
-Replace `customers` and fields with those relevant to your schema.
+Run some example queries in GraphiQL to confirm it's working. Here's an example query to get you started:
 
 {% highlight graphql %}
-query Test {
-  customers {
-    totalEdgeCount
-    nodes {
-      id
-      name
-      email
-    }
-  }
-}
+{{ site.data.music_queries.filtering.FindArtistsFormedIn90s }}
 {% endhighlight %}
 
-**Explanation**:
+Visit the [Query API docs]({% link query-api.md %}) for other example queries that work against the example schema.
 
-- **customers**: The dataset you defined.
-- **totalEdgeCount**: Returns the total number of records.
-- **nodes**: An array of data nodes.
-- **fields inside nodes**: The fields you've defined in your schema.
+## Step 3: Add a new field to the Schema
 
-Learn more about ElasticGraph queries in the [Query API documentation]({{ '/query-api' | relative_url }}).
+If this is your first ElasticGraph project, we recommend you add a new field to the
+example schema to get a feel for how it works. (Feel free to skip this step if you've
+worked in an ElasticGraph project before).
 
-## Step 7: Access the OpenSearch Dashboard (aka Elasticsearch Kibana)
+Let's add a `Venue.yearOpened` field to our schema. Here's a git diff showing what to change:
 
-With `bundle exec rake boot_locally` still running:
-
-1. **Open Dashboard**:
-
-   Navigate to [http://localhost:5601](http://localhost:5601) in your web browser.
-
-2. **Explore Your Data**:
-
-   - Click on **"Dev Tools"** in the Kibana sidebar.
-   - Run the following commands to explore your indices:
-
-{% highlight elasticsearch %}
-GET /_cat/indices?v
-GET /_cat/shards?v
-GET /_cat/templates?v
+{% highlight diff %}
+diff --git a/config/schema/artists.rb b/config/schema/artists.rb
+index 77e63de..7999fe4 100644
+--- a/config/schema/artists.rb
++++ b/config/schema/artists.rb
+@@ -56,6 +56,9 @@ ElasticGraph.define_schema do |schema|
+   schema.object_type "Venue" do |t|
+     t.field "id", "ID"
+     t.field "name", "String"
++    t.field "yearOpened", "Int" do |f|
++      f.json_schema minimum: 1900, maximum: 2100
++    end
+     t.field "location", "GeoLocation"
+     t.field "capacity", "Int"
+     t.relates_to_many "featuredArtists", "Artist", via: "tours.shows.venueId", dir: :in, singular: "featuredArtist"
 {% endhighlight %}
 
-3. **Search Your Data**:
+Next, rebuild the project:
 
-   Replace `your-index-name` with the name of your index (usually your dataset name).
-
-{% highlight elasticsearch %}
-GET /your-index-name/_search
+{% highlight shell %}
+$ bundle exec rake build
 {% endhighlight %}
 
-   This will return all documents in your index. Normally you'll query via GraphiQL, but this is useful for debugging.
+This will re-generate the schema artifacts, run the test suite, and fail. The failing test will indicate
+that the `:venue` factory is missing the new field. To fix it, define `yearOpened` on the `:venue` factory in the `factories.rb` file under `lib`:
 
-## Troubleshooting
+{% highlight diff %}
+diff --git a/lib/my_eg_project/factories.rb b/lib/my_eg_project/factories.rb
+index 0d8659c..509f274 100644
+--- a/lib/my_eg_project/factories.rb
++++ b/lib/my_eg_project/factories.rb
+@@ -95,6 +95,7 @@ FactoryBot.define do
+       "#{city_name} #{venue_type}"
+     end
 
-- **Docker Issues**:
++    yearOpened { Faker::Number.between(from: 1900, to: 2025) }
+     location { build(:geo_location) }
+     capacity { Faker::Number.between(from: 200, to: 100_000) }
+   end
+{% endhighlight %}
 
-  - Ensure Docker is running.
-  - If ports are already in use, stop other services or adjust the port settings in `docker-compose.yml`.
-
-- **GraphiQL Not Loading**:
-
-  - Verify that the local server is running.
-  - Check for errors in the terminal where `boot_locally` is running.
-
-- **Schema Errors**:
-
-  - Ensure your schema files are correctly formatted.
-  - Check for typos in field names and types.
-
-- **Kibana Not Accessible**:
-
-  - Confirm that Kibana is running (`docker ps` to see running containers).
-  - Check if another service is using port `5601`.
+Re-run `bundle exec rake build` and everything should pass. You can also run `bundle exec rake boot_locally`
+and query your new field to confirm the fake values being generated for it.
 
 ## Next Steps
 
-Congratulations! You've set up ElasticGraph locally and run your first queries.
+Congratulations! You've set up ElasticGraph locally and run your first queries. Here are some next steps you can take.
 
-- **Explore Advanced Features**:
+### Replace the Example Schema
 
-  - Learn about custom resolvers.
-  - Implement complex queries and mutations.
+Delete the `artist` schema definition:
 
-- **Connect to Real Data Sources**:
+{% highlight shell %}
+$ rm config/schema/artists.rb
+{% endhighlight %}
 
-  - Replace fake data with real data ingestion pipelines.
-  - Integrate with databases or APIs.
+Then define your own schema in a Ruby file under `config/schema`.
 
-- **Contribute to ElasticGraph**:
+* Use the [schema definition API docs](/elasticgraph/docs/main/ElasticGraph/SchemaDefinition/API.html) as a reference.
+* Run `bundle exec rake build` and deal with any errors that are reported.
+* Hint: search the project codebase for `TODO` comments to find things that need updating.
 
-  - Report issues or suggest features on GitHub.
-  - Submit pull requests to improve the project.
+### Setup a CI Build
+
+Your ElasticGraph project includes a command that's designed to be run on CI:
+
+{% highlight shell %}
+$ bundle exec rake check
+{% endhighlight %}
+
+This should be run on every commit (ideally before merging a pull request) using a CI system
+such as [GitHub Actions](https://github.com/features/actions), [Buildkite](http://buildkite.com/),
+or [Circle CI](https://circleci.com/).
+
+### Deploy
+
+ElasticGraph can be deployed in two different ways:
+
+* As a standard Ruby [Rack](https://github.com/rack/rack) application using [elasticgraph-rack](https://github.com/block/elasticgraph/tree/main/elasticgraph-rack).
+  Similar to a [Rails](https://rubyonrails.org/) or [Sinatra](https://sinatrarb.com/) app, you can serve ElasticGraph from
+  [any of the webservers](https://github.com/rack/rack#supported-web-servers) that support the Rack spec. Or you could mount your
+  ElasticGraph GraphQL endpoint inside an existing Rails or Sinatra application!
+* As a serverless application in AWS using [elasticgraph-graphql_lambda](https://github.com/block/elasticgraph/tree/main/elasticgraph-graphql_lambda).
+
+### Connect a Real Data Source
+
+Finally, you'll want to publish into your deployed ElasticGraph project from a real data source. The generated `json_schemas.yaml` artifact
+can be used in your publishing system to validate the indexing payloads or for code generation (using a project like
+[json-kotlin-schema-codegen](https://github.com/pwall567/json-kotlin-schema-codegen)).
 
 ## Resources
 
 - **ElasticGraph Documentation**: [{{ '/docs/main' | absolute_url }}]({{ '/docs/main' | relative_url }})
 - **GraphQL Introduction**: [https://graphql.org/learn/](https://graphql.org/learn/)
-- **OpenSearch Documentation**: [https://opensearch.org/docs/latest/](https://opensearch.org/docs/latest/)
 
 ## Feedback
 
-We'd love to hear your feedback. If you encounter any issues or have suggestions, please open an issue on our GitHub repository.
+We'd love to hear your feedback. If you encounter any issues or have suggestions, please start a discussion in
+our [discord channel](https://discord.gg/8m9FqJ7a7F) or on [GitHub](https://github.com/block/elasticgraph/discussions).
 
 ---
 
