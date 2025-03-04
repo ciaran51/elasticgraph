@@ -21,10 +21,10 @@ Before you begin, ensure you have the following installed on your system:
 
 Begin by cloning the ElasticGraph project template from GitHub:
 
-```bash
-git clone <COMING SOON>!
-cd elasticgraph-project-template
-```
+{% highlight bash %}
+$ git clone <COMING SOON>!
+$ cd elasticgraph-project-template
+{% endhighlight %}
 
 ## Step 2: Run the Initialization Script
 
@@ -32,9 +32,9 @@ We have an initialization script that sets up your ElasticGraph project with nec
 
 Run the following command in your terminal:
 
-```bash
-curl -sL https://raw.githubusercontent.com/<COMING-SOON>/elasticgraph-project-template/main/script/init_eg | bash -s
-```
+{% highlight bash %}
+$ curl -sL https://raw.githubusercontent.com/<COMING-SOON>/elasticgraph-project-template/main/script/init_eg | bash -s
+{% endhighlight %}
 
 This script will prompt you for some inputs:
 
@@ -57,9 +57,9 @@ You can skip this part for now if you want to play with the sample schema. Other
 
    Delete the sample schema file:
 
-   ```bash
-   rm config/schema/people.rb
-   ```
+{% highlight shell %}
+$ rm config/schema/people.rb
+{% endhighlight %}
 
 2. **Create Your Schema**:
 
@@ -67,26 +67,26 @@ You can skip this part for now if you want to play with the sample schema. Other
 
    Define your schema in this file. Here's a basic example:
 
-   ```ruby
-    ElasticGraph.define_schema do |schema|
-      schema.json_schema_version 1
+{% highlight ruby %}
+ElasticGraph.define_schema do |schema|
+  schema.json_schema_version 1
 
-      schema.object_type "Artist" do |t|
-        t.field "id", "ID"
-        t.field "name", "String"
-        t.field "lifetimeSales", "Int"
-        t.field "bio", "ArtistBio"
+  schema.object_type "Artist" do |t|
+    t.field "id", "ID"
+    t.field "name", "String"
+    t.field "lifetimeSales", "Int"
+    t.field "bio", "ArtistBio"
 
-        t.field "albums", "[Album!]!" do |f|
-          f.mapping type: "nested"
-        end
-
-        t.index "artists"
-      end
+    t.field "albums", "[Album!]!" do |f|
+      f.mapping type: "nested"
     end
 
-    # ...
-   ```
+    t.index "artists"
+  end
+end
+
+# ...
+{% endhighlight %}
 
 3. **Update Configuration**:
 
@@ -100,17 +100,17 @@ You can skip this part for now if you want to play with the sample schema. Other
 
 1. **Install Dependencies**:
 
-   ```bash
-   bundle install
-   ```
+{% highlight bash %}
+$ bundle install
+{% endhighlight %}
 
 2. **Run Rake Tasks**:
 
    Test your setup by running:
 
-   ```bash
-   bundle exec rake
-   ```
+{% highlight bash %}
+$ bundle exec rake
+{% endhighlight %}
 
    This command runs all the default tasks to ensure everything is configured correctly.
 
@@ -122,9 +122,9 @@ You can skip this part for now if you want to play with the sample schema. Other
 
 With Docker running, start your local ElasticGraph instance:
 
-```bash
-bundle exec rake boot_locally
-```
+{% highlight bash %}
+$ bundle exec rake boot_locally
+{% endhighlight %}
 
 This command will:
 
@@ -143,7 +143,7 @@ Once GraphiQL opens in your browser, you can start running queries against your 
 
 Replace `customers` and fields with those relevant to your schema.
 
-```graphql
+{% highlight graphql %}
 query Test {
   customers {
     totalEdgeCount
@@ -154,7 +154,7 @@ query Test {
     }
   }
 }
-```
+{% endhighlight %}
 
 **Explanation**:
 
@@ -178,22 +178,21 @@ With `bundle exec rake boot_locally` still running:
    - Click on **"Dev Tools"** in the Kibana sidebar.
    - Run the following commands to explore your indices:
 
-     ```elasticsearch
-     GET /_cat/indices?v
-     GET /_cat/shards?v
-     GET /_cat/templates?v
-     ```
+{% highlight elasticsearch %}
+GET /_cat/indices?v
+GET /_cat/shards?v
+GET /_cat/templates?v
+{% endhighlight %}
 
 3. **Search Your Data**:
 
    Replace `your-index-name` with the name of your index (usually your dataset name).
 
-   ```elasticsearch
-   GET /your-index-name/_search
-   ```
+{% highlight elasticsearch %}
+GET /your-index-name/_search
+{% endhighlight %}
 
    This will return all documents in your index. Normally you'll query via GraphiQL, but this is useful for debugging.
-
 
 ## Troubleshooting
 
