@@ -40,7 +40,8 @@ $ gem exec elasticgraph new path/to/project --datastore elasticsearch
 $ gem exec elasticgraph new path/to/project --datastore opensearch
 {% endhighlight %}
 
-{% comment %}TODO: figure out a way to highlight this section as a note.{% endcomment %}
+{: .alert-note}
+**Note**{: .alert-title}
 Not sure whether to use Elasticsearch or OpenSearch? We recommend using whichever has better
 support in your organization. ElasticGraph works identically with both, and the choice makes
 no difference in the tutorial that follows.

@@ -18,7 +18,8 @@ This query, for example, will find artists that released a platinum-selling albu
 {{ site.data.music_queries.filtering.ArtistsWithPlatinum90sAlbum }}
 {% endhighlight %}
 
-{% comment %}TODO: figure out a way to highlight this section as a warning.{% endcomment %}
+{: .alert-warning}
+**Warning**{: .alert-title}
 One thing to bear in mind: this query is selecting which _artists_ to return,
 not which _albums_ to return. You might expect that the returned `nodes.albums` would
 all be platinum-selling 90s albums, but that's not how the filtering API works. Only artists
