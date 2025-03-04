@@ -25,7 +25,6 @@ The ElasticGraph platform will allow you to query your data in many different co
 
 ## Get started
 
-
-```shell
+{% highlight shell %}
 gem install elasticgraph
-```
+{% endhighlight %}
