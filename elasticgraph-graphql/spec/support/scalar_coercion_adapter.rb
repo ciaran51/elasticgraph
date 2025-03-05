@@ -32,11 +32,11 @@ RSpec.shared_context "scalar coercion adapter support" do |scalar_type_name, sch
 
     @graphql = build_graphql(graphql_adapter: test_adapter, clients_by_name: {}, schema_definition: lambda do |schema|
       schema_definition&.call(schema)
-      schema.raw_sdl <<~EOS
-        type Query {
-          echo(arg: #{scalar_type_name}): #{scalar_type_name}
-        }
-      EOS
+      schema.on_root_query_type do |t|
+        t.field "echo", scalar_type_name do |f|
+          f.argument "arg", scalar_type_name
+        end
+      end
     end)
 
     @query = <<~QUERY

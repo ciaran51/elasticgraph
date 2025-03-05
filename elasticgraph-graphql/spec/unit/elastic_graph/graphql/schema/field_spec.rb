@@ -155,22 +155,23 @@ module ElasticGraph
             }.to raise_error(Errors::NotFoundError, a_string_including("No enum value named bogus_DESC"))
           end
 
-          it "raises an error if a sort enum value lacks `sort_field` in the runtime metadata" do
-            schema = define_schema do |s|
+          it "raises an error if a sort enum value is omitted from runtime metadata (e.g. because it lacks a `sort_field`)" do
+            # `reload_schema_artifacts: true` is necessary to cause the runtime metadata to get pruned
+            # and put it into the state we are exercising here.
+            schema = define_schema(reload_schema_artifacts: true) do |s|
               s.object_type "Photo" do |t|
                 t.field "id", "ID!"
-                t.index "photos"
               end
 
-              s.raw_sdl <<~EOS
-                enum PhotoSort {
-                  invalid_photo_sort_DESC
-                }
+              s.enum_type "PhotoSort" do |t|
+                t.value "invalid_photo_sort_DESC"
+              end
 
-                type Query {
-                  photos(order_by: [PhotoSort!]): [Photo!]!
-                }
-              EOS
+              s.on_root_query_type do |f|
+                f.field "photos", "[Photo!]!" do |f|
+                  f.argument "order_by", "[PhotoSort!]"
+                end
+              end
             end
 
             field = schema.field_named("Query", "photos")
@@ -279,16 +280,22 @@ module ElasticGraph
         describe "#args_to_schema_form" do
           let(:field) do
             define_schema do |s|
-              s.raw_sdl <<~EOS
-                input Nested {
-                  fooBar_bazzDazz: Int
-                  nested: Nested
-                }
+              s.object_type "Nested1" do |t|
+                t.field "fooBar_bazzDazz", "Int"
+                t.field "nested", "Nested2"
+              end
 
-                type Query {
-                  foo(camelCaseField: Int, maybe_set_to_null: String, nested: Nested): Int
-                }
-              EOS
+              s.object_type "Nested2" do |t|
+                t.field "fooBar_bazzDazz", "Int"
+              end
+
+              s.on_root_query_type do |t|
+                t.field "foo", "Int" do |f|
+                  f.argument "camelCaseField", "Int"
+                  f.argument "maybe_set_to_null", "String"
+                  f.argument "nested", "Nested1FilterInput"
+                end
+              end
             end.field_named("Query", "foo")
           end
 

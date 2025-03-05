@@ -70,7 +70,21 @@ target :elasticgraph_gems do
     elasticgraph-schema_definition/lib/elastic_graph/schema_definition/schema_elements/union_type.rb
   ])
 
-  library "logger", "time", "json", "base64", "date", "digest", "pathname", "fileutils", "uri", "forwardable", "shellwords", "tempfile", "did_you_mean", "delegate"
+  library "logger",
+    "base64",
+    "date",
+    "delegate",
+    "did_you_mean",
+    "digest",
+    "fileutils",
+    "forwardable",
+    "json",
+    "pathname",
+    "shellwords",
+    "tmpdir",
+    "tempfile",
+    "time",
+    "uri"
 
   configure_code_diagnostics(::Steep::Diagnostic::Ruby.all_error) do |config|
     # Setting these to :hint for now, as some branches are unreachable by steep

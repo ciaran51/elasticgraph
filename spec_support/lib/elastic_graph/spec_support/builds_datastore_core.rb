@@ -31,6 +31,7 @@ module ElasticGraph
       schema_artifacts_directory: nil,
       schema_artifacts: nil,
       datastore_backend: nil,
+      reload_schema_artifacts: false,
       **config_overrides,
       &customize_config
     )
@@ -59,6 +60,7 @@ module ElasticGraph
             schema_element_name_overrides: schema_element_name_overrides,
             derived_type_name_formats: derived_type_name_formats,
             enum_value_overrides_by_type: enum_value_overrides_by_type,
+            reload_schema_artifacts: reload_schema_artifacts,
             &schema_definition
           )
         elsif schema_artifacts_directory

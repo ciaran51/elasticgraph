@@ -180,11 +180,10 @@ module ElasticGraph
 
         it "logs the full sanitized query with exception details if executing the query triggers an exception" do
           self.schema_artifacts = generate_schema_artifacts do |schema|
-            schema.raw_sdl <<~EOS
-              type Query {
-                foo: Int
-              }
-            EOS
+            schema.on_root_query_type do |t|
+              t.default_graphql_resolver = nil
+              t.field "foo", "Int"
+            end
           end
 
           query_string = <<~EOS
@@ -368,12 +367,10 @@ module ElasticGraph
         context "when the schema has been customized (as in an extension like elasticgraph-apollo)" do
           before(:context) do
             self.schema_artifacts = generate_schema_artifacts do |schema|
-              schema.on_built_in_types do |type|
-                if type.name == "Query"
-                  type.field "multiply", "Int" do |f|
-                    f.argument("operands", "Operands!")
-                    f.resolver = :multiply
-                  end
+              schema.on_root_query_type do |type|
+                type.field "multiply", "Int" do |f|
+                  f.argument("operands", "Operands!")
+                  f.resolver = :multiply
                 end
               end
 

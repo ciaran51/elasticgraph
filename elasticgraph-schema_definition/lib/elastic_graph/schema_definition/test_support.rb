@@ -7,8 +7,9 @@
 # frozen_string_literal: true
 
 require "elastic_graph/errors"
-require "elastic_graph/schema_definition/api"
 require "elastic_graph/schema_artifacts/runtime_metadata/schema_element_names"
+require "elastic_graph/schema_definition/api"
+require "elastic_graph/schema_definition/schema_artifact_manager"
 
 module ElasticGraph
   module SchemaDefinition
@@ -27,6 +28,7 @@ module ElasticGraph
         derived_type_name_formats: {},
         type_name_overrides: {},
         enum_value_overrides_by_type: {},
+        reload_schema_artifacts: false,
         output: nil,
         &block
       )
@@ -43,6 +45,7 @@ module ElasticGraph
           derived_type_name_formats: derived_type_name_formats,
           type_name_overrides: type_name_overrides,
           enum_value_overrides_by_type: enum_value_overrides_by_type,
+          reload_schema_artifacts: reload_schema_artifacts,
           output: output,
           &block
         )
@@ -56,6 +59,7 @@ module ElasticGraph
         derived_type_name_formats: {},
         type_name_overrides: {},
         enum_value_overrides_by_type: {},
+        reload_schema_artifacts: false,
         output: nil
       )
         api = API.new(
@@ -75,7 +79,23 @@ module ElasticGraph
           api.json_schema_version json_schema_version
         end
 
-        api.results
+        # :nocov: -- the else branch and code past this aren't used by tests in elasticgraph-schema_definition.
+        return api.results unless reload_schema_artifacts
+
+        # Reloading the schema artifacts takes extra time that we don't usually want to spend (so it's opt-in)
+        # but it can be useful in some cases because there is a bit of extra pruning/validation that it applies.
+        tmp_dir = ::Dir.mktmpdir
+        artifacts_manager = SchemaDefinition::SchemaArtifactManager.new(
+          schema_definition_results: api.results,
+          schema_artifacts_directory: tmp_dir,
+          enforce_json_schema_version: false,
+          output: ::StringIO.new
+        )
+
+        artifacts_manager.dump_artifacts
+
+        SchemaArtifacts::FromDisk.new(tmp_dir, :graphql)
+        # :nocov:
       end
 
       DOC_COMMENTS = (
