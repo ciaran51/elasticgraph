@@ -26,11 +26,11 @@ gems:
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: aws-sdk-cloudwatch
-  version: 1.111.0
+  version: 1.112.0
   source:
     type: rubygems
 - name: aws-sdk-core
-  version: 3.219.0
+  version: 3.220.0
   source:
     type: rubygems
 - name: aws-sdk-kms
