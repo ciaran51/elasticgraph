@@ -181,8 +181,9 @@ can be used in your publishing system to validate the indexing payloads or for c
 
 ## Resources
 
-- **ElasticGraph Documentation**: [{{ '/docs/main' | absolute_url }}]({{ '/docs/main' | relative_url }})
-- **GraphQL Introduction**: [https://graphql.org/learn/](https://graphql.org/learn/)
+- **[ElasticGraph Query API Documentation]({% link query-api.md %})**
+- **[ElasticGraph Ruby API Documentation]({{ '/docs/' | append: site.data.doc_versions.latest_version | relative_url }})**
+- **[GraphQL Introduction](https://graphql.org/learn/)**
 
 ## Feedback
 
