@@ -45,18 +45,16 @@ module ApolloTestImpl
     # `Query` type to add the required fields.
     #
     # [^1]: https://github.com/apollographql/apollo-federation-subgraph-compatibility/blob/2.0.0/COMPATIBILITY.md#products-schema-to-be-implemented-by-library-maintainers
-    schema.on_built_in_types do |type|
-      if type.name == "Query"
-        type.field "product", "Product" do |f|
-          f.argument "id", "ID!"
-          f.resolver = :product
-        end
+    schema.on_root_query_type do |type|
+      type.field "product", "Product" do |f|
+        f.argument "id", "ID!"
+        f.resolver = :product
+      end
 
-        type.field "deprecatedProduct", "DeprecatedProduct" do |f|
-          f.argument "sku", "String!"
-          f.argument "package", "String!"
-          f.directive "deprecated", reason: "Use product query instead"
-        end
+      type.field "deprecatedProduct", "DeprecatedProduct" do |f|
+        f.argument "sku", "String!"
+        f.argument "package", "String!"
+        f.directive "deprecated", reason: "Use product query instead"
       end
     end
 

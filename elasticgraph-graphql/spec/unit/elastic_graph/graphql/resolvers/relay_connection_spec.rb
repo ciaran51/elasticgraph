@@ -28,14 +28,10 @@ module ElasticGraph
                 end
               end
 
-              # One test relies on `widgets_non_relay`, which isn't defined by default on `Query` so we define it here.
-              schema.raw_sdl <<~EOS
-                type Query {
-                  widgets: WidgetConnection!
-                  widget_aggregations: WidgetAggregationConnection!
-                  widgets_non_relay: [Widget!]!
-                }
-              EOS
+              schema.on_root_query_type do |t|
+                # One test relies on `widgets_non_relay`, which isn't defined by default on `Query` so we define it here.
+                t.field "widgets_non_relay", "[Widget!]!"
+              end
             end
           end
 

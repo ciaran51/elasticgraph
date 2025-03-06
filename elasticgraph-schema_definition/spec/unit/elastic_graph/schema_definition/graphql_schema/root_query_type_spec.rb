@@ -380,10 +380,8 @@ module ElasticGraph
               t.index "people"
             end
 
-            api.on_built_in_types do |t|
-              if t.name == "Query"
-                t.field "time", "String"
-              end
+            api.on_root_query_type do |t|
+              t.field "time", "String"
             end
           end
 
@@ -391,18 +389,35 @@ module ElasticGraph
           expect(type_names.grep(/\AQuery/)).to eq ["Query"]
         end
 
-        it "can be overridden via `raw_sdl` to support ElasticGraph tests that require a custom `Query` type" do
-          query_type_def = <<~EOS.strip
-            type Query {
-              foo: Int
-            }
-          EOS
+        it "can be customized using `on_root_query_type`" do
+          available_field_names = []
 
-          result = define_schema do |schema|
-            schema.raw_sdl query_type_def
+          result = define_schema do |api|
+            api.object_type "BeforeType" do |t|
+              t.field "id", "ID"
+              t.index "before_type"
+            end
+
+            api.on_root_query_type do |t|
+              t.directive "deprecated", reason: "for testing"
+              available_field_names.concat(t.graphql_fields_by_name.keys)
+            end
+
+            api.object_type "AfterType" do |t|
+              t.field "id", "ID"
+              t.index "after_type"
+            end
           end
 
-          expect(type_def_from(result, "Query")).to eq(query_type_def)
+          expect(type_def_from(result, "Query")).to start_with 'type Query @deprecated(reason: "for testing") {'
+
+          # demonstrate that the block has access to all root query fields, even those defined after the block.
+          expect(available_field_names).to contain_exactly(
+            correctly_cased("after_types"),
+            correctly_cased("after_type_aggregations"),
+            correctly_cased("before_types"),
+            correctly_cased("before_type_aggregations")
+          )
         end
       end
     end

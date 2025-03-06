@@ -24,22 +24,27 @@ module ElasticGraph
         before(:context) do
           self.schema_artifacts_by_first_name = ::Hash.new do |hash, first_name|
             hash[first_name] = generate_schema_artifacts do |schema|
-              schema.raw_sdl <<~EOS
-                type Person {
-                  name(truncate_to: Int): String
-                  last_name: String
-                  age: Int
-                  #{first_name}: String
-                  birth_date: String
-                  birthDate: String
-                  favorite_quote(truncate_to: Int, foo_bar_bazz: Int): String
-                  favorite_quote2(trunc_to: Int): String
-                }
+              schema.object_type "Person" do |t|
+                t.field "name", "String" do |f|
+                  f.argument "truncate_to", "Int"
+                end
+                t.field "last_name", "String"
+                t.field "age", "Int"
+                t.field first_name, "String"
+                t.field "birth_date", "String"
+                t.field "birthDate", "String"
+                t.field "favorite_quote", "String" do |f|
+                  f.argument "truncate_to", "Int"
+                  f.argument "foo_bar_bazz", "Int"
+                end
+                t.field "favorite_quote2", "String" do |f|
+                  f.argument "trunc_to", "Int"
+                end
+              end
 
-                type Query {
-                  person: Person
-                }
-              EOS
+              schema.on_root_query_type do |t|
+                t.field "person", "Person"
+              end
             end
           end
         end

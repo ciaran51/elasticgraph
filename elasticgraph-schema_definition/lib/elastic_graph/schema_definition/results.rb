@@ -114,10 +114,6 @@ module ElasticGraph
       end
 
       def define_root_graphql_type
-        # Some of our tests need to define their own root `Query` type, so here we avoid
-        # generating `Query` if an sdl part exists that already defines it.
-        return if state.sdl_parts.flat_map { |sdl| sdl.lines }.any? { |line| line.start_with?("type Query") }
-
         state.api.object_type "Query" do |query_type|
           query_type.documentation "The query entry point for the entire schema."
 
