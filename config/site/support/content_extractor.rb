@@ -35,6 +35,7 @@ module ElasticGraph
         next if %w[frames.html file_list.html class_list.html method_list.html].include?(File.basename(file))
 
         title, content = extract_content(file)
+        next if content.empty?
 
         # Generate URL with /docs/version/ prefix
         relative_path = file.sub(dir.to_s, "")
@@ -69,6 +70,7 @@ module ElasticGraph
 
         # Clean up the content
         text_content = main_content.gsub(/\s+/, " ").strip
+        next if text_content.empty?
 
         # Get the title
         title = doc.css("h1, h2").first&.text&.strip || doc.title
@@ -83,6 +85,28 @@ module ElasticGraph
         }
       end
     end
+
+    # Common YARD-generated phrases that we want to exclude from search indexing
+    YARD_PHRASES_TO_REMOVE = [
+      /Generated on.*?by yard.*?ruby.*?\)\./,
+      "Overview",
+      /This (?:class|method|module|constant) is part of a private API\. You should avoid using this (?:class|method|module|constant) if possible, as it may be removed or be changed in the future\./,
+      /This (?:class|method|module|constant) is private\./,
+      /This is a private (?:class|method|module|constant)\./,
+      "Returns:",
+      "Returns — ",
+      /(see .+? for more details)/,  # Regex to match cross-references
+      "Implementation from",
+      "Implementation detail:",
+      "Source:",
+      "File:",
+      "Defined in:",
+      /(also: #[a-zA-Z_]+)/,  # Regex to match "also: #method_name" references
+      "View source",
+      "Toggle source",
+      "Toggle Docs",
+      "Permalink"
+    ].freeze
 
     def extract_content(file_path)
       content = File.read(file_path)
@@ -101,7 +125,13 @@ module ElasticGraph
       # Combine and clean up the text
       content = [main_content, method_details].join(" ")
       content.gsub!(/\s+/, " ") # normalize whitespace
-      content.gsub!(/Generated on.*?by yard.*?ruby.*?\)\./, "") # remove YARD generation timestamp
+
+      # Remove common YARD-generated phrases
+      YARD_PHRASES_TO_REMOVE.each do |phrase|
+        content.gsub!(phrase, "")
+      end
+
+      content.gsub!(/\s+/, " ") # normalize whitespace again after removals
       content.strip!
 
       # Get the title

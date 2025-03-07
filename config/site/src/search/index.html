@@ -14,7 +14,7 @@ title: Search
 window.store = {};
 
 {% for doc in site.data.searchable_content %}
-    window.store["{{ doc.url | slugify }}"] = {
+    window.store["{{ doc.url }}"] = {
         "title": {{ doc.title | jsonify }},
         "content": {{ doc.content | jsonify }},
         "url": "{{ site.baseurl }}{{ doc.url | xml_escape }}"
