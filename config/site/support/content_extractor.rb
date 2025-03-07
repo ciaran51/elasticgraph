@@ -1,0 +1,115 @@
+# Copyright 2024 Block, Inc.
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
+#
+# frozen_string_literal: true
+
+require "nokogiri"
+
+module ElasticGraph
+  class ContentExtractor
+    def initialize(jekyll_site_dir:, docs_dir:)
+      @jekyll_site_dir = jekyll_site_dir
+      @docs_dir = docs_dir
+    end
+
+    def extract_searchable_content
+      latest_docs_version = Dir.entries(@docs_dir).grep(/^v/)
+        .max_by { |v| Gem::Version.new(v.delete_prefix("v")) }
+
+      puts "Indexing API docs from latest version: #{latest_docs_version}"
+
+      api_docs_content = process_docs_directory(@docs_dir / latest_docs_version, latest_docs_version)
+      markdown_content = process_markdown_pages
+
+      api_docs_content + markdown_content
+    end
+
+    private
+
+    def process_docs_directory(dir, version)
+      Dir.glob(File.join(dir, "**", "*.html")).filter_map do |file|
+        next if file.include?("/css/") || file.include?("/js/")
+        next if %w[frames.html file_list.html class_list.html method_list.html].include?(File.basename(file))
+
+        title, content = extract_content(file)
+
+        # Generate URL with /docs/version/ prefix
+        relative_path = file.sub(dir.to_s, "")
+        url = "/docs/#{version}#{relative_path}"
+
+        {
+          "title" => "API Documentation - #{title}",
+          "url" => url,
+          "content" => content
+        }
+      end
+    end
+
+    # Process markdown pages
+    def process_markdown_pages
+      # Now process the rendered HTML files
+      Dir.glob(File.join(@jekyll_site_dir, "**", "*.html")).filter_map do |file|
+        # Skip files we don't want to index
+        next if file.include?("/css/") || file.include?("/js/")
+        next if %w[frames.html file_list.html class_list.html method_list.html].include?(File.basename(file))
+        next if file.include?("/docs/") # Skip API docs, we handle those separately
+
+        # Get the rendered content
+        content = File.read(file)
+        doc = Nokogiri::HTML(content)
+
+        # Remove navigation elements, scripts, etc
+        doc.css("nav, script, style, footer").remove
+
+        # Get just the main content
+        main_content = doc.css("main").text
+
+        # Clean up the content
+        text_content = main_content.gsub(/\s+/, " ").strip
+
+        # Get the title
+        title = doc.css("h1, h2").first&.text&.strip || doc.title
+
+        # Get the relative URL
+        relative_path = file.sub(@jekyll_site_dir.to_s, "").delete_suffix("index.html")
+
+        {
+          "title" => title,
+          "url" => relative_path,
+          "content" => text_content
+        }
+      end
+    end
+
+    def extract_content(file_path)
+      content = File.read(file_path)
+      doc = Nokogiri::HTML(content)
+
+      # Remove script, style, and line number elements
+      doc.css("script, style").remove
+
+      # Get the main content without line numbers and source code
+      doc.css(".line-numbers, .line, .source_code, .file").remove
+      main_content = doc.css("#main").text
+
+      # Get method details - just the signatures and docstrings
+      method_details = doc.css(".method_details .method_signature, .method_details .docstring").text
+
+      # Combine and clean up the text
+      content = [main_content, method_details].join(" ")
+      content.gsub!(/\s+/, " ") # normalize whitespace
+      content.gsub!(/Generated on.*?by yard.*?ruby.*?\)\./, "") # remove YARD generation timestamp
+      content.strip!
+
+      # Get the title
+      title = doc.css("title").text.strip
+      title = title.split(" - ").first if title.include?(" - ")
+      title = title.sub(/\s*— Documentation by YARD.*$/, "") # Remove YARD suffix
+
+      [title, content]
+    end
+  end
+end

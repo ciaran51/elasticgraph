@@ -8,6 +8,7 @@
 
 # Note: we need to avoid loading anything here except rake and standard library things, because
 # our release workflow loads this with a minimal Gemfile that lacks most of our dependencies.
+require "yaml"
 require "pathname"
 require "rake/tasklib"
 
@@ -124,17 +125,29 @@ module ElasticGraph
           end
         end
 
-        common_jekyll_args = [
-          "--source #{SITE_SOURCE_DIR}",
-          "--destination #{JEKYLL_SITE_DIR}",
-          "--baseUrl /elasticgraph",
-          "--strict-front-matter",
-          "--trace"
-        ].join(" ")
-
         desc "Build Jekyll site with freshly generated YARD documentation"
-        task build: [:build_docs, :build_css, "examples:compile_queries"] do
-          sh "bundle exec jekyll build #{common_jekyll_args}"
+        task build: [:build_docs, :build_css, "examples:compile_queries", :extract_searchable_content] do
+          # First Jekyll build to get the API docs in place
+          run_jekyll :build
+        end
+
+        desc "Extracts the site's searchable content"
+        task extract_searchable_content: [:build_docs] do
+          require_relative "support/content_extractor"
+
+          # Build Jekyll content so that we have parsable HTML to extarct content from.
+          # (We couldn't figure out a way to extract the rendered content within Jekyll itself).
+          run_jekyll :build
+
+          extractor = ContentExtractor.new(jekyll_site_dir: JEKYLL_SITE_DIR, docs_dir: DOCS_DIR)
+          searchable_content = extractor.extract_searchable_content
+          searchable_content_file = JEKYLL_DATA_DIR / "searchable_content.yaml"
+
+          puts "Writing searchable content from #{searchable_content.size} pages to #{searchable_content_file}."
+
+          # Write to data file
+          ::FileUtils.mkdir_p(JEKYLL_DATA_DIR)
+          ::File.write(searchable_content_file, ::YAML.dump(searchable_content))
         end
 
         desc "Build YARD docs and create versioned archive"
@@ -179,7 +192,7 @@ module ElasticGraph
         end
 
         desc "Serve Jekyll site locally"
-        task serve: [:build_docs, :build_css, "examples:compile_queries"] do
+        task serve: [:build_docs, :build_css, "examples:compile_queries", :extract_searchable_content] do
           require "filewatcher"
 
           # Regenerate the YARD docs anytime we change anything.
@@ -217,7 +230,7 @@ module ElasticGraph
             end
           end
 
-          sh "bundle exec jekyll serve #{common_jekyll_args}"
+          run_jekyll :serve
         end
 
         desc "Validates the markdown of the website"
@@ -354,6 +367,18 @@ module ElasticGraph
 
     def yard_cmd(subcmd)
       "bundle exec yard #{subcmd} #{YARD_DOC_OPTS}"
+    end
+
+    COMMON_JEKYLL_ARGS = [
+      "--source #{SITE_SOURCE_DIR}",
+      "--destination #{JEKYLL_SITE_DIR}",
+      "--baseUrl /elasticgraph",
+      "--strict-front-matter",
+      "--trace"
+    ].join(" ")
+
+    def run_jekyll(subcmd)
+      sh "bundle exec jekyll #{subcmd} #{COMMON_JEKYLL_ARGS}"
     end
   end
 end

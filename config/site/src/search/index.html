@@ -1,0 +1,263 @@
+---
+layout: default
+title: Search
+---
+
+<div class="search-container">
+    <input type="text" id="search-input" placeholder="Search...">
+    <ul id="search-results"></ul>
+</div>
+
+<script src="https://unpkg.com/lunr/lunr.js"></script>
+<script>
+// Initialize the store with pre-processed content
+window.store = {};
+
+{% for doc in site.data.searchable_content %}
+    window.store["{{ doc.url | slugify }}"] = {
+        "title": {{ doc.title | jsonify }},
+        "content": {{ doc.content | jsonify }},
+        "url": "{{ site.baseurl }}{{ doc.url | xml_escape }}"
+    };
+{% endfor %}
+
+(function() {
+    function highlightText(text, term) {
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function displaySearchResults(results, store) {
+        const searchResults = document.getElementById('search-results');
+        if (results.length) {
+            let appendString = '';
+
+            for (let i = 0; i < Math.min(results.length, 20); i++) {
+                let item = store[results[i].ref];
+                let preview = item.content;
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+                // Find all matches in the content
+                const matches = [...preview.toLowerCase().matchAll(searchTerm)];
+                if (matches.length > 0) {
+                    // Take a larger snippet around the first match
+                    const matchIndex = matches[0].index;
+                    const startIndex = Math.max(0, matchIndex - 200);
+                    const endIndex = Math.min(preview.length, matchIndex + 400);
+
+                    // Add ellipsis if we're not at the start/end
+                    preview = (startIndex > 0 ? '... ' : '') +
+                            preview.substring(startIndex, endIndex) +
+                            (endIndex < preview.length ? ' ...' : '');
+                } else {
+                    // No direct match found (might be matching title), show first 600 chars
+                    preview = preview.substring(0, 600) + ' ...';
+                }
+
+                // Highlight all search terms in the preview
+                const terms = searchTerm.split(/\s+/);
+                terms.forEach(term => {
+                    if (term) {
+                        preview = highlightText(preview, term);
+                    }
+                });
+
+                appendString += '<li class="result-item">';
+                appendString += '<a href="' + item.url + '" class="no-underline hover:underline"><h3>' + highlightText(item.title, searchTerm) + '</h3></a>';
+                appendString += '<p class="preview">' + preview + '</p>';
+                appendString += '<p class="url">' + item.url + '</p>';
+                appendString += '</li>';
+            }
+
+            if (results.length > 20) {
+                appendString += '<li class="more-results">Showing top 20 results of ' + results.length + ' total matches</li>';
+            }
+
+            searchResults.innerHTML = appendString;
+        } else {
+            searchResults.innerHTML = '<li class="no-results">No results found</li>';
+        }
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+
+            if (pair[0] === variable) {
+                return decodeURIComponent(pair[1].replace(/\+/g, '%20'));
+            }
+        }
+    }
+
+    let searchTerm = getQueryVariable('query');
+
+    if (searchTerm) {
+        document.getElementById('search-input').setAttribute("value", searchTerm);
+
+        // Initialize lunr with the fields we want to search
+        var idx = lunr(function () {
+            this.field('id');
+            this.field('title', { boost: 10 });
+            this.field('content');
+
+            for (var key in window.store) {
+                this.add({
+                    'id': key,
+                    'title': window.store[key].title,
+                    'content': window.store[key].content
+                });
+            }
+        });
+
+        var results = idx.search(searchTerm);
+        displaySearchResults(results, window.store);
+    }
+
+    // Handle real-time search
+    document.getElementById('search-input').addEventListener('keyup', function() {
+        var searchTerm = this.value;
+
+        if (searchTerm) {
+            var idx = lunr(function () {
+                this.field('id');
+                this.field('title', { boost: 10 });
+                this.field('content');
+
+                for (var key in window.store) {
+                    this.add({
+                        'id': key,
+                        'title': window.store[key].title,
+                        'content': window.store[key].content
+                    });
+                }
+            });
+
+            var results = idx.search(searchTerm);
+            displaySearchResults(results, window.store);
+        } else {
+            document.getElementById('search-results').innerHTML = '';
+        }
+    });
+})();
+</script>
+
+<style>
+.search-container {
+    margin: 20px 0;
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0 20px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+}
+
+#search-results {
+    list-style-type: none;
+    padding: 0;
+}
+
+.result-item {
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.result-item:hover {
+    border-color: #ddd;
+    background-color: #f9f9f9;
+}
+
+.result-item h3 {
+    margin: 0 0 12px 0;
+    color: #2c5282;
+    font-size: 1.2em;
+}
+
+.result-item .preview {
+    margin: 12px 0;
+    color: #4a5568;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.result-item .url {
+    margin: 8px 0 0 0;
+    color: #718096;
+    font-size: 0.85em;
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+.more-results {
+    text-align: center;
+    padding: 10px;
+    color: #666;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+}
+
+mark {
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 0.1em 0.2em;
+    border-radius: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+    #search-input {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .result-item {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .result-item:hover {
+        background-color: #283141;
+        border-color: #4a5568;
+    }
+
+    .result-item h3 {
+        color: #90cdf4;
+    }
+
+    .result-item .preview {
+        color: #e2e8f0;
+    }
+
+    .result-item .url {
+        color: #a0aec0;
+    }
+
+    .no-results, .more-results {
+        color: #a0aec0;
+    }
+
+    mark {
+        background-color: #92400e;
+        color: #fef3c7;
+    }
+}
+</style>
