@@ -62,7 +62,7 @@ Confirm it works by running the following:
 
 {% highlight shell %}
 $ cd path/to/project
-$ bundle exec boot_locally
+$ bundle exec rake boot_locally
 {% endhighlight %}
 
 This will:
