@@ -170,20 +170,11 @@ module ElasticGraph
         require "elastic_graph/graphql/resolvers/nested_relationships"
         require "elastic_graph/graphql/resolvers/object"
 
-        get_record_field_value = Resolvers::GetRecordFieldValue.new(
-          schema_element_names: runtime_metadata.schema_element_names
-        )
-
-        nested_relationships = Resolvers::NestedRelationships.new(
-          schema_element_names: runtime_metadata.schema_element_names,
-          logger: logger
-        )
-
         {
-          get_record_field_value: get_record_field_value,
-          list_records: Resolvers::ListRecords.new,
-          nested_relationships: nested_relationships,
-          object: Resolvers::Object.new
+          get_record_field_value: Resolvers::GetRecordFieldValue.new(elasticgraph_graphql: self, config: {}),
+          list_records: Resolvers::ListRecords.new(elasticgraph_graphql: self, config: {}),
+          nested_relationships: Resolvers::NestedRelationships.new(elasticgraph_graphql: self, config: {}),
+          object: Resolvers::Object.new(elasticgraph_graphql: self, config: {})
         }
       end
     end

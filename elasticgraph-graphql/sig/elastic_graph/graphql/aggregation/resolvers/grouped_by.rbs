@@ -26,7 +26,7 @@ module ElasticGraph
         end
 
         class GroupedBy < GroupedBySupertype
-          include GraphQL::Resolvers::_Resolver
+          include GraphQL::Resolvers::_Resolvable
         end
       end
     end

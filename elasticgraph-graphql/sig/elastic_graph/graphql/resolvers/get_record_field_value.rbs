@@ -3,10 +3,6 @@ module ElasticGraph
     module Resolvers
       class GetRecordFieldValue
         include _Resolver
-
-        def initialize: (
-          schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
-        ) -> void
       end
     end
   end

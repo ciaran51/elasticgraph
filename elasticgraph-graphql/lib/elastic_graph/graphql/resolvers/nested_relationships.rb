@@ -18,12 +18,12 @@ module ElasticGraph
       #
       # Most of the logic for this lives in ElasticGraph::Schema::RelationJoin.
       class NestedRelationships
-        def initialize(schema_element_names:, logger:)
-          @schema_element_names = schema_element_names
-          @logger = logger
+        def initialize(elasticgraph_graphql:, config:)
+          @schema_element_names = elasticgraph_graphql.runtime_metadata.schema_element_names
+          @logger = elasticgraph_graphql.logger
         end
 
-        def resolve(object:, field:, context:, lookahead:, **)
+        def resolve(field:, object:, args:, context:, lookahead:)
           log_warning = ->(**options) { log_field_problem_warning(field: field, **options) }
           join = field.relation_join
           id_or_ids = join.extract_id_or_ids_from(object, log_warning)

@@ -13,6 +13,10 @@ module ElasticGraph
       #
       # @private
       class ServiceFieldResolver
+        def initialize(elasticgraph_graphql:, config:)
+          # Nothing to initialize, but needs to be defined to satisfy the resolver interface.
+        end
+
         def resolve(field:, object:, args:, context:, lookahead:)
           {"sdl" => service_sdl(context.fetch(:elastic_graph_schema).graphql_schema)}
         end

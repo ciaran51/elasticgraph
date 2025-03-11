@@ -19,9 +19,9 @@ module ElasticGraph
       #
       # @private
       class EntitiesFieldResolver
-        def initialize(datastore_query_builder:, schema_element_names:)
-          @datastore_query_builder = datastore_query_builder
-          @schema_element_names = schema_element_names
+        def initialize(elasticgraph_graphql:, config:)
+          @datastore_query_builder = elasticgraph_graphql.datastore_query_builder
+          @schema_element_names = elasticgraph_graphql.runtime_metadata.schema_element_names
         end
 
         def resolve(field:, object:, args:, context:, lookahead:)

@@ -15,8 +15,8 @@ module ElasticGraph
     module Resolvers
       # Responsible for fetching a single field value from a document.
       class GetRecordFieldValue
-        def initialize(schema_element_names:)
-          @schema_element_names = schema_element_names
+        def initialize(elasticgraph_graphql:, config:)
+          @schema_element_names = elasticgraph_graphql.runtime_metadata.schema_element_names
         end
 
         def resolve(field:, object:, args:, context:, lookahead:)

@@ -61,31 +61,7 @@ end
 RSpec.shared_context "resolver support" do
   include ResolverHelperMethods
 
-  resolver_dependencies = described_class
-    .instance_method(:initialize)
-    .parameters
-    .map do |type, name|
-      if [:keyreq, :key].include?(type)
-        name
-      else
-        # :nocov: -- only executed when a resolver's `initialize` is incorrectly defined to use positional args instead of kw args
-        raise "All resolver init args must be keyword args, but `#{described_class}#initialize` accepts non-kwarg `#{name}`"
-        # :nocov:
-      end
-    end
-
-  subject(:resolver) do
-    dependencies = resolver_dependencies.each_with_object({}) do |dep_name, deps|
-      deps[dep_name] =
-        if dep_name == :schema_element_names
-          graphql.runtime_metadata.schema_element_names
-        else
-          graphql.public_send(dep_name)
-        end
-    end
-
-    described_class.new(**dependencies)
-  end
+  subject(:resolver) { described_class.new(elasticgraph_graphql: graphql, config: {}) }
 
   let(:query_adapter) do
     ElasticGraph::GraphQL::Resolvers::QueryAdapter.new(
