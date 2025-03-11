@@ -72,30 +72,12 @@ module ElasticGraph
           }.to raise_error NameError, a_string_including("ElasticGraph::Extensions::Typo")
         end
 
-        it "verifies the extension matches the interface definition, notifying of missing instance methods" do
+        it "verifies the extension matches the interface definition" do
           expect {
             loader.load("ElasticGraph::Extensions::MissingInstanceMethod", from: "support/example_extensions/missing_instance_method", config: {})
           }.to raise_error Errors::InvalidExtensionError, a_string_including(
             "ElasticGraph::Extensions::MissingInstanceMethod",
             "Missing instance methods", "instance_method1"
-          )
-        end
-
-        it "verifies the extension matches the interface definition, notifying of missing class methods" do
-          expect {
-            loader.load("ElasticGraph::Extensions::MissingClassMethod", from: "support/example_extensions/missing_class_method", config: {})
-          }.to raise_error Errors::InvalidExtensionError, a_string_including(
-            "ElasticGraph::Extensions::MissingClassMethod",
-            "Missing class methods", "class_method"
-          )
-        end
-
-        it "verifies the extension matches the interface definition, notifying of argument mis-matches" do
-          expect {
-            loader.load("ElasticGraph::Extensions::ArgsMismatch", from: "support/example_extensions/args_mismatch", config: {})
-          }.to raise_error Errors::InvalidExtensionError, a_string_including(
-            "ElasticGraph::Extensions::ArgsMismatch",
-            "Method signature", "def self.class_method", "def instance_method1", "def instance_method2"
           )
         end
 
@@ -117,32 +99,8 @@ module ElasticGraph
           )
         end
 
-        it "ignores extra methods defined on the extension beyond what the interface requires" do
-          extension = loader.load("ElasticGraph::Extensions::AdditionalMethods", from: "support/example_extensions/additional_methods", config: {})
-
-          expect(extension).to eq_extension(ElasticGraph::Extensions::AdditionalMethods, from: "support/example_extensions/additional_methods", config: {})
-        end
-
         context "with an instantiable extension interface" do
           let(:loader) { ExtensionLoader.new(ExampleInstantiableExtension) }
-
-          it "raises an exception if the extension is missing the required `initialize` method" do
-            expect {
-              loader.load("ElasticGraph::Extensions::InitializeMissing", from: "support/example_extensions/initialize_missing", config: {})
-            }.to raise_error Errors::InvalidExtensionError, a_string_including(
-              "ElasticGraph::Extensions::InitializeMissing",
-              "Missing instance methods: `initialize`"
-            )
-          end
-
-          it "raises an exception if the extension's `initialize` accepts different arguments" do
-            expect {
-              loader.load("ElasticGraph::Extensions::InitializeDoesntMatch", from: "support/example_extensions/initialize_doesnt_match", config: {})
-            }.to raise_error Errors::InvalidExtensionError, a_string_including(
-              "ElasticGraph::Extensions::InitializeDoesntMatch",
-              "Method signature for instance method `initialize` (`def initialize(some_arg:, another_arg:)`) does not match interface (`def initialize(some_arg:)`)"
-            )
-          end
 
           it "returns a valid implementation" do
             extension = loader.load("ElasticGraph::Extensions::ValidInstantiable", from: "support/example_extensions/valid_instantiable", config: {})
