@@ -53,7 +53,7 @@ module ElasticGraph
               current_players: [build(:player, name: "Bob")],
               formed_on: "1903-01-01",
               seasons: [
-                build(:team_season, year: 2020, record: build(:team_record, wins: 50, losses: 12, first_win_on: "2020-03-02", last_win_on: "2020-11-12"), notes: ["pandemic", "shortened"], started_at: "2020-01-15T12:02:20Z", players: [
+                build(:team_season, year: 2020, was_shortened: true, record: build(:team_record, wins: 50, losses: 12, first_win_on: "2020-03-02", last_win_on: "2020-11-12"), notes: ["pandemic", "shortened"], started_at: "2020-01-15T12:02:20Z", players: [
                   build(:player, name: "Ted", seasons: [build(:player_season, year: 2018, games_played: 20), build(:player_season, year: 2018, games_played: 30)]),
                   build(:player, name: "Dave", seasons: [build(:player_season, year: 2022, games_played: 10)])
                 ])
@@ -65,10 +65,10 @@ module ElasticGraph
               formed_on: "1883-01-01",
               current_players: [build(:player, name: "Kat", seasons: []), build(:player, name: "Sue", seasons: [])],
               seasons: [
-                build(:team_season, year: 2020, record: build(:team_record, wins: 30, losses: 22, first_win_on: "2020-05-02", last_win_on: "2020-12-12"), notes: ["pandemic", "covid"], started_at: "2020-01-15T12:02:20Z", players: []),
-                build(:team_season, year: 2021, record: build(:team_record, wins: nil, losses: 22, first_win_on: nil, last_win_on: "2021-12-12"), notes: [], started_at: "2021-02-16T13:03:30Z", players: []),
-                build(:team_season, year: 2022, record: build(:team_record, wins: 40, losses: 15, first_win_on: "2022-06-02", last_win_on: "2022-08-12"), notes: [], started_at: "2022-03-17T14:04:40Z", players: []),
-                build(:team_season, year: 2023, record: build(:team_record, wins: 50, losses: nil, first_win_on: "2023-01-06", last_win_on: nil), notes: [], started_at: "2023-04-18T12:02:59Z", players: [])
+                build(:team_season, year: 2020, was_shortened: true, record: build(:team_record, wins: 30, losses: 22, first_win_on: "2020-05-02", last_win_on: "2020-12-12"), notes: ["pandemic", "covid"], started_at: "2020-01-15T12:02:20Z", players: []),
+                build(:team_season, year: 2021, was_shortened: false, record: build(:team_record, wins: nil, losses: 22, first_win_on: nil, last_win_on: "2021-12-12"), notes: [], started_at: "2021-02-16T13:03:30Z", players: []),
+                build(:team_season, year: 2022, was_shortened: false, record: build(:team_record, wins: 40, losses: 15, first_win_on: "2022-06-02", last_win_on: "2022-08-12"), notes: [], started_at: "2022-03-17T14:04:40Z", players: []),
+                build(:team_season, year: 2023, was_shortened: false, record: build(:team_record, wins: 50, losses: nil, first_win_on: "2023-01-06", last_win_on: nil), notes: [], started_at: "2023-04-18T12:02:59Z", players: [])
               ]
             ),
             build(
@@ -77,7 +77,7 @@ module ElasticGraph
               formed_on: "1901-01-01",
               current_players: [build(:player, name: "Ed", seasons: []), build(:player, name: "Ty", seasons: [])],
               seasons: [
-                build(:team_season, year: 2019, record: build(:team_record, wins: 40, losses: 7, first_win_on: "2019-04-02", last_win_on: "2019-07-12"), notes: ["old rules"], started_at: "2019-01-15T12:02:20Z", players: [])
+                build(:team_season, year: 2019, was_shortened: false, record: build(:team_record, wins: 40, losses: 7, first_win_on: "2019-04-02", last_win_on: "2019-07-12"), notes: ["old rules"], started_at: "2019-01-15T12:02:20Z", players: [])
               ]
             ),
             build(
@@ -184,6 +184,13 @@ module ElasticGraph
             {"year" => 2021} => count_detail_of(1),
             {"year" => 2022} => count_detail_of(1),
             {"year" => 2023} => count_detail_of(1)
+          })
+
+          # Test a simple sub-aggregation grouping of one Boolean `terms` field
+          team_seasons_nodes = aggregate_season_counts_grouped_by("was_shortened")
+          expect(indexed_counts_from(team_seasons_nodes)).to eq({
+            {case_correctly("was_shortened") => true} => count_detail_of(2),
+            {case_correctly("was_shortened") => false} => count_detail_of(4)
           })
 
           # Test what happens if all grouped by fields are excluded via a directive.

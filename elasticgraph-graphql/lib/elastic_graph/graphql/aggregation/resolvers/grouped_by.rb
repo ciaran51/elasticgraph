@@ -19,7 +19,31 @@ module ElasticGraph
             return with(field_path: new_field_path) if field.type.object?
 
             bucket_entry = Support::HashUtil.verbose_fetch(bucket, "key")
-            Support::HashUtil.verbose_fetch(bucket_entry, FieldPathEncoder.encode(new_field_path.map(&:name_in_graphql_query)))
+            value = Support::HashUtil.verbose_fetch(bucket_entry, FieldPathEncoder.encode(new_field_path.map(&:name_in_graphql_query)))
+
+            if field.type.unwrap_fully.name == "Boolean"
+              work_around_terms_aggregation_boolean_value(value)
+            else
+              value
+            end
+          end
+
+          private
+
+          # Elasticsearch/OpenSearch generally return `true`/`false` for Boolean fields. However, there's one exception to that[^1]:
+          #
+          # > Aggregations like the terms aggregation use 1 and 0 for the key, and the strings "true" and "false" for the key_as_string.
+          #
+          # Since we get 0/1 in _only_ this one case, we translate it back to false/true here. While a bit hacky, there isn't a widespread
+          # need to handle Booleans like this in other places. It would be nice to apply this logic in the `NonCompositeGroupingAdapter`
+          # (since the `composite` aggregation used by the `CompositeGroupingAdapter` does not suffer from this issue!) but we don't have
+          # ready access to the field type there to know that 0/1 mean false/true.
+          #
+          # [^1]: https://www.elastic.co/guide/en/elasticsearch/reference/8.17/boolean.html
+          def work_around_terms_aggregation_boolean_value(value)
+            return false if value == 0
+            return true if value == 1
+            value
           end
         end
       end
