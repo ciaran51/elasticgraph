@@ -161,6 +161,8 @@ json_schema_version: 1
     required:
     - sponsorships_nested
     - sponsorships_object
+  Boolean:
+    type: boolean
   Color:
     type: string
     enum:
@@ -989,6 +991,13 @@ json_schema_version: 1
         ElasticGraph:
           type: "[DateTime!]!"
           nameInIndex: won_games_at
+      was_shortened:
+        anyOf:
+        - "$ref": "#/$defs/Boolean"
+        - type: 'null'
+        ElasticGraph:
+          type: Boolean
+          nameInIndex: was_shortened
       players_nested:
         type: array
         items:
@@ -1014,6 +1023,7 @@ json_schema_version: 1
     - count
     - started_at
     - won_games_at
+    - was_shortened
     - players_nested
     - players_object
   Untyped:
@@ -1283,6 +1293,13 @@ json_schema_version: 1
         ElasticGraph:
           type: Color
           nameInIndex: color
+      is_draft:
+        anyOf:
+        - "$ref": "#/$defs/Boolean"
+        - type: 'null'
+        ElasticGraph:
+          type: Boolean
+          nameInIndex: is_draft
       __typename:
         type: string
         const: WidgetOptions
@@ -1291,6 +1308,7 @@ json_schema_version: 1
     - size
     - the_size
     - color
+    - is_draft
   WidgetWorkspace:
     type: object
     properties:

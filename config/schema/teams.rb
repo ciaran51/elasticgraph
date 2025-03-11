@@ -121,6 +121,7 @@ ElasticGraph.define_schema do |schema|
     t.field "started_at_legacy", "DateTime", name_in_index: "started_at", graphql_only: true, legacy_grouping_schema: true
     t.field "won_games_at", "[DateTime!]!", singular: "won_game_at"
     t.field "won_games_at_legacy", "[DateTime!]!", singular: "won_game_at_legacy", name_in_index: "won_games_at", graphql_only: true, legacy_grouping_schema: true
+    t.field "was_shortened", "Boolean"
 
     t.field "players_nested", "[Player!]!" do |f|
       f.mapping type: "nested"

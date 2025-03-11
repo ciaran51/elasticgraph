@@ -108,6 +108,7 @@ module ElasticGraph
         "seasons_object|the_record|last_win_date" => 2,
         "seasons_object|the_record|loss_count" => 2,
         "seasons_object|the_record|win_count" => 2,
+        "seasons_object|was_shortened" => 2,
         "seasons_object|won_games_at" => 0,
         "seasons_object|year" => 2,
         "the_nested_fields|current_players" => 2,
