@@ -55,6 +55,7 @@ module ApolloTestImpl
         f.argument "sku", "String!"
         f.argument "package", "String!"
         f.directive "deprecated", reason: "Use product query instead"
+        f.resolver = :product
       end
     end
 

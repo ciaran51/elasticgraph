@@ -116,6 +116,7 @@ module ElasticGraph
       def define_root_graphql_type
         state.api.object_type "Query" do |query_type|
           query_type.documentation "The query entry point for the entire schema."
+          query_type.default_graphql_resolver = nil
 
           state.types_by_name.values.select(&:indexed?).sort_by(&:name).each do |type|
             # @type var indexed_type: Mixins::HasIndices & _Type

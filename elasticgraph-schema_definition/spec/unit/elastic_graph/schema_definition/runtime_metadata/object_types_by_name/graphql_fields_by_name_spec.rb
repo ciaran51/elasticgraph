@@ -39,23 +39,44 @@ module ElasticGraph
         })
       end
 
+      it "raises an error when a custom `Query` field lacks a resolver, as it won't be resolvable by elasticgraph-graphql" do
+        expect {
+          object_type_metadata_for "Query" do |s|
+            s.on_root_query_type do |t|
+              t.field "name", "String"
+            end
+          end
+        }.to raise_error Errors::SchemaError, a_string_including(
+          "`Query.name` needs a resolver. Fix by assigning a `resolver` on the field (`name`)."
+        )
+      end
+
+      it "raises an error when an object field field lacks a resolver, as it won't be resolvable by elasticgraph-graphql" do
+        expect {
+          object_type_metadata_for "Widget" do |s|
+            s.object_type "Widget" do |t|
+              t.default_graphql_resolver = nil
+              t.field "id", "ID" do |f|
+                f.resolver = nil
+              end
+            end
+          end
+        }.to raise_error Errors::SchemaError, a_string_including(
+          "`Widget.id` needs a resolver. Fix by assigning the `default_graphql_resolver` on the parent type (`Widget`) or a `resolver` on the field (`id`)."
+        )
+      end
+
       context "on a normal indexed type" do
         it "dumps the `name_in_index` of any fields" do
           metadata = object_type_metadata_for "Widget" do |s|
             s.object_type "Widget" do |t|
-              t.default_graphql_resolver = nil
               t.field "id", "ID"
               t.field "description", "String", name_in_index: "description_index"
               t.index "widgets"
             end
           end
 
-          expect(metadata.graphql_fields_by_name).to eq({
-            "description" => graphql_field_with(
-              name_in_index: "description_index",
-              relation: nil
-            )
-          })
+          expect(metadata.graphql_fields_by_name.fetch("description").name_in_index).to eq("description_index")
         end
 
         it "dumps the customized `name_in_index` on filter types, too, so that the query engine is made aware of the alternate name" do
@@ -78,22 +99,14 @@ module ElasticGraph
         it "honors `name_in_index` passed to `paginated_collection_field`" do
           metadata = object_types_by_name do |s|
             s.object_type "Widget" do |t|
-              t.default_graphql_resolver = nil
               t.field "id", "ID"
               t.paginated_collection_field "names", "String", name_in_index: "names2"
               t.index "widgets"
             end
           end
 
-          expected_graphql_fields_by_name = {
-            "names" => graphql_field_with(
-              name_in_index: "names2",
-              relation: nil
-            )
-          }
-
-          expect(metadata.fetch("Widget").graphql_fields_by_name).to eq(expected_graphql_fields_by_name)
-          expect(metadata.fetch("WidgetFilterInput").graphql_fields_by_name).to eq(expected_graphql_fields_by_name)
+          expect(metadata.fetch("Widget").graphql_fields_by_name.fetch("names").name_in_index).to eq("names2")
+          expect(metadata.fetch("WidgetFilterInput").graphql_fields_by_name.fetch("names").name_in_index).to eq("names2")
         end
       end
 

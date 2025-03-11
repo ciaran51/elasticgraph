@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/constants"
+require "elastic_graph/errors"
 require "elastic_graph/schema_definition/indexing/update_target_factory"
 
 module ElasticGraph
@@ -272,8 +273,21 @@ module ElasticGraph
           graphql_fields_by_name.transform_values do |field|
             field_metadata = field.runtime_metadata_graphql_field
 
-            if default_graphql_resolver && !field_metadata.resolver
-              field_metadata.with(resolver: default_graphql_resolver)
+            if field_metadata.resolver.nil?
+              if default_graphql_resolver
+                field_metadata.with(resolver: default_graphql_resolver)
+              else
+                parent_type_option =
+                  if name == "Query"
+                    # With `Query`, we don't want to use the `default_graphql_resolver`. Each field should set its own resolver.
+                    ""
+                  else
+                    "the `default_graphql_resolver` on the parent type (`#{name}`) or "
+                  end
+
+                raise Errors::SchemaError, "`#{name}.#{field.name}` needs a resolver. Fix by assigning #{parent_type_option}" \
+                  "a `resolver` on the field (`#{field.name}`)."
+              end
             else
               field_metadata
             end
