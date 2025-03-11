@@ -181,6 +181,7 @@ module ElasticGraph
           register_enum_types
           register_date_and_time_grouped_by_types
           register_standard_elastic_graph_types
+          register_standard_graphql_resolvers
         end
 
         private
@@ -1366,6 +1367,28 @@ module ElasticGraph
               v.documentation "Sunday."
             end
           end
+        end
+
+        def register_standard_graphql_resolvers
+          require(require_path = "elastic_graph/graphql/resolvers/get_record_field_value")
+          schema_def_api.register_graphql_resolver :get_record_field_value,
+            GraphQL::Resolvers::GetRecordFieldValue,
+            defined_at: require_path
+
+          require(require_path = "elastic_graph/graphql/resolvers/list_records")
+          schema_def_api.register_graphql_resolver :list_records,
+            GraphQL::Resolvers::ListRecords,
+            defined_at: require_path
+
+          require(require_path = "elastic_graph/graphql/resolvers/nested_relationships")
+          schema_def_api.register_graphql_resolver :nested_relationships,
+            GraphQL::Resolvers::NestedRelationships,
+            defined_at: require_path
+
+          require(require_path = "elastic_graph/graphql/resolvers/object")
+          schema_def_api.register_graphql_resolver :object,
+            GraphQL::Resolvers::Object,
+            defined_at: require_path
         end
 
         def define_date_grouping_arguments(grouping_field, omit_timezone: false)

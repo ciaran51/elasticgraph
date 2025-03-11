@@ -1498,6 +1498,19 @@ enum_types_by_name:
         sort_field:
           direction: desc
           field_path: widget.id
+graphql_resolvers_by_name:
+  get_record_field_value:
+    extension_name: ElasticGraph::GraphQL::Resolvers::GetRecordFieldValue
+    require_path: elastic_graph/graphql/resolvers/get_record_field_value
+  list_records:
+    extension_name: ElasticGraph::GraphQL::Resolvers::ListRecords
+    require_path: elastic_graph/graphql/resolvers/list_records
+  nested_relationships:
+    extension_name: ElasticGraph::GraphQL::Resolvers::NestedRelationships
+    require_path: elastic_graph/graphql/resolvers/nested_relationships
+  object:
+    extension_name: ElasticGraph::GraphQL::Resolvers::Object
+    require_path: elastic_graph/graphql/resolvers/object
 index_definitions_by_name:
   addresses:
     current_sources:

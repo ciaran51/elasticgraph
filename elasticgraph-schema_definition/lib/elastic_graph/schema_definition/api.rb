@@ -290,6 +290,39 @@ module ElasticGraph
         nil
       end
 
+      # Registers a GraphQL resolver that will be loaded and used by `elasticgraph-graphql`. To use a GraphQL resolver you have
+      # registered, set a field's `resolver` to the name you provide when registering your resolver.
+      #
+      # @param name [Symbol] unique name of the resolver
+      # @param klass [Class] resolver class
+      # @param defined_at [String] the `require` path of the resolver
+      # @param resolver_config [Hash<Symbol, Object>] configuration options for the resolver, to support parameterized resolvers
+      # @return [void]
+      #
+      # @example Register a custom resolver for use by a custom `Query` field
+      #   # In `add_resolver.rb`:
+      #   class AddResolver
+      #     # ...
+      #   end
+      #
+      #   # In `config/schema.rb`:
+      #   ElasticGraph.define_schema do |schema|
+      #     require(resolver_path = "add_resolver")
+      #     schema.register_graphql_resolver :add, AddResolver, defined_at: resolver_path
+      #
+      #     schema.on_root_query_type do |t|
+      #       t.field "add", "Int" do |f|
+      #         f.argument "x", "Int!"
+      #         f.argument "y", "Int!"
+      #         f.resolver = :add
+      #       end
+      #     end
+      #   end
+      def register_graphql_resolver(name, klass, defined_at:, **resolver_config)
+        @state.graphql_resolvers_by_name[name] = SchemaArtifacts::RuntimeMetadata::Extension.new(klass, defined_at, resolver_config)
+        nil
+      end
+
       # @return the results of the schema definition
       def results
         @results ||= Results.new(@state)

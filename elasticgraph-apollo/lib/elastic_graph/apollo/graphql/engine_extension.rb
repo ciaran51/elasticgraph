@@ -8,7 +8,7 @@
 
 module ElasticGraph
   module Apollo
-    # Namespace for all Apollo GraphQL enging logic.
+    # Namespace for all Apollo GraphQL engine logic.
     #
     # @note This module provides no public types or APIs. It will be used automatically when you use
     #   {SchemaDefinition::APIExtension} as a schema definition extension module.
@@ -18,19 +18,6 @@ module ElasticGraph
       #
       # @private
       module EngineExtension
-        # @private
-        def named_graphql_resolvers
-          @named_graphql_resolvers ||= begin
-            require "elastic_graph/apollo/graphql/entities_field_resolver"
-            require "elastic_graph/apollo/graphql/service_field_resolver"
-
-            apollo_entities = EntitiesFieldResolver.new(elasticgraph_graphql: self, config: {})
-            apollo_service = ServiceFieldResolver.new(elasticgraph_graphql: self, config: {})
-
-            super.merge({apollo_entities: apollo_entities, apollo_service: apollo_service})
-          end
-        end
-
         # @private
         def graphql_gem_plugins
           @graphql_gem_plugins ||= begin

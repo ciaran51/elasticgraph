@@ -164,18 +164,8 @@ module ElasticGraph
 
     # @private
     def named_graphql_resolvers
-      @named_graphql_resolvers ||= begin
-        require "elastic_graph/graphql/resolvers/get_record_field_value"
-        require "elastic_graph/graphql/resolvers/list_records"
-        require "elastic_graph/graphql/resolvers/nested_relationships"
-        require "elastic_graph/graphql/resolvers/object"
-
-        {
-          get_record_field_value: Resolvers::GetRecordFieldValue.new(elasticgraph_graphql: self, config: {}),
-          list_records: Resolvers::ListRecords.new(elasticgraph_graphql: self, config: {}),
-          nested_relationships: Resolvers::NestedRelationships.new(elasticgraph_graphql: self, config: {}),
-          object: Resolvers::Object.new(elasticgraph_graphql: self, config: {})
-        }
+      @named_graphql_resolvers ||= runtime_metadata.graphql_resolvers_by_name.transform_values do |ext|
+        (_ = ext.extension_class).new(elasticgraph_graphql: self, config: ext.extension_config)
       end
     end
 

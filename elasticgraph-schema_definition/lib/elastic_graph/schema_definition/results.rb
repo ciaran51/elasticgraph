@@ -231,6 +231,7 @@ module ElasticGraph
           index_definitions_by_name: index_definitions_by_name,
           schema_element_names: state.schema_elements,
           graphql_extension_modules: state.graphql_extension_modules,
+          graphql_resolvers_by_name: state.graphql_resolvers_by_name,
           static_script_ids_by_scoped_name: STATIC_SCRIPT_REPO.script_ids_by_scoped_name
         )
       end

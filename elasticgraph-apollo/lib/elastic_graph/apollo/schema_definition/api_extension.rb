@@ -379,6 +379,12 @@ module ElasticGraph
               t.subtypes(*entity_type_names)
             end
           end
+
+          require(require_path = "elastic_graph/apollo/graphql/entities_field_resolver")
+          register_graphql_resolver :apollo_entities, GraphQL::EntitiesFieldResolver, defined_at: require_path
+
+          require(require_path = "elastic_graph/apollo/graphql/service_field_resolver")
+          register_graphql_resolver :apollo_service, GraphQL::ServiceFieldResolver, defined_at: require_path
         end
 
         def apollo_object_type(name, &block)
