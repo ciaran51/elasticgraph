@@ -16,23 +16,17 @@
 # @private
 module ApolloTestImplementationExtension
   def named_graphql_resolvers
-    @named_graphql_resolvers ||= super.merge({product: product_field_resolver})
-  end
-
-  def product_field_resolver
-    @product_field_resolver ||= ProductFieldResolver.new(
-      datastore_query_builder: datastore_query_builder,
-      product_index_def: datastore_core.index_definitions_by_name.fetch("products"),
-      datastore_router: datastore_search_router
-    )
+    @named_graphql_resolvers ||= super.merge({
+      product: ProductFieldResolver.new(elasticgraph_graphql: self, config: {})
+    })
   end
 
   # @private
   class ProductFieldResolver
-    def initialize(datastore_query_builder:, product_index_def:, datastore_router:)
-      @datastore_query_builder = datastore_query_builder
-      @product_index_def = product_index_def
-      @datastore_router = datastore_router
+    def initialize(elasticgraph_graphql:, config:)
+      @datastore_query_builder = elasticgraph_graphql.datastore_query_builder
+      @product_index_def = elasticgraph_graphql.datastore_core.index_definitions_by_name.fetch("products")
+      @datastore_router = elasticgraph_graphql.datastore_search_router
     end
 
     def resolve(field:, object:, args:, context:, lookahead:)

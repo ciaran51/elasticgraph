@@ -4,11 +4,6 @@ module ElasticGraph
       class EntitiesFieldResolver
         include ::ElasticGraph::GraphQL::Resolvers::_Resolver
 
-        def initialize: (
-          datastore_query_builder: ::ElasticGraph::GraphQL::DatastoreQuery::Builder,
-          schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
-        ) -> void
-
         private
 
         @datastore_query_builder: ::ElasticGraph::GraphQL::DatastoreQuery::Builder

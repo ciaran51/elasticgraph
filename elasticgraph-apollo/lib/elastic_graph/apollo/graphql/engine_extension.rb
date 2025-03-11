@@ -24,12 +24,8 @@ module ElasticGraph
             require "elastic_graph/apollo/graphql/entities_field_resolver"
             require "elastic_graph/apollo/graphql/service_field_resolver"
 
-            apollo_entities = EntitiesFieldResolver.new(
-              datastore_query_builder: datastore_query_builder,
-              schema_element_names: runtime_metadata.schema_element_names
-            )
-
-            apollo_service = ServiceFieldResolver.new
+            apollo_entities = EntitiesFieldResolver.new(elasticgraph_graphql: self, config: {})
+            apollo_service = ServiceFieldResolver.new(elasticgraph_graphql: self, config: {})
 
             super.merge({apollo_entities: apollo_entities, apollo_service: apollo_service})
           end

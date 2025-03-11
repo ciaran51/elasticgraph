@@ -3,7 +3,7 @@ module ElasticGraph
     module Resolvers
       type fieldArgs = ::Hash[::String, untyped]
 
-      interface _Resolver
+      interface _Resolvable
         def resolve: (
           field: Schema::Field,
           object: untyped,
@@ -11,6 +11,15 @@ module ElasticGraph
           args: fieldArgs,
           lookahead: ::GraphQL::Execution::Lookahead
         ) -> untyped
+      end
+
+      interface _Resolver
+        def initialize: (
+          elasticgraph_graphql: GraphQL,
+          config: ::Hash[::String, untyped]
+        ) -> void
+
+        include _Resolvable
       end
     end
   end
