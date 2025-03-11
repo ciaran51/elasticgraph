@@ -21,6 +21,10 @@ module ElasticGraph
 
         include _Resolvable
       end
+
+      class Interface
+        include _Resolver
+      end
     end
   end
 end

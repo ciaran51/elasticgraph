@@ -14,6 +14,7 @@ require "elastic_graph/schema_artifacts/runtime_metadata/object_type"
 require "elastic_graph/schema_artifacts/runtime_metadata/scalar_type"
 require "elastic_graph/schema_artifacts/runtime_metadata/schema"
 require "elastic_graph/spec_support/runtime_metadata_support"
+require "elastic_graph/spec_support/example_extensions/graphql_resolvers"
 require "support/example_extensions/graphql_extension_modules"
 require "support/example_extensions/indexing_preparers"
 require "support/example_extensions/scalar_coercion_adapters"
@@ -142,6 +143,7 @@ module ElasticGraph
               overrides: {"any_of" => "or"}
             ),
             graphql_extension_modules: [graphql_extension_module1],
+            graphql_resolvers_by_name: {resolver1: graphql_resolver1(limit: 10)},
             static_script_ids_by_scoped_name: {
               "filter/time_of_day" => "time_of_day_4474b200b6a00f385ed49f7c9669cbf3"
             }
@@ -274,6 +276,13 @@ module ElasticGraph
               "extension_name" => "ElasticGraph::SchemaArtifacts::GraphQLExtensionModule1",
               "require_path" => "support/example_extensions/graphql_extension_modules"
             }],
+            "graphql_resolvers_by_name" => {
+              "resolver1" => {
+                "extension_name" => "ElasticGraph::GraphQLResolver1",
+                "require_path" => "elastic_graph/spec_support/example_extensions/graphql_resolvers",
+                "extension_config" => {"limit" => 10}
+              }
+            },
             "static_script_ids_by_scoped_name" => {
               "filter/time_of_day" => "time_of_day_4474b200b6a00f385ed49f7c9669cbf3"
             }
@@ -341,6 +350,7 @@ module ElasticGraph
             index_definitions_by_name: {},
             schema_element_names: SchemaElementNames.from_hash({"form" => "camelCase"}),
             graphql_extension_modules: [],
+            graphql_resolvers_by_name: {},
             static_script_ids_by_scoped_name: {}
           )
         end

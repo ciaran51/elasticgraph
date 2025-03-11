@@ -22,10 +22,12 @@ module ElasticGraph
     doctest.before do
       @original_pwd = ::Dir.pwd
       @tmp_dir = ::Dir.mktmpdir
+      @original_load_path = $LOAD_PATH.dup
       ::Dir.chdir(@tmp_dir)
     end
 
     doctest.after do
+      $LOAD_PATH.replace(@original_load_path)
       ::Dir.chdir(@original_pwd)
       ::FileUtils.rm_rf(@tmp_dir)
     end
@@ -107,6 +109,11 @@ module ElasticGraph
           end
         end
       EOS
+    end
+
+    doctest.before "ElasticGraph::SchemaDefinition::API#register_graphql_resolver" do
+      $LOAD_PATH << ::Dir.pwd
+      ::File.write("add_resolver.rb", "")
     end
 
     [

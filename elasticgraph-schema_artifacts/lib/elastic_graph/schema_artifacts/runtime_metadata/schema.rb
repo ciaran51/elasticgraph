@@ -27,6 +27,7 @@ module ElasticGraph
         :index_definitions_by_name,
         :schema_element_names,
         :graphql_extension_modules,
+        :graphql_resolvers_by_name,
         :static_script_ids_by_scoped_name
       )
         OBJECT_TYPES_BY_NAME = "object_types_by_name"
@@ -35,6 +36,7 @@ module ElasticGraph
         INDEX_DEFINITIONS_BY_NAME = "index_definitions_by_name"
         SCHEMA_ELEMENT_NAMES = "schema_element_names"
         GRAPHQL_EXTENSION_MODULES = "graphql_extension_modules"
+        GRAPHQL_RESOLVERS_BY_NAME = "graphql_resolvers_by_name"
         STATIC_SCRIPT_IDS_BY_NAME = "static_script_ids_by_scoped_name"
 
         def self.from_hash(hash, for_context:)
@@ -56,16 +58,29 @@ module ElasticGraph
 
           schema_element_names = SchemaElementNames.from_hash(hash.fetch(SCHEMA_ELEMENT_NAMES))
 
-          loader = ExtensionLoader.new(Module.new)
+          extension_loader = ExtensionLoader.new(Module.new)
           graphql_extension_modules =
             if for_context == :graphql
               hash[GRAPHQL_EXTENSION_MODULES]&.map do |ext_mod_hash|
-                Extension.load_from_hash(ext_mod_hash, via: loader)
+                Extension.load_from_hash(ext_mod_hash, via: extension_loader)
               end || []
             else
-              # Avoid loading GraphQL extrnsion modules if we're not in a GraphQL context. We can't count
+              # Avoid loading GraphQL extension modules if we're not in a GraphQL context. We can't count
               # on the extension modules even being available to load in other contexts.
               [] # : ::Array[Extension]
+            end
+
+          graphql_resolvers_by_name =
+            if for_context == :graphql
+              require "elastic_graph/graphql/resolvers/interface"
+              resolver_loader = ExtensionLoader.new(GraphQL::Resolvers::Interface)
+              hash[GRAPHQL_RESOLVERS_BY_NAME]&.to_h do |name, resolver_hash|
+                [name.to_sym, Extension.load_from_hash(resolver_hash, via: resolver_loader)]
+              end || {}
+            else
+              # Avoid loading GraphQL resolvers if we're not in a GraphQL context. We can't count
+              # on the resolvers even being available to load in other contexts.
+              {} # : ::Hash[::Symbol, Extension]
             end
 
           static_script_ids_by_scoped_name = hash[STATIC_SCRIPT_IDS_BY_NAME] || {}
@@ -77,6 +92,7 @@ module ElasticGraph
             index_definitions_by_name: index_definitions_by_name,
             schema_element_names: schema_element_names,
             graphql_extension_modules: graphql_extension_modules,
+            graphql_resolvers_by_name: graphql_resolvers_by_name,
             static_script_ids_by_scoped_name: static_script_ids_by_scoped_name
           )
         end
@@ -86,6 +102,7 @@ module ElasticGraph
             # Keys here are ordered alphabetically; please keep them that way.
             ENUM_TYPES_BY_NAME => HashDumper.dump_hash(enum_types_by_name, &:to_dumpable_hash),
             GRAPHQL_EXTENSION_MODULES => graphql_extension_modules.map(&:to_dumpable_hash),
+            GRAPHQL_RESOLVERS_BY_NAME => HashDumper.dump_hash(graphql_resolvers_by_name.transform_keys(&:to_s), &:to_dumpable_hash),
             INDEX_DEFINITIONS_BY_NAME => HashDumper.dump_hash(index_definitions_by_name, &:to_dumpable_hash),
             OBJECT_TYPES_BY_NAME => HashDumper.dump_hash(object_types_by_name, &:to_dumpable_hash),
             SCALAR_TYPES_BY_NAME => HashDumper.dump_hash(scalar_types_by_name, &:to_dumpable_hash),

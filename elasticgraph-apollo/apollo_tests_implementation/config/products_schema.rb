@@ -59,6 +59,9 @@ module ApolloTestImpl
       end
     end
 
+    require_relative "../lib/product_resolver"
+    schema.register_graphql_resolver :product, ProductResolver, defined_at: "./lib/product_resolver"
+
     schema.object_type "Product" do |t|
       t.directive "custom" unless federation_version == "2.0"
       t.apollo_key fields: "sku package"

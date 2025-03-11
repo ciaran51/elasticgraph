@@ -19,6 +19,7 @@ module ElasticGraph
           index_definitions_by_name: {},
           schema_element_names: SchemaElementNames.new(form: :snake_case),
           graphql_extension_modules: [],
+          graphql_resolvers_by_name: {},
           static_script_ids_by_scoped_name: {}
         )
           Schema.new(
@@ -28,6 +29,7 @@ module ElasticGraph
             index_definitions_by_name: index_definitions_by_name,
             schema_element_names: schema_element_names,
             graphql_extension_modules: graphql_extension_modules,
+            graphql_resolvers_by_name: graphql_resolvers_by_name,
             static_script_ids_by_scoped_name: static_script_ids_by_scoped_name
           )
         end
@@ -174,6 +176,10 @@ module ElasticGraph
 
         def graphql_extension_module1
           Extension.new(GraphQLExtensionModule1, "support/example_extensions/graphql_extension_modules", {})
+        end
+
+        def graphql_resolver1(**config)
+          Extension.new(GraphQLResolver1, "elastic_graph/spec_support/example_extensions/graphql_resolvers", config)
         end
       end
     end

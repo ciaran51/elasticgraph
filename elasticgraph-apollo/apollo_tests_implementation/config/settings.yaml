@@ -27,8 +27,5 @@ indexer:
 graphql:
   default_page_size: 50
   max_page_size: 500
-  extension_modules:
-  - require_path: ./lib/test_implementation_extension
-    extension_name: ApolloTestImplementationExtension
 schema_artifacts:
   directory: config/schema/artifacts
