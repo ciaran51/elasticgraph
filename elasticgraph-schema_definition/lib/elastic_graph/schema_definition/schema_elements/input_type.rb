@@ -41,10 +41,14 @@ module ElasticGraph
         end
 
         def runtime_metadata(extra_update_targets)
+          graphql_input_fields_by_name = graphql_fields_by_name.transform_values do |field|
+            field.runtime_metadata_graphql_field.with(resolver: nil)
+          end
+
           SchemaArtifacts::RuntimeMetadata::ObjectType.new(
             update_targets: extra_update_targets,
             index_definition_names: [],
-            graphql_fields_by_name: graphql_fields_by_name.transform_values(&:runtime_metadata_graphql_field),
+            graphql_fields_by_name: graphql_input_fields_by_name,
             elasticgraph_category: nil,
             source_type: nil,
             graphql_only_return_type: false

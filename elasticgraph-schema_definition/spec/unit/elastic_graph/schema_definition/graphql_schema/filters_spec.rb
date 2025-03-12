@@ -632,6 +632,24 @@ module ElasticGraph
           EOS
         end
 
+        it "avoids copying the `resolver` into the filter field" do
+          results = []
+
+          define_schema do |api|
+            api.object_type "Widget" do |t|
+              t.field "id", "ID!" do |f|
+                f.resolver = :list_records
+
+                f.customize_filter_field do |ff|
+                  results << ff.resolver
+                end
+              end
+            end
+          end
+
+          expect(results.uniq).to eq [nil]
+        end
+
         it "references a `*ListFilterInput` from a list-of-text-strings field on the filter type" do
           result = define_schema do |api|
             api.object_type "Widget" do |t|
