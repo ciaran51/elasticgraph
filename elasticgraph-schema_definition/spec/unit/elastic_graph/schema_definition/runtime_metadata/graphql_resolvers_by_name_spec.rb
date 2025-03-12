@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require_relative "runtime_metadata_support"
+require "elastic_graph/errors"
 require "elastic_graph/spec_support/example_extensions/graphql_resolvers"
 
 module ElasticGraph
@@ -40,6 +41,82 @@ module ElasticGraph
         end
 
         expect(result.fetch(:resolver1)).to eq(graphql_resolver1(param: 15))
+      end
+
+      it "verifies the registered resolver to confirm it confirms to the resolver interface" do
+        expect {
+          graphql_resolvers_by_name do |schema|
+            schema.register_graphql_resolver :missing_args,
+              MissingArgumentsResolver,
+              defined_at: "elastic_graph/spec_support/example_extensions/graphql_resolvers"
+          end
+        }.to raise_error Errors::InvalidExtensionError
+      end
+
+      it "verifies that all referenced resolvers exist" do
+        expect {
+          graphql_resolvers_by_name do |schema|
+            schema.on_root_query_type do |t|
+              t.field "foo1", "Int" do |f|
+                f.resolver = :resolver1
+              end
+
+              t.field "foo2", "Int" do |f|
+                f.resolver = :get_record_field_value
+              end
+
+              t.field "foo3", "Int" do |f|
+                f.resolver = :resolver1
+              end
+            end
+
+            schema.object_type "MyType" do |t|
+              t.field "bar", "Int" do |f|
+                f.resolver = :resolver2
+              end
+            end
+          end
+        }.to raise_error Errors::SchemaError do |error|
+          expect(error.message).to eq <<~EOS
+            GraphQL resolver `:resolver1` is unregistered but is assigned to 2 field(s):
+
+              - Query.foo1
+              - Query.foo3
+
+            GraphQL resolver `:resolver2` is unregistered but is assigned to 1 field(s):
+
+              - MyType.bar
+
+            To continue, register the named resolvers with `schema.register_graphql_resolver`
+            or update the fields listed above to use one of the other registered resolvers:
+
+              - :get_record_field_value
+              - :list_records
+              - :nested_relationships
+              - :object
+          EOS
+        end
+      end
+
+      it "warns when resolvers are registered but never used" do
+        output = StringIO.new
+
+        graphql_resolvers_by_name(output: output) do |schema|
+          schema.register_graphql_resolver :resolver1,
+            GraphQLResolver1,
+            defined_at: "elastic_graph/spec_support/example_extensions/graphql_resolvers"
+
+          schema.register_graphql_resolver :resolver2,
+            GraphQLResolver2,
+            defined_at: "elastic_graph/spec_support/example_extensions/graphql_resolvers"
+        end
+
+        expect(output.string).to eq(<<~EOS)
+          WARNING: 2 GraphQL resolver(s) have been registered but are unused:
+            - resolver1
+            - resolver2
+          These resolvers can be removed.
+        EOS
       end
 
       def graphql_resolvers_by_name(...)

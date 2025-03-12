@@ -233,7 +233,7 @@ module ElasticGraph
           graphql_extension_modules: state.graphql_extension_modules,
           graphql_resolvers_by_name: state.graphql_resolvers_by_name,
           static_script_ids_by_scoped_name: STATIC_SCRIPT_REPO.script_ids_by_scoped_name
-        )
+        ).tap { |rm| verify_runtime_metadata(rm) }
       end
 
       # Builds a map, keyed by object type name, of extra `update_targets` that have been generated
@@ -352,6 +352,53 @@ module ElasticGraph
           end
           .sort_by(&:name)
           .to_h { |type| [type.name, type.to_indexing_field_type] }
+      end
+
+      def verify_runtime_metadata(runtime_metadata)
+        registered_resolvers = runtime_metadata.graphql_resolvers_by_name
+
+        fields_by_resolvers = runtime_metadata
+          .object_types_by_name
+          .each_with_object(::Hash.new { |h, k| h[k] = [] }) do |(type_name, type), hash|
+            type.graphql_fields_by_name.each do |field_name, field|
+              if (resolver = field.resolver)
+                hash[resolver] << "#{type_name}.#{field_name}"
+              end
+            end
+          end
+
+        unused_resolvers = registered_resolvers.except(*fields_by_resolvers.keys).reject do |name, res|
+          # Ignore our built-in resolvers..
+          res.require_path.start_with?("elastic_graph/graphql/resolvers/")
+        end.keys
+
+        unless unused_resolvers.empty?
+          state.output.puts <<~EOS
+            WARNING: #{unused_resolvers.size} GraphQL resolver(s) have been registered but are unused:
+              - #{unused_resolvers.sort.join("\n  - ")}
+            These resolvers can be removed.
+          EOS
+        end
+
+        undefined_resolvers = fields_by_resolvers.except(*registered_resolvers.keys)
+        unless undefined_resolvers.empty?
+          resolver_errors = undefined_resolvers.sort_by(&:first).map do |resolver, fields|
+            <<~EOS.strip
+              GraphQL resolver `#{resolver.inspect}` is unregistered but is assigned to #{fields.size} field(s):
+
+                - #{fields.sort.join("\n  - ")}
+            EOS
+          end
+
+          raise Errors::SchemaError, <<~EOS
+            #{resolver_errors.join("\n\n")}
+
+            To continue, register the named resolvers with `schema.register_graphql_resolver`
+            or update the fields listed above to use one of the other registered resolvers:
+
+              - #{registered_resolvers.keys.map(&:inspect).sort.join("\n  - ")}
+          EOS
+        end
       end
 
       def strip_trailing_whitespace(string)

@@ -16,26 +16,26 @@ module ElasticGraph
       it "defaults the `resolver` of each individual field to the parent type's `default_graphql_resolver`" do
         metadata = object_type_metadata_for "Widget" do |s|
           s.object_type "Widget" do |t|
-            t.default_graphql_resolver = :parent_default
+            t.default_graphql_resolver = :list_records
 
             t.field "id", "ID"
             t.field "description", "String"
 
             t.field "name", "String" do |f|
-              f.resolver = :other1
+              f.resolver = :get_record_field_value
             end
 
             t.field "title", "String" do |f|
-              f.resolver = :other2
+              f.resolver = :object
             end
           end
         end
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "id" => graphql_field_with(name_in_index: "id", resolver: :parent_default),
-          "description" => graphql_field_with(name_in_index: "description", resolver: :parent_default),
-          "name" => graphql_field_with(name_in_index: "name", resolver: :other1),
-          "title" => graphql_field_with(name_in_index: "title", resolver: :other2)
+          "id" => graphql_field_with(name_in_index: "id", resolver: :list_records),
+          "description" => graphql_field_with(name_in_index: "description", resolver: :list_records),
+          "name" => graphql_field_with(name_in_index: "name", resolver: :get_record_field_value),
+          "title" => graphql_field_with(name_in_index: "title", resolver: :object)
         })
       end
 
