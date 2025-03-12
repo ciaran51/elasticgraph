@@ -27,6 +27,10 @@ module ElasticGraph
 
         class GroupedBy < GroupedBySupertype
           include GraphQL::Resolvers::_Resolvable
+
+          private
+
+          def work_around_terms_aggregation_boolean_value: (untyped) -> untyped
         end
       end
     end

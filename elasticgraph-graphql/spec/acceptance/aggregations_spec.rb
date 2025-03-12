@@ -80,9 +80,9 @@ module ElasticGraph
           # and also to support grouping on a numeric field (position x and y)
           component = build(:component, position: {x: 10, y: 20}),
           build(:component, position: {x: 10, y: 30}),
-          widget1 = build(:widget, name: "w100", amount_cents: 100, options: build(:widget_options, size: "SMALL", color: "BLUE"), cost_currency: "USD", created_at: "2019-06-01T12:02:20Z", release_timestamps: ["2019-06-01T12:02:20Z", "2019-06-04T19:19:19Z"], components: [component], tags: [], fees: []),
-          build(:widget, name: "w200", amount_cents: 200, options: build(:widget_options, size: "SMALL", color: "RED"), cost_currency: "GBP", created_at: "2019-06-02T12:02:20Z", release_timestamps: ["2019-06-02T12:02:20Z"], tags: ["small", "red"], fees: ten_usd_and_cad),
-          build(:widget, name: "w300", amount_cents: 300, options: build(:widget_options, size: "MEDIUM", color: "RED"), cost_currency: "USD", created_at: "2019-06-01T13:03:30Z", release_timestamps: ["2019-06-01T13:03:30Z"], tags: ["medium", "red", "red"], fees: [])
+          widget1 = build(:widget, name: "w100", amount_cents: 100, options: build(:widget_options, size: "SMALL", color: "BLUE", is_draft: false), cost_currency: "USD", created_at: "2019-06-01T12:02:20Z", release_timestamps: ["2019-06-01T12:02:20Z", "2019-06-04T19:19:19Z"], components: [component], tags: [], fees: []),
+          build(:widget, name: "w200", amount_cents: 200, options: build(:widget_options, size: "SMALL", color: "RED", is_draft: true), cost_currency: "GBP", created_at: "2019-06-02T12:02:20Z", release_timestamps: ["2019-06-02T12:02:20Z"], tags: ["small", "red"], fees: ten_usd_and_cad),
+          build(:widget, name: "w300", amount_cents: 300, options: build(:widget_options, size: "MEDIUM", color: "RED", is_draft: false), cost_currency: "USD", created_at: "2019-06-01T13:03:30Z", release_timestamps: ["2019-06-01T13:03:30Z"], tags: ["medium", "red", "red"], fees: [])
         )
 
         # Verify that we can group on a list field (which groups by the individual values of that field)
@@ -258,6 +258,32 @@ module ElasticGraph
           {
             grouped_by => {
               "cost" => {"currency" => "GBP"}
+            },
+            aggregated_values => {
+              amount_cents => expected_aggregated_amounts_of(200),
+              "cost" => {amount_cents => expected_aggregated_amounts_of(200)}
+            },
+            "count" => 1
+          }
+        )
+
+        # Verify single grouping aggregation on a boolean field
+        aggregations = list_widgets_with_aggregations(amount_aggregation("options.is_draft"))
+
+        expect(aggregations).to contain_exactly(
+          {
+            grouped_by => {
+              "options" => {case_correctly("is_draft") => false}
+            },
+            aggregated_values => {
+              amount_cents => expected_aggregated_amounts_of(100, 300),
+              "cost" => {amount_cents => expected_aggregated_amounts_of(100, 300)}
+            },
+            "count" => 2
+          },
+          {
+            grouped_by => {
+              "options" => {case_correctly("is_draft") => true}
             },
             aggregated_values => {
               amount_cents => expected_aggregated_amounts_of(200),

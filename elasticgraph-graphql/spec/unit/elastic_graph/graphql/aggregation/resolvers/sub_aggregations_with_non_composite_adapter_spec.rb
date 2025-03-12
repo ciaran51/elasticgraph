@@ -163,7 +163,7 @@ module ElasticGraph
         end
 
         context "with grouping" do
-          it "resolves a sub-aggregation grouping on one non-date field" do
+          it "resolves a sub-aggregation grouping on one non-date, non-boolean field" do
             aggs = {
               "target:seasons_nested" => {
                 "meta" => outer_meta({"buckets_path" => ["seasons_nested.year"]}),
@@ -212,6 +212,60 @@ module ElasticGraph
                     {"count_detail" => {"approximate_value" => 2}, "grouped_by" => {"year" => 2020}},
                     {"count_detail" => {"approximate_value" => 1}, "grouped_by" => {"year" => 2019}},
                     {"count_detail" => {"approximate_value" => 1}, "grouped_by" => {"year" => 2022}}
+                  ]
+                }
+              }
+            }])
+          end
+
+          it "resolves a sub-aggregation grouping on one boolean field" do
+            aggs = {
+              "target:seasons_nested" => {
+                "meta" => outer_meta({"buckets_path" => ["seasons_nested.was_shortened"]}),
+                "doc_count" => 6,
+                "seasons_nested.was_shortened" => {
+                  "meta" => inner_terms_meta({"grouping_fields" => ["seasons_nested.was_shortened"], "key_path" => ["key"]}),
+                  "doc_count_error_upper_bound" => 0,
+                  "sum_other_doc_count" => 0,
+                  "buckets" => [
+                    {
+                      "key" => 0,
+                      "key_as_string" => "false",
+                      "doc_count" => 4,
+                      "doc_count_error_upper_bound" => 0
+                    },
+                    {
+                      "key" => 1,
+                      "key_as_string" => "true",
+                      "doc_count" => 2,
+                      "doc_count_error_upper_bound" => 0
+                    }
+                  ]
+                }
+              }.with_missing_value_bucket(0)
+            }
+
+            response = resolve_target_nodes(<<~QUERY, aggs: aggs)
+              target: team_aggregations {
+                nodes {
+                  sub_aggregations {
+                    seasons_nested {
+                      nodes {
+                        grouped_by { was_shortened }
+                        count_detail { approximate_value }
+                      }
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            expect(response).to eq([{
+              "sub_aggregations" => {
+                "seasons_nested" => {
+                  "nodes" => [
+                    {"count_detail" => {"approximate_value" => 4}, "grouped_by" => {"was_shortened" => false}},
+                    {"count_detail" => {"approximate_value" => 2}, "grouped_by" => {"was_shortened" => true}}
                   ]
                 }
               }
