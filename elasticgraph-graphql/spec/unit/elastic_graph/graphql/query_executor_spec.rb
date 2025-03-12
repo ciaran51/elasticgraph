@@ -368,7 +368,26 @@ module ElasticGraph
 
         context "when the schema has been customized (as in an extension like elasticgraph-apollo)" do
           before(:context) do
+            multiply_resolver = Class.new do
+              def initialize(elasticgraph_graphql:, config:)
+              end
+
+              def resolve(field:, object:, args:, context:, lookahead:)
+                [
+                  args.dig("operands", "x"),
+                  args.dig("operands", "y"),
+                  context[:additional_operand]
+                ].compact.reduce(:*)
+              end
+
+              def self.name
+                "MultiplyResolver"
+              end
+            end
+
             self.schema_artifacts = generate_schema_artifacts do |schema|
+              schema.register_graphql_resolver :multiply, multiply_resolver, defined_at: __FILE__
+
               schema.on_root_query_type do |type|
                 type.field "multiply", "Int" do |f|
                   f.argument("operands", "Operands!")
@@ -388,25 +407,7 @@ module ElasticGraph
             end
           end
 
-          let(:graphql) do
-            multiply_resolver = Class.new do
-              def resolve(field:, object:, args:, context:, lookahead:)
-                [
-                  args.dig("operands", "x"),
-                  args.dig("operands", "y"),
-                  context[:additional_operand]
-                ].compact.reduce(:*)
-              end
-            end.new
-
-            build_graphql(schema_artifacts: schema_artifacts, extension_modules: [
-              Module.new do
-                define_method :named_graphql_resolvers do
-                  @named_graphql_resolvers ||= super().merge({multiply: multiply_resolver})
-                end
-              end
-            ])
-          end
+          let(:graphql) { build_graphql(schema_artifacts: schema_artifacts) }
 
           it "allows an injected resolver to resolve the custom field" do
             query = <<~EOS

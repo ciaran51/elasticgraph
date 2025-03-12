@@ -14,4 +14,20 @@ module ElasticGraph
     def resolve(field:, object:, args:, context:, lookahead:)
     end
   end
+
+  class GraphQLResolver2
+    def initialize(elasticgraph_graphql:, config:)
+    end
+
+    def resolve(field:, object:, args:, context:, lookahead:)
+    end
+  end
+
+  class MissingArgumentsResolver
+    def initialize(elasticgraph_graphql:, config:)
+    end
+
+    def resolve(field:, object:, args:, context:)
+    end
+  end
 end

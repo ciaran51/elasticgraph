@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/errors"
+require "elastic_graph/graphql/resolvers/interface"
 require "elastic_graph/schema_artifacts/runtime_metadata/extension"
 require "elastic_graph/schema_definition/mixins/has_readable_to_s_and_inspect"
 require "elastic_graph/schema_definition/results"
@@ -302,7 +303,12 @@ module ElasticGraph
       # @example Register a custom resolver for use by a custom `Query` field
       #   # In `add_resolver.rb`:
       #   class AddResolver
-      #     # ...
+      #     def initialize(elasticgraph_graphql:, config:)
+      #     end
+      #
+      #     def resolve(field:, object:, args:, context:, lookahead:)
+      #       args.fetch("x") + args.fetch("y")
+      #     end
       #   end
       #
       #   # In `config/schema.rb`:
@@ -319,7 +325,9 @@ module ElasticGraph
       #     end
       #   end
       def register_graphql_resolver(name, klass, defined_at:, **resolver_config)
-        @state.graphql_resolvers_by_name[name] = SchemaArtifacts::RuntimeMetadata::Extension.new(klass, defined_at, resolver_config)
+        resolver = SchemaArtifacts::RuntimeMetadata::Extension.new(klass, defined_at, resolver_config)
+        resolver.verify_against(GraphQL::Resolvers::Interface)
+        @state.graphql_resolvers_by_name[name] = resolver
         nil
       end
 

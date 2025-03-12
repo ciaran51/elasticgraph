@@ -26,19 +26,26 @@ module ElasticGraph
 
     describe "#schema" do
       it "fails to load if the resolver for any fields cannot be found" do
-        graphql = build_graphql(schema_definition: ->(schema) {
-          schema.object_type "Widget" do |t|
-            t.field "id", "ID" do |f|
-              f.resolver = :unknown
+        graphql = build_graphql(
+          extension_modules: [Module.new {
+            def named_graphql_resolvers
+              super.except(:get_record_field_value)
             end
-            t.index "widgets"
-          end
-        })
+          }],
+          schema_definition: ->(schema) {
+            schema.object_type "Widget" do |t|
+              t.field "id", "ID" do |f|
+                f.resolver = :get_record_field_value
+              end
+              t.index "widgets"
+            end
+          }
+        )
 
         expect {
           graphql.schema
         }.to raise_error Errors::SchemaError, a_string_including(
-          "Resolver `unknown` (for `Widget.id`) cannot be found."
+          "Resolver `get_record_field_value`", "cannot be found."
         )
       end
     end
