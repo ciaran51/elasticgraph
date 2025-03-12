@@ -1750,6 +1750,8 @@ index_definitions_by_name:
         source: __self
       __counts.seasons_object|the_record|win_count:
         source: __self
+      __counts.seasons_object|was_shortened:
+        source: __self
       __counts.seasons_object|won_games_at:
         source: __self
       __counts.seasons_object|year:
@@ -2062,6 +2064,8 @@ index_definitions_by_name:
         source: __self
       nested_fields2.the_seasons.the_record.win_count:
         source: __self
+      nested_fields2.the_seasons.was_shortened:
+        source: __self
       nested_fields2.the_seasons.won_games_at:
         source: __self
       nested_fields2.the_seasons.year:
@@ -2202,6 +2206,8 @@ index_definitions_by_name:
         source: __self
       seasons_nested.the_record.win_count:
         source: __self
+      seasons_nested.was_shortened:
+        source: __self
       seasons_nested.won_games_at:
         source: __self
       seasons_nested.year:
@@ -2303,6 +2309,8 @@ index_definitions_by_name:
       seasons_object.the_record.loss_count:
         source: __self
       seasons_object.the_record.win_count:
+        source: __self
+      seasons_object.was_shortened:
         source: __self
       seasons_object.won_games_at:
         source: __self
@@ -2504,6 +2512,8 @@ index_definitions_by_name:
         source: __self
       the_nested_fields.the_seasons.the_record.win_count:
         source: __self
+      the_nested_fields.the_seasons.was_shortened:
+        source: __self
       the_nested_fields.the_seasons.won_games_at:
         source: __self
       the_nested_fields.the_seasons.year:
@@ -2647,6 +2657,8 @@ index_definitions_by_name:
         source: __self
       options.color:
         source: __self
+      options.is_draft:
+        source: __self
       options.size:
         source: __self
       options.the_sighs:
@@ -2658,6 +2670,8 @@ index_definitions_by_name:
       tags:
         source: __self
       the_opts.color:
+        source: __self
+      the_opts.is_draft:
         source: __self
       the_opts.size:
         source: __self
@@ -2820,6 +2834,10 @@ object_types_by_name:
       upper_bound:
         resolver: object
     graphql_only_return_type: true
+  BooleanListFilterInput:
+    graphql_fields_by_name:
+      count:
+        name_in_index: __counts
   ColorListFilterInput:
     graphql_fields_by_name:
       count:
@@ -4960,6 +4978,8 @@ object_types_by_name:
       started_at_legacy:
         name_in_index: started_at
         resolver: get_record_field_value
+      was_shortened:
+        resolver: get_record_field_value
       won_games_at:
         resolver: get_record_field_value
       won_games_at_legacy:
@@ -4982,6 +5002,8 @@ object_types_by_name:
         resolver: object
       started_at_legacy:
         name_in_index: started_at
+        resolver: object
+      was_shortened:
         resolver: object
       won_games_at:
         resolver: object
@@ -5022,6 +5044,8 @@ object_types_by_name:
         resolver: object
       started_at_legacy:
         name_in_index: started_at
+        resolver: object
+      was_shortened:
         resolver: object
       won_game_at:
         name_in_index: won_games_at
@@ -5774,6 +5798,8 @@ object_types_by_name:
     graphql_fields_by_name:
       color:
         resolver: get_record_field_value
+      is_draft:
+        resolver: get_record_field_value
       size:
         resolver: get_record_field_value
       the_size:
@@ -5782,6 +5808,8 @@ object_types_by_name:
   WidgetOptionsAggregatedValues:
     graphql_fields_by_name:
       color:
+        resolver: object
+      is_draft:
         resolver: object
       size:
         resolver: object
@@ -5795,6 +5823,8 @@ object_types_by_name:
   WidgetOptionsGroupedBy:
     graphql_fields_by_name:
       color:
+        resolver: object
+      is_draft:
         resolver: object
       size:
         resolver: object

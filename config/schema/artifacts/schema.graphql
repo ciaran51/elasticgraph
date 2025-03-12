@@ -451,6 +451,116 @@ type AggregationCountDetail {
   upper_bound: JsonSafeLong!
 }
 
+"""
+Input type used to specify filters on `Boolean` fields.
+
+Will match all documents if passed as an empty object (or as `null`).
+"""
+input BooleanFilterInput {
+  """
+  Matches records where any of the provided sub-filters evaluate to true.
+  This works just like an OR operator in SQL.
+
+  When `null` is passed, matches all documents.
+  When an empty list is passed, this part of the filter matches no documents.
+  """
+  any_of: [BooleanFilterInput!]
+
+  """
+  Matches records where the field value is equal to any of the provided values.
+  This works just like an IN operator in SQL.
+
+  When `null` is passed, matches all documents. When an empty list is passed,
+  this part of the filter matches no documents. When `null` is passed in the
+  list, this part of the filter matches records where the field value is `null`.
+  """
+  equal_to_any_of: [Boolean]
+
+  """
+  Matches records where the provided sub-filter evaluates to false.
+  This works just like a NOT operator in SQL.
+
+  When `null` or an empty object is passed, matches no documents.
+  """
+  not: BooleanFilterInput
+}
+
+"""
+Input type used to specify filters on elements of a `[Boolean]` field.
+
+Will match all documents if passed as an empty object (or as `null`).
+"""
+input BooleanListElementFilterInput {
+  """
+  Matches records where any of the provided sub-filters evaluate to true.
+  This works just like an OR operator in SQL.
+
+  When `null` is passed, matches all documents.
+  When an empty list is passed, this part of the filter matches no documents.
+  """
+  any_of: [BooleanListElementFilterInput!]
+
+  """
+  Matches records where the field value is equal to any of the provided values.
+  This works just like an IN operator in SQL.
+
+  When `null` is passed, matches all documents. When an empty list is passed,
+  this part of the filter matches no documents. When `null` is passed in the
+  list, this part of the filter matches records where the field value is `null`.
+  """
+  equal_to_any_of: [Boolean!]
+}
+
+"""
+Input type used to specify filters on `[Boolean]` fields.
+
+Will match all documents if passed as an empty object (or as `null`).
+"""
+input BooleanListFilterInput {
+  """
+  Matches records where all of the provided sub-filters evaluate to true. This works just like an AND operator in SQL.
+
+  Note: multiple filters are automatically ANDed together. This is only needed when you have multiple filters that can't
+  be provided on a single `BooleanListFilterInput` input because of collisions
+  between key names. For example, if you want to provide
+  multiple `any_satisfy: ...` filters, you could do `all_of: [{any_satisfy: ...}, {any_satisfy: ...}]`.
+
+  When `null` or an empty list is passed, matches all documents.
+  """
+  all_of: [BooleanListFilterInput!]
+
+  """
+  Matches records where any of the provided sub-filters evaluate to true.
+  This works just like an OR operator in SQL.
+
+  When `null` is passed, matches all documents.
+  When an empty list is passed, this part of the filter matches no documents.
+  """
+  any_of: [BooleanListFilterInput!]
+
+  """
+  Matches records where any of the list elements match the provided sub-filter.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  any_satisfy: BooleanListElementFilterInput
+
+  """
+  Used to filter on the number of non-null elements in this list field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  count: IntFilterInput
+
+  """
+  Matches records where the provided sub-filter evaluates to false.
+  This works just like a NOT operator in SQL.
+
+  When `null` or an empty object is passed, matches no documents.
+  """
+  not: BooleanListFilterInput
+}
+
 enum Color {
   BLUE
   GREEN
@@ -10529,6 +10639,7 @@ type TeamSeason {
   record: TeamRecord
   started_at: DateTime
   started_at_legacy: DateTime
+  was_shortened: Boolean
   won_games_at: [DateTime!]!
   won_games_at_legacy: [DateTime!]!
   year: Int
@@ -10567,6 +10678,11 @@ type TeamSeasonAggregatedValues {
   Computed aggregate values for the `started_at_legacy` field.
   """
   started_at_legacy: DateTimeAggregatedValues
+
+  """
+  Computed aggregate values for the `was_shortened` field.
+  """
+  was_shortened: NonNumericAggregatedValues
 
   """
   Computed aggregate values for the `won_games_at` field.
@@ -10657,6 +10773,13 @@ input TeamSeasonFieldsListFilterInput {
   When `null` or an empty object is passed, matches all documents.
   """
   started_at_legacy: DateTimeListFilterInput
+
+  """
+  Used to filter on the `was_shortened` field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  was_shortened: BooleanListFilterInput
 
   """
   Used to filter on the `won_games_at` field.
@@ -10753,6 +10876,13 @@ input TeamSeasonFilterInput {
   started_at_legacy: DateTimeFilterInput
 
   """
+  Used to filter on the `was_shortened` field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  was_shortened: BooleanFilterInput
+
+  """
   Used to filter on the `won_games_at` field.
 
   When `null` or an empty object is passed, matches all documents.
@@ -10838,6 +10968,11 @@ type TeamSeasonGroupedBy {
     """
     time_zone: TimeZone = "UTC"
   ): DateTime
+
+  """
+  The `was_shortened` field value for this group.
+  """
+  was_shortened: Boolean
 
   """
   The individual value from `won_games_at` for this group.
@@ -12924,6 +13059,7 @@ input WidgetOptionSetsFilterInput {
 
 type WidgetOptions {
   color: Color
+  is_draft: Boolean
   size: Size
   the_size: Size
 }
@@ -12936,6 +13072,11 @@ type WidgetOptionsAggregatedValues {
   Computed aggregate values for the `color` field.
   """
   color: NonNumericAggregatedValues
+
+  """
+  Computed aggregate values for the `is_draft` field.
+  """
+  is_draft: NonNumericAggregatedValues
 
   """
   Computed aggregate values for the `size` field.
@@ -12971,6 +13112,13 @@ input WidgetOptionsFilterInput {
   color: ColorFilterInput
 
   """
+  Used to filter on the `is_draft` field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  is_draft: BooleanFilterInput
+
+  """
   Matches records where the provided sub-filter evaluates to false.
   This works just like a NOT operator in SQL.
 
@@ -13001,6 +13149,11 @@ type WidgetOptionsGroupedBy {
   The `color` field value for this group.
   """
   color: Color
+
+  """
+  The `is_draft` field value for this group.
+  """
+  is_draft: Boolean
 
   """
   The `size` field value for this group.

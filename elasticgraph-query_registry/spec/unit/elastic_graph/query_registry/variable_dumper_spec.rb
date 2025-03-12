@@ -152,6 +152,11 @@ module ElasticGraph
                 "not" => "ColorFilterInput",
                 "equal_to_any_of" => {"type" => "[ColorInput]", "values" => ["BLUE", "GREEN", "RED"]}
               }},
+              "is_draft" => {"type" => "BooleanFilterInput", "fields" => {
+                "any_of" => "[BooleanFilterInput!]",
+                "not" => "BooleanFilterInput",
+                "equal_to_any_of" => "[Boolean]"
+              }},
               "size" => {"type" => "SizeFilterInput", "fields" => {
                 "any_of" => "[SizeFilterInput!]",
                 "not" => "SizeFilterInput",

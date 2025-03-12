@@ -73,6 +73,7 @@ module ElasticGraph
             all_types_related_to("Team") +
             all_types_related_to("Sponsor") +
             relay_types_related_to("String", include_list_filter: true) - ["StringSortOrderInput"] +
+            type_and_filters_for("Boolean", include_list: true) +
             type_and_filters_for("Color", include_list: true, as_input_enum: true) +
             type_and_filters_for("Date", include_list: true) +
             type_and_filters_for("DateTime", include_list: true) +
@@ -102,7 +103,7 @@ module ElasticGraph
             type_filter_and_non_indexed_aggregation_types_for("WidgetCurrencyNestedFields") +
             type_filter_and_non_indexed_aggregation_types_for("WorkspaceWidget") +
             type_filter_and_non_indexed_aggregation_types_for("Sponsorship", include_list_filter: true, include_fields_list_filter: true) - ["SponsorshipListElementFilterInput"] +
-            ::GraphQL::Schema::BUILT_IN_TYPES.keys.flat_map { |k| type_and_filters_for(k) } - ["BooleanFilterInput"] +
+            ::GraphQL::Schema::BUILT_IN_TYPES.keys.flat_map { |k| type_and_filters_for(k) } +
             %w[
               FloatAggregatedValues IntAggregatedValues JsonSafeLongAggregatedValues LongStringAggregatedValues NonNumericAggregatedValues
               DateAggregatedValues DateTimeAggregatedValues LocalTimeAggregatedValues

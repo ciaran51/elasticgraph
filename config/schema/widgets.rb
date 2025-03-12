@@ -26,6 +26,7 @@ ElasticGraph.define_schema do |schema|
     # when a selected `group_by` option has a different name in the index vs GraphQL.
     t.field "the_size", "Size", name_in_index: "the_sighs"
     t.field "color", "Color"
+    t.field "is_draft", "Boolean"
   end
 
   schema.object_type "Person" do |t|

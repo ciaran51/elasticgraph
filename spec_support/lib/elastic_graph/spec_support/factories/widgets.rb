@@ -36,6 +36,7 @@ FactoryBot.define do
     size { Faker::Base.sample(["SMALL", "MEDIUM", "LARGE"]) }
     the_size { size }
     color { Faker::Base.sample(["RED", "GREEN", "BLUE"]) }
+    is_draft { false }
   end
 
   factory :person, parent: :hash_base do
