@@ -39,6 +39,25 @@ module ElasticGraph
         })
       end
 
+      it "omits `resolver` from input fields" do
+        metadata = object_type_metadata_for "WidgetFilterInput" do |s|
+          s.object_type "Widget" do |t|
+            t.field "id", "ID", name_in_index: "id2"
+
+            t.field "title", "String", name_in_index: "title2" do |f|
+              f.customize_filter_field do |ff|
+                ff.resolver = :other2
+              end
+            end
+          end
+        end
+
+        expect(metadata.graphql_fields_by_name.transform_values(&:resolver)).to eq({
+          "id" => nil,
+          "title" => nil
+        })
+      end
+
       it "raises an error when a custom `Query` field lacks a resolver, as it won't be resolvable by elasticgraph-graphql" do
         expect {
           object_type_metadata_for "Query" do |s|

@@ -736,9 +736,13 @@ module ElasticGraph
             .as_static_derived_type(filter_field_category(for_single_value))
             .name
 
-          params = to_h
-            .slice(*@@initialize_param_names)
-            .merge(type: filter_type, parent_type: parent_type, name_in_index: name_in_index, type_for_derived_types: nil)
+          params = to_h.slice(*@@initialize_param_names).merge(
+            type: filter_type,
+            parent_type: parent_type,
+            name_in_index: name_in_index,
+            type_for_derived_types: nil,
+            resolver: nil
+          )
 
           schema_def_state.factory.new_field(**params).tap do |f|
             f.documentation derived_documentation(
