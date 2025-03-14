@@ -97,6 +97,7 @@ jobs:
       - name: Create pull request for the version bump
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
+          sign-commits: true
           branch: release-v${{ inputs.version }}
           title: "Release v${{ inputs.version }}"
           body: |
