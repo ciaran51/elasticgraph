@@ -61,7 +61,7 @@ bundle exec rake -T
 bundle exec rake boot_locally
 
 # The GraphiQL UI should open automatically
-open http://localhost:9393/
+open http://localhost:9000/
 
 # You can also visit <%= ElasticGraph.setup_env.datastore_ui_name %> via:
 open http://localhost:19293/
@@ -108,7 +108,7 @@ If you use a `:daemon` task, you can later use the corresponding `:halt` task to
 ### Using the GraphiQL interactive GraphQL query editor
 
 When running `bundle exec rake boot_locally` the GraphiQL editor should open automatically
-(`open http://localhost:9393/`). Using it you can query your ElasticGraph cluster using GraphQL.
+(`open http://localhost:9000/`). Using it you can query your ElasticGraph cluster using GraphQL.
 
 ### Seeding Fake Data
 

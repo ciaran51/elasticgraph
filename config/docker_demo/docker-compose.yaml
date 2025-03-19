@@ -32,9 +32,9 @@ services:
   elasticgraph:
     image: ${ELASTICGRAPH_IMAGE:-ghcr.io/block/elasticgraph-demo:latest}
     environment:
-      - PORT=${ELASTICGRAPH_PORT:-9393}
+      - PORT=${ELASTICGRAPH_PORT:-9000}
     ports:
-      - "${ELASTICGRAPH_PORT:-9393}:${ELASTICGRAPH_PORT:-9393}"
+      - "${ELASTICGRAPH_PORT:-9000}:${ELASTICGRAPH_PORT:-9000}"
     depends_on:
       opensearch:
         condition: service_healthy

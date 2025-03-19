@@ -34,7 +34,7 @@ for i in {1..30}; do
   echo "Checking container status..."
   docker compose -f config/docker_demo/docker-compose.yaml ps
 
-  if curl -s http://localhost:9393/graphiql >/dev/null; then
+  if curl -s http://localhost:9000/graphiql >/dev/null; then
     echo "ElasticGraph is ready"
     kill $LOGS_PID
     break
@@ -52,7 +52,7 @@ done
 # Run a test query
 echo "Running test query..."
 QUERY='{"query": "{ artists { totalEdgeCount } }"}'
-RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$QUERY" http://localhost:9393/graphql)
+RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$QUERY" http://localhost:9000/graphql)
 
 # Check if we got a positive number back
 if echo "$RESPONSE" | grep -q '"totalEdgeCount":[1-9][0-9]*'; then
