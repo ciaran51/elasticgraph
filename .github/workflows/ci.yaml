@@ -15,6 +15,7 @@ env:
   # We use the VCR gem as a local "test accelerator" which caches datastore requests/responses for us.
   # But in our CI build we don't want to use it at all, so we disable it here.
   NO_VCR: "1"
+  docker_platforms: linux/amd64,linux/arm64
 
 jobs:
   ci-check:
@@ -95,6 +96,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        with:
+          driver: docker-container
 
       - name: Build OpenSearch image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
@@ -138,6 +141,7 @@ jobs:
           context: elasticgraph-local/lib/elastic_graph/local/opensearch
           file: elasticgraph-local/lib/elastic_graph/local/opensearch/Dockerfile
           push: true
+          platforms: ${{ env.docker_platforms }}
           build-args: |
             VERSION=${{ env.OPENSEARCH_VERSION }}
           tags: |
@@ -151,6 +155,7 @@ jobs:
           context: .
           file: config/docker_demo/Dockerfile
           push: true
+          platforms: ${{ env.docker_platforms }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/elasticgraph-demo:${{ github.sha }}
             ghcr.io/${{ github.repository_owner }}/elasticgraph-demo:latest
