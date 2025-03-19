@@ -9,8 +9,10 @@
 require "elastic_graph/admin/rake_tasks"
 require "elastic_graph/local/docker_runner"
 require "elastic_graph/schema_definition/rake_tasks"
+require "net/http"
 require "rake/tasklib"
 require "shellwords"
+require "uri"
 
 module ElasticGraph
   # Provides support for developing and running ElasticGraph applications locally.
@@ -496,7 +498,13 @@ module ElasticGraph
         end
 
         task :ensure_local_datastore_running do
-          unless /200 OK/.match?(`curl -is #{local_datastore_url}`)
+          datastore_status_code = begin
+            ::Net::HTTP.get_response(URI(local_datastore_url)).code
+          rescue ::SystemCallError
+            "500"
+          end
+
+          unless datastore_status_code == "200"
             if elasticsearch_versions.empty?
               raise <<~EOS
                 OpenSearch is not running locally. You need to start it in another terminal using this command:
