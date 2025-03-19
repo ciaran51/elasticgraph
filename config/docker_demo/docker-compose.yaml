@@ -40,7 +40,3 @@ services:
         condition: service_healthy
 volumes:
   opensearch:
-networks:
-  default:
-    name: elasticgraph-docker-demo
-    external: false
