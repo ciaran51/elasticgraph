@@ -9,6 +9,7 @@
 require "elastic_graph/errors"
 require "elastic_graph/graphql/decoded_cursor"
 require "elastic_graph/graphql/datastore_response/document"
+require "elastic_graph/support/hash_util"
 require "forwardable"
 
 module ElasticGraph
@@ -17,7 +18,7 @@ module ElasticGraph
       # Represents a search response from the datastore. Exposes both the raw metadata
       # provided by the datastore and the collection of documents. Can be treated as a
       # collection of documents when you don't care about the metadata.
-      class SearchResponse < ::Data.define(:raw_data, :metadata, :documents, :total_document_count)
+      class SearchResponse < ::Data.define(:raw_data, :metadata, :documents, :total_document_count, :aggregations_unavailable_reason, :decoded_cursor_factory)
         include Enumerable
         extend Forwardable
 
@@ -27,7 +28,7 @@ module ElasticGraph
 
         EXCLUDED_METADATA_KEYS = %w[hits aggregations].freeze
 
-        def self.build(raw_data, decoded_cursor_factory: DecodedCursor::Factory::Null)
+        def self.build(raw_data, decoded_cursor_factory: DecodedCursor::Factory::Null, aggregations_unavailable_reason: nil)
           documents = raw_data.fetch("hits").fetch("hits").map do |doc|
             Document.build(doc, decoded_cursor_factory: decoded_cursor_factory)
           end
@@ -52,10 +53,12 @@ module ElasticGraph
           total_document_count = metadata.dig("hits", "total", "value")
 
           new(
-            raw_data: raw_data,
-            metadata: metadata,
-            documents: documents,
-            total_document_count: total_document_count
+            raw_data:,
+            metadata:,
+            documents:,
+            total_document_count:,
+            aggregations_unavailable_reason:,
+            decoded_cursor_factory:
           )
         end
 
@@ -97,6 +100,32 @@ module ElasticGraph
         RAW_EMPTY = {"hits" => {"hits" => [], "total" => {"value" => 0}}}.freeze
         EMPTY = build(RAW_EMPTY)
 
+        # Returns a response filtered to results that have matching `values` at the given `field_path`.
+        #
+        # This is designed for use in situations where we have N different datastore queries which are identical
+        # except for differing filter values. For efficiency, we combine those queries into a single query that
+        # filters on the set union of values. We can then use this method to "split" the single response into what
+        # the separate responses would have been if we hadn't combined into a single query.
+        def filter_results(field_path, values)
+          filter =
+            if field_path == "id"
+              # `id` filtering is a very common case, and we want to avoid having to request
+              # `id` within `_source`, given it's available as `_id`.
+              ->(hit) { values.include?(hit.fetch("_id")) }
+            else
+              ->(hit) { values.intersect?(Support::HashUtil.fetch_leaf_values_at_path(hit.fetch("_source"), field_path).to_set) }
+            end
+
+          hits = raw_data.fetch("hits").fetch("hits").select(&filter)
+          updated_raw_data = Support::HashUtil.deep_merge(raw_data, {"hits" => {"hits" => hits, "total" => nil}})
+
+          SearchResponse.build(
+            updated_raw_data,
+            decoded_cursor_factory: decoded_cursor_factory,
+            aggregations_unavailable_reason: "aggregations cannot be provided accurately on a search response filtered in memory"
+          )
+        end
+
         def docs_description
           (documents.size < 3) ? documents.inspect : "[#{documents.first}, ..., #{documents.last}]"
         end
@@ -106,6 +135,10 @@ module ElasticGraph
         end
 
         def aggregations
+          if (reason = aggregations_unavailable_reason)
+            raise Errors::AggregationsUnavailableError, "Aggregations are unavailable on this search response: #{reason}."
+          end
+
           raw_data["aggregations"] || {}
         end
 

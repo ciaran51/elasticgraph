@@ -27,6 +27,9 @@ module ElasticGraph
     class CountUnavailableError < Error
     end
 
+    class AggregationsUnavailableError < Error
+    end
+
     class InvalidArgumentValueError < Error
     end
 
