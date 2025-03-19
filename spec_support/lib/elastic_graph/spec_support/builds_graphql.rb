@@ -18,6 +18,7 @@ module ElasticGraph
       extension_modules: [],
       extension_settings: {},
       slow_query_latency_warning_threshold_in_ms: 30000,
+      nested_relationship_resolver_mode: :optimized,
       max_page_size: 500,
       default_page_size: 50,
       datastore_core: nil,
@@ -37,6 +38,7 @@ module ElasticGraph
           max_page_size: max_page_size,
           default_page_size: default_page_size,
           slow_query_latency_warning_threshold_in_ms: slow_query_latency_warning_threshold_in_ms,
+          nested_relationship_resolver_mode: nested_relationship_resolver_mode,
           client_resolver: client_resolver || GraphQL::Client::DefaultResolver.new({}),
           extension_modules: extension_modules,
           extension_settings: extension_settings

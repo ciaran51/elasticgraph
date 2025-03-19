@@ -161,7 +161,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to perform_datastore_msearch("main", 2).times.and perform_datastore_search("main", 3).times
+          }.to perform_datastore_msearch("main", 2).times.and perform_datastore_search("main", 2).times
 
           # Test a relates_to_many case (Widget.components) with ascending forwards pagination
           paginate_widgets_and_component_ids(backwards: false, first_page: :min, last_page: :max) do |cursor|
@@ -226,23 +226,20 @@ module ElasticGraph
                   ))
                 ))
               )
-            }.to perform_datastore_msearch("main", 5).times.and perform_datastore_search("main", 10).times
+            }.to perform_datastore_msearch("main", 6).times.and perform_datastore_search("main", 6).times
 
             expect_to_have_routed_to_shards_with("main",
               # Root `widgets` query isn't filtering on anything and uses no routing.
               ["widgets_rollover__*", nil],
               # `Widget.components` uses an `out` foreign key and routes on `id`
-              ["components", widget1.fetch(case_correctly(:component_ids)).sort.join(",")],
-              ["components", widget2.fetch(case_correctly(:component_ids)).sort.join(",")],
+              ["components", [widget1, widget2].flat_map { |w| w.fetch(case_correctly(:component_ids)) }.uniq.sort.join(",")],
               # `Component.parts` is an `out` foreign key, and routes on `id`
-              ["electrical_parts,mechanical_parts", component1.fetch(case_correctly(:part_ids)).sort.join(",")],
-              ["electrical_parts,mechanical_parts", component2.fetch(case_correctly(:part_ids)).sort.join(",")],
-              ["electrical_parts,mechanical_parts", component3.fetch(case_correctly(:part_ids)).sort.join(",")],
+              ["electrical_parts,mechanical_parts", [component1, component2, component3].flat_map { |c| c.fetch(case_correctly(:part_ids)) }.uniq.sort.join(",")],
               # `ElectricalPart.manufacturer`/`MechanicalPart.manufacturer` use an `out` foreign key and route on `id`.
               ["manufacturers", part1.fetch(case_correctly(:manufacturer_id))],
               ["manufacturers", part3.fetch(case_correctly(:manufacturer_id))],
               # `Manufacturer.addresses` uses an `in` foreign key and therefore cannot route on `id`.
-              ["addresses", nil], ["addresses", nil])
+              ["addresses", nil])
 
             datastore_requests_by_cluster_name["main"].clear
 
@@ -267,20 +264,19 @@ module ElasticGraph
                     ))
                   )))
               )
-            }.to perform_datastore_msearch("main", 5).times.and perform_datastore_search("main", 11).times
+            }.to perform_datastore_msearch("main", 6).times.and perform_datastore_search("main", 6).times
 
             expect_to_have_routed_to_shards_with("main",
               # Root `addresses` query isn't filtering on anything and uses no routing.
               ["addresses", nil],
               # The `Address.manufacturer` relation uses an `out` foreign key and therefore uses routing on `id`.
-              ["manufacturers", address1.fetch(case_correctly(:manufacturer_id))],
-              ["manufacturers", address2.fetch(case_correctly(:manufacturer_id))],
+              ["manufacturers", [address1, address2].map { |a| a.fetch(case_correctly(:manufacturer_id)) }.sort.join(",")],
               # The `Manufacturer.manufactured_parts` relation uses an `in` foreign key and therefore cannot route on `id`.
-              ["electrical_parts,mechanical_parts", nil], ["electrical_parts,mechanical_parts", nil],
+              ["electrical_parts,mechanical_parts", nil],
               # The `ElectricalPart.components` and `MechanicalPart.components` relations use an `in` foreign key and therefore cannot route on `id`
-              ["components", nil], ["components", nil], ["components", nil],
+              ["components", nil], ["components", nil],
               # The `Component.widgets` relation uses an `in` foreign key and therefore cannot route on `id`.
-              ["widgets_rollover__*", nil], ["widgets_rollover__*", nil], ["widgets_rollover__*", nil])
+              ["widgets_rollover__*", nil])
           end
         end
 

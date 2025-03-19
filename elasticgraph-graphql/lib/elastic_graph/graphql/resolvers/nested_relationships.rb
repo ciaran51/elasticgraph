@@ -6,6 +6,7 @@
 #
 # frozen_string_literal: true
 
+require "elastic_graph/graphql/resolvers/nested_relationships_source"
 require "elastic_graph/graphql/resolvers/relay_connection"
 require "elastic_graph/graphql/datastore_response/search_response"
 
@@ -21,18 +22,15 @@ module ElasticGraph
         def initialize(elasticgraph_graphql:, config:)
           @schema_element_names = elasticgraph_graphql.runtime_metadata.schema_element_names
           @logger = elasticgraph_graphql.logger
+          @monotonic_clock = elasticgraph_graphql.monotonic_clock
+          @resolver_mode = elasticgraph_graphql.config.nested_relationship_resolver_mode
         end
 
         def resolve(field:, object:, args:, context:, lookahead:)
           log_warning = ->(**options) { log_field_problem_warning(field: field, **options) }
           join = field.relation_join
           id_or_ids = join.extract_id_or_ids_from(object, log_warning)
-
-          filters = [
-            build_filter(join.filter_id_field_name, nil, join.foreign_key_nested_paths, Array(id_or_ids)),
-            join.additional_filter
-          ].reject(&:empty?)
-          query = yield.merge_with(filters: filters)
+          query = yield
 
           response =
             case id_or_ids
@@ -40,7 +38,12 @@ module ElasticGraph
               join.blank_value
             else
               initial_response = try_synthesize_response_from_ids(field, id_or_ids, query) ||
-                QuerySource.execute_one(query, for_context: context)
+                NestedRelationshipsSource.execute_one(
+                  Array(id_or_ids).to_set,
+                  query:, join:, context:,
+                  monotonic_clock: @monotonic_clock,
+                  mode: @resolver_mode
+                )
 
               join.normalize_documents(initial_response) do |problem|
                 log_warning.call(document: {"id" => id_or_ids}, problem: "got #{problem} from the datastore search query")
@@ -94,18 +97,6 @@ module ElasticGraph
         def log_field_problem_warning(field:, document:, problem:)
           id = document.fetch("id", "<no id>")
           @logger.warn "#{field.parent_type.name}(id: #{id}).#{field.name} had a problem: #{problem}"
-        end
-
-        def build_filter(path, previous_nested_path, nested_paths, ids)
-          if nested_paths.empty?
-            path = path.delete_prefix("#{previous_nested_path}.") if previous_nested_path
-            {path => {@schema_element_names.equal_to_any_of => ids}}
-          else
-            next_nested_path, *rest_nested_paths = nested_paths
-            sub_filter = build_filter(path, next_nested_path, rest_nested_paths, ids)
-            next_nested_path = next_nested_path.delete_prefix("#{previous_nested_path}.") if previous_nested_path
-            {next_nested_path => {@schema_element_names.any_satisfy => sub_filter}}
-          end
         end
       end
     end

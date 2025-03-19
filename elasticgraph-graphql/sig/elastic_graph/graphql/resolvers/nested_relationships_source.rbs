@@ -1,0 +1,67 @@
+module ElasticGraph
+  class GraphQL
+    module Resolvers
+      class NestedRelationshipsSource < ::GraphQL::Dataloader::Source
+        MAX_OPTIMIZED_ATTEMPTS: ::Integer
+        EXTRA_SIZE_MULTIPLIER: ::Integer
+
+        def initialize: (
+          query: DatastoreQuery,
+          join: Schema::RelationJoin,
+          context: ::GraphQL::Query::Context,
+          monotonic_clock: Support::MonotonicClock,
+          mode: nestedRelationshipResolverMode
+        ) -> void
+
+        @query: DatastoreQuery
+        @join: Schema::RelationJoin
+        @context: ::GraphQL::Query::Context
+        @schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+        @logger: ::Logger
+        @monotonic_clock: Support::MonotonicClock
+        @mode: nestedRelationshipResolverMode
+
+        def fetch: (::Array[::Set[untyped]]) -> ::Array[DatastoreResponse::SearchResponse]
+
+        def self.execute_one: (
+          ::Set[::String],
+          query: DatastoreQuery,
+          join: Schema::RelationJoin,
+          context: ::GraphQL::Query::Context,
+          monotonic_clock: Support::MonotonicClock,
+          mode: nestedRelationshipResolverMode
+        ) -> DatastoreResponse::SearchResponse
+
+        private
+
+        def fetch_optimized: (::Array[::Set[untyped]]) -> ::Array[DatastoreResponse::SearchResponse]
+        def fetch_original: (::Array[::Set[untyped]], ?requested_fields: ::Array[::String]) -> ::Array[DatastoreResponse::SearchResponse]
+        def fetch_comparison: (::Array[::Set[untyped]]) -> ::Array[DatastoreResponse::SearchResponse]
+
+        def can_merge_filters?: () -> bool
+
+        def fetch_via_single_query_with_merged_filters: (
+          ::Array[::Set[untyped]],
+          ?remaining_attempts: ::Integer
+        ) ?{ () -> void } -> ::Hash[::Set[untyped], DatastoreResponse::SearchResponse]
+
+        def fetch_via_separate_queries: (
+          ::Array[::Set[untyped]],
+          ?requested_fields: ::Array[::String]
+        ) -> ::Array[DatastoreResponse::SearchResponse]
+
+        def filters_for: (::Set[untyped]) -> ::Array[::Hash[::String, untyped]]
+
+        def build_filter: (
+          ::String,
+          ::String?,
+          ::Array[::String],
+          ::Array[untyped]
+        ) -> ::Hash[::String, untyped]
+
+        def time_duration: [T] () { () -> T } -> [::Integer, T]
+        def loggable_results: (::Array[DatastoreResponse::SearchResponse]) -> ::Array[::Array[::String]]
+      end
+    end
+  end
+end

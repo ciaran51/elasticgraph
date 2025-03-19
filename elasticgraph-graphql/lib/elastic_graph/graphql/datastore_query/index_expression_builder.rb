@@ -142,8 +142,7 @@ module ElasticGraph
       private_constant :IndexExpressionBuilder
 
       # Steep is complaining that it can't find some `Query` but they are not in this file...
-      # @dynamic aggregations, shard_routing_values, search_index_definitions, merge_with, search_index_expression
-      # @dynamic with, to_datastore_msearch_header_and_body, document_paginator
+      # @dynamic shard_routing_values, effective_size, merge_with, search_index_expression, with, to_datastore_msearch_header_and_body
     end
   end
 end

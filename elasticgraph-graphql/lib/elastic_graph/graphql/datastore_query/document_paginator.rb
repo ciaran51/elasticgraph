@@ -59,14 +59,14 @@ module ElasticGraph
           end
         end
 
-        private
-
         def effective_size
           @effective_size ||= begin
             uncapped_size = (individual_docs_needed ? paginator.requested_page_size : 0) * size_multiplier
             (uncapped_size > max_effective_size) ? max_effective_size : uncapped_size
           end
         end
+
+        private
 
         def effective_sort
           return [] unless effective_size > 0

@@ -11,11 +11,14 @@ require "graphql"
 module ElasticGraph
   class GraphQL
     module Resolvers
-      # Provides a way to avoid N+1 query problems by batching up multiple
-      # datastore queries into one `msearch` call. In general, it is recommended
+      # Provides a way to avoid N+1 request problems by batching up multiple
+      # datastore queries into one `msearch` request. In general, it is recommended
       # that you use this from any resolver that needs to query the datastore, to
       # maximize our ability to combine multiple datastore requests. Importantly,
       # this should never be instantiated directly; instead use the `execute` method from below.
+      #
+      # Note: `NestedRelationshipsSource` implements further optimizations on top of this, and should
+      # be used rather than this class when applicable.
       class QuerySource < ::GraphQL::Dataloader::Source
         def initialize(datastore_router, query_tracker)
           @datastore_router = datastore_router
