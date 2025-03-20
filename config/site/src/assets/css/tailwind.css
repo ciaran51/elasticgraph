@@ -20,6 +20,17 @@
   }
 }
 
+@layer utilities {
+  .prose {
+    code {
+      &::before,
+      &::after {
+        content: none;
+      }
+    }
+  }
+}
+
 @layer components {
   /* NOTE: Be sure to include `dark:` prefixed styles for handling dark-mode UI */
   /* Buttons */
