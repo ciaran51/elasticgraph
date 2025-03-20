@@ -471,7 +471,7 @@ module ElasticGraph
 
         desc "Boots ElasticGraph locally with the GraphiQL UI, and opens it in a browser."
         task :boot_graphiql, [:port, :rackup_args, :no_open] => :ensure_datastore_ready_for_indexing_and_querying do |task, args|
-          args.with_defaults(port: 9393, rackup_args: "", no_open: false)
+          args.with_defaults(port: 9000, rackup_args: "", no_open: false)
           port = args.fetch(:port)
 
           # :nocov: -- we can't test `open` behavior through a test
