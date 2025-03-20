@@ -21,6 +21,8 @@ module ElasticGraph
         include Enumerable
         extend Forwardable
 
+        private :raw_data
+
         def_delegators :documents, :each, :to_a, :size, :empty?
 
         EXCLUDED_METADATA_KEYS = %w[hits aggregations].freeze
@@ -99,8 +101,12 @@ module ElasticGraph
           (documents.size < 3) ? documents.inspect : "[#{documents.first}, ..., #{documents.last}]"
         end
 
-        def total_document_count
-          super || raise(Errors::CountUnavailableError, "#{__method__} is unavailable; set `query.total_document_count_needed = true` to make it available")
+        def total_document_count(default: nil)
+          super() || default || raise(Errors::CountUnavailableError, "#{__method__} is unavailable; set `query.total_document_count_needed = true` to make it available")
+        end
+
+        def aggregations
+          raw_data["aggregations"] || {}
         end
 
         def to_s

@@ -30,7 +30,7 @@ module ElasticGraph
             for_query: Query
           ) -> ::Array[::Hash[::String, untyped]]
 
-          def self.build_bucket: (Query, ::Hash[::String, untyped]) -> ::Hash[::String, untyped]
+          def self.build_bucket: (Query, DatastoreResponse::SearchResponse) -> ::Hash[::String, untyped]
         end
       end
     end
