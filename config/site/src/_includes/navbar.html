@@ -1,60 +1,76 @@
 <!-- Navbar -->
 <nav class="w-full pt-4 pb-3 bg-gray-200 dark:bg-gray-800 shadow-sm">
-  <div class="container mx-auto flex justify-between items-center px-4">
-    <div class="flex items-center space-x-6">
+  <div class="container mx-auto px-4">
+    <!-- Desktop and Mobile Nav Container -->
+    <div class="flex justify-between items-center">
+      <!-- Logo -->
       <a href="{{ '/' | relative_url }}" class="text-lg font-bold hover:underline">ElasticGraph</a>
-      <a href="{{ '/getting-started' | relative_url }}" class="text-base {{ site.style.link }}">Get Started</a>
 
-      {% include query_api_nav.html %}
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-button" class="lg:hidden p-2" aria-label="Toggle menu">
+        {% include icons/menu.svg %}
+      </button>
 
-      {% include guides_nav.html %}
+      <!-- Desktop Navigation -->
+      <div class="hidden lg:flex lg:items-center lg:space-x-6 w-full justify-between ml-6">
+        <!-- Left Side Nav Items -->
+        <div class="flex items-center space-x-6">
+          <a href="{% link getting-started.md %}" class="text-base {{ site.style.link }}">Get Started</a>
 
-      <!-- Docs dropdown -->
-      <div class="relative group">
-        <button class="{{site.style.dropdown_button}}">
-          <span>Docs</span>
-          {% include icons/chevron-down.svg %}
-        </button>
-        <div class="{{site.style.dropdown_toggle}}">
-          <div class="{{site.style.navbar_dropdown}}">
-            <!-- Dropdown pip -->
-            <div class="{{site.style.dropdown_pip}}"></div>
-            <div class="relative py-1">
-              {% for version in site.data.doc_versions.versions %}
-                <a href="{{ '/docs/' | append: version | relative_url }}"
-                   class="{{site.style.dropdown_item}}">
-                  {% if version == 'main' %}
-                    Development (main)
-                  {% else %}
-                    {{ version }}
-                  {% endif %}
-                </a>
-              {% endfor %}
-            </div>
-          </div>
+          {% include query_api_nav.html %}
+          {% include guides_nav.html %}
+          {% include api_docs_nav.html %}
+        </div>
+
+        <!-- Right Side Nav Items -->
+        <div class="flex items-center space-x-6">
+          <form action="{{ '/search/' | relative_url }}" method="get" class="relative">
+            <input type="text" name="query" placeholder="Search..."
+                   class="w-full px-3 py-1 rounded-md text-base border border-gray-200/80 dark:border-gray-600/50
+                          bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200
+                          focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </form>
+          <a href="{{ site.github_url }}" target="_blank" class="text-base {{ site.style.link }} inline-flex items-center space-x-2" rel="noopener">
+            {% include icons/github.svg %}
+            <span>GitHub</span>
+          </a>
+          <a href="{% link about.md %}" class="text-base {{ site.style.link }}">About</a>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center space-x-6">
-      <form action="{{ '/search/' | relative_url }}" method="get" class="relative">
-        <input type="text" name="query" placeholder="Search..."
-               class="px-3 py-1 rounded-md text-base border border-gray-200/80 dark:border-gray-600/50
-                      bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200
-                      focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </form>
-      <a href="{{ site.github_url }}" target="_blank" class="text-base {{ site.style.link }} inline-flex items-center space-x-2" rel="noopener">
-        {% include icons/github.svg %}
-        <span>GitHub</span>
-      </a>
-      <a href="{{ '/about' | relative_url }}" class="text-base {{ site.style.link }}">About</a>
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden mt-4">
+      <div class="flex flex-col space-y-4">
+        <a href="{% link getting-started.md %}" class="text-base {{ site.style.link }}">Get Started</a>
+        <a href="{% link query-api.md %}" class="text-base {{ site.style.link }}">Query API</a>
+        <a href="{% link guides.md %}" class="text-base {{ site.style.link }}">Guides</a>
+        <a href="{% link api-docs.md %}" class="text-base {{ site.style.link }}">API Docs</a>
+
+        <!-- Mobile Search -->
+        <form action="{{ '/search/' | relative_url }}" method="get" class="relative">
+          <input type="text" name="query" placeholder="Search..."
+                 class="w-full px-3 py-2 rounded-md text-base border border-gray-200/80 dark:border-gray-600/50
+                        bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200
+                        focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </form>
+
+        <!-- Mobile Additional Links -->
+        <div class="flex flex-col space-y-4 pt-2">
+          <a href="{{ site.github_url }}" target="_blank" class="text-base {{ site.style.link }} inline-flex items-center space-x-2" rel="noopener">
+            {% include icons/github.svg %}
+            <span>GitHub</span>
+          </a>
+          <a href="{% link about.md %}" class="text-base {{ site.style.link }}">About</a>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Breadcrumbs -->
   <div class="container mx-auto px-4 mt-2">
     <nav class="text-base text-gray-600 dark:text-gray-400" aria-label="Breadcrumb">
-      <ol class="list-reset flex">
+      <ol class="list-reset flex flex-wrap">
         {% if page.url != "/" %}
         <li>
           <a href="{{ '/' | relative_url }}" class="hover:underline">Home</a>
@@ -87,3 +103,10 @@
     </nav>
   </div>
 </nav>
+
+<!-- Mobile Menu JavaScript -->
+<script>
+  document.getElementById('mobile-menu-button').addEventListener('click', function() {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+</script>
