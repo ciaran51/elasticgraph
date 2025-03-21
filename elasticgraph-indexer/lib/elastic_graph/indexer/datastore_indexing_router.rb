@@ -186,12 +186,13 @@ module ElasticGraph
       # This nested structure is necessary because a single operation can target more than one datastore
       # cluster, and a document may have different source event versions in different datastore clusters.
       def source_event_versions_in_index(operations)
-        ops_by_client_name = operations.each_with_object(::Hash.new { |h, k| h[k] = [] }) do |op, ops_hash|
+        ops_by_client_name = ::Hash.new { |h, k| h[k] = [] } # : ::Hash[::String, ::Array[_Operation]]
+        operations.each do |op|
           # Note: this intentionally does not use `accessible_cluster_names_to_index_into`.
           # We want to fail with clear error if any clusters are inaccessible instead of silently ignoring
           # the named cluster. The `IndexingFailuresError` provides a clear error.
           cluster_names = op.destination_index_def.clusters_to_index_into
-          cluster_names.each { |cluster_name| ops_hash[cluster_name] << op }
+          cluster_names.each { |cluster_name| ops_by_client_name[cluster_name] << op }
         end
 
         client_names_and_results = Support::Threading.parallel_map(ops_by_client_name) do |(client_name, all_ops)|
@@ -203,6 +204,7 @@ module ElasticGraph
                 # We only care about the source versions, but the way we get it varies.
                 include_version =
                   if op.destination_index_def.use_updates_for_indexing?
+                    # @type var op: Operation::Update
                     {_source: {includes: [
                       "__versions.#{op.update_target.relationship}",
                       # The update_data script before ElasticGraph v0.8 used __sourceVersions[type] instead of __versions[relationship].
@@ -239,7 +241,10 @@ module ElasticGraph
           errors = msearch_response.fetch("responses").select { |res| res["error"] }
 
           if errors.empty?
-            versions_by_op = ops.zip(msearch_response.fetch("responses")).to_h do |(op, response)|
+            # We assume the size of the ops and the other array is the same and it cannot have `nil`.
+            zip = ops.zip(msearch_response.fetch("responses")) # : ::Array[[_Operation, ::Hash[::String, ::Hash[::String, untyped]]]]
+
+            versions_by_op = zip.to_h do |(op, response)|
               hits = response.fetch("hits").fetch("hits")
 
               if hits.size > 1
@@ -254,6 +259,7 @@ module ElasticGraph
               end
 
               if op.destination_index_def.use_updates_for_indexing?
+                # @type var op: Operation::Update
                 versions = hits.filter_map do |hit|
                   hit.dig("_source", "__versions", op.update_target.relationship, hit.fetch("_id")) ||
                     # The update_data script before ElasticGraph v0.8 used __sourceVersions[type] instead of __versions[relationship].
@@ -323,9 +329,10 @@ module ElasticGraph
       # need to worry about it mutating during the lifetime of a single process (particularly given the expense of doing
       # so).
       def validate_mapping_completeness_of!(index_cluster_name_method, *index_definitions)
-        diffs_by_cluster_and_index_name = index_definitions.reduce(_ = {}) do |accum, index_def|
-          accum.merge(mapping_diffs_for(index_def, index_cluster_name_method))
-        end
+        diffs_by_cluster_and_index_name =
+          index_definitions.reduce({}) do |accum, index_def| # $ ::Hash[[::String, ::String], ::String]
+            accum.merge(mapping_diffs_for(index_def, index_cluster_name_method))
+          end
 
         if diffs_by_cluster_and_index_name.any?
           formatted_diffs = diffs_by_cluster_and_index_name.map do |(cluster_name, index_name), diff|
