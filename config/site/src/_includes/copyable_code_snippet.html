@@ -1,0 +1,44 @@
+{% comment %}
+  Renders a syntax-highlighted code snippet with a copy button.
+
+  Parameters:
+    language: The language for syntax highlighting (e.g., "graphql", "ruby", "shell")
+    code: Raw code to display
+    music_query: Name of a query from site.data.music_queries (e.g. "filtering.FindArtist")
+    font_size: Optional font size class (e.g., "text-xs", "text-sm", etc)
+    style: Optional "dark" for dark background style
+{% endcomment %}
+{% if include.music_query %}
+  {% assign parts = include.music_query | split: "." %}
+  {% assign section = parts[0] %}
+  {% assign name = parts[1] %}
+  {% assign code = site.data.music_queries[section][name] %}
+{% else %}
+  {% assign code = include.code %}
+{% endif %}
+
+<div class="relative {% if include.style == 'dark' %}bg-gray-800 dark:bg-gray-900 text-white py-3 px-6 rounded-sm not-prose mx-auto max-w-3xl{% endif %}">
+  <div class="absolute right-2 top-2 z-10">
+    <div class="relative">
+      <button onclick="copyToClipboard(this, {{ code | jsonify | escape }})"
+        class="{% if include.style == 'dark' %}text-white hover:text-blue-300{% else %}text-gray-400 hover:text-blue-300{% endif %} transition-all cursor-pointer"
+        aria-label="Copy code">
+        <span class="sr-only">Copy code</span>
+        {% include icons/document-duplicate.svg %}
+      </button>
+      <span class="hidden absolute -top-8 left-1/2 transform -translate-x-1/2 bg-blue-300 text-gray-900 text-xs py-1 px-2 rounded whitespace-nowrap" data-copy-message>
+        Copied!
+      </span>
+    </div>
+  </div>
+
+  <div class="{% if include.font_size %}{{ include.font_size }}{% endif %}">
+    {% if include.language == "shell" %}
+      {% capture shell_display %}$ {{ code }}{% endcapture %}
+      {% capture md_include %}{% include code_block.md language=include.language code=shell_display %}{% endcapture %}
+    {% else %}
+      {% capture md_include %}{% include code_block.md language=include.language code=code %}{% endcapture %}
+    {% endif %}
+    {{ md_include | markdownify }}
+  </div>
+</div>

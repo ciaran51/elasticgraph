@@ -11,9 +11,7 @@ ElasticGraph supports a negation predicate:
 
 One of the more common use cases is to filter to non-null values:
 
-```graphql
-{{ site.data.music_queries.filtering.FindArtistsWithBios }}
-```
+{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindArtistsWithBios" %}
 
 `not` is available at any level of a `filter`. All of these are equivalent:
 

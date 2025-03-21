@@ -34,13 +34,10 @@ You don't need these exact versions (these are just examples). Your Ruby version
 
 ## Step 1: Bootstrap a new ElasticGraph Project
 
-Run the following command in your terminal:
+Run one of the following commands in your terminal:
 
-```shell
-$ gem exec elasticgraph new path/to/project --datastore elasticsearch
-# or
-$ gem exec elasticgraph new path/to/project --datastore opensearch
-```
+{% include copyable_code_snippet.html language="shell" code="gem exec elasticgraph new path/to/project --datastore elasticsearch" %}
+{% include copyable_code_snippet.html language="shell" code="gem exec elasticgraph new path/to/project --datastore opensearch" %}
 
 {: .alert-note}
 **Note**{: .alert-title}
@@ -62,10 +59,7 @@ This will:
 The initial project skeleton comes with everything you need to run ElasticGraph locally.
 Confirm it works by running the following:
 
-```shell
-$ cd path/to/project
-$ bundle exec rake boot_locally
-```
+{% include copyable_code_snippet.html language="shell" code="cd path/to/project && bundle exec rake boot_locally" %}
 
 This will:
 
@@ -77,9 +71,7 @@ This will:
 
 Run some example queries in GraphiQL to confirm it's working. Here's an example query to get you started:
 
-```graphql
-{{ site.data.music_queries.filtering.FindArtistsFormedIn90s }}
-```
+{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindArtistsFormedIn90s" %}
 
 Visit the [Query API docs]({% link query-api.md %}) for other example queries that work against the example schema.
 
@@ -110,9 +102,7 @@ index 77e63de..7999fe4 100644
 
 Next, rebuild the project:
 
-```shell
-$ bundle exec rake build
-```
+{% include copyable_code_snippet.html language="shell" code="bundle exec rake build" %}
 
 This will re-generate the schema artifacts, run the test suite, and fail. The failing test will indicate
 that the `:venue` factory is missing the new field. To fix it, define `yearOpened` on the `:venue` factory in the `factories.rb` file under `lib`:
@@ -143,9 +133,7 @@ Congratulations! You've set up ElasticGraph locally and run your first queries. 
 
 Delete the `artist` schema definition:
 
-```shell
-$ rm config/schema/artists.rb
-```
+{% include copyable_code_snippet.html language="shell" code="rm config/schema/artists.rb" %}
 
 Then define your own schema in a Ruby file under `config/schema`.
 
@@ -157,9 +145,7 @@ Then define your own schema in a Ruby file under `config/schema`.
 
 Your ElasticGraph project includes a command that's designed to be run on CI:
 
-```shell
-$ bundle exec rake check
-```
+{% include copyable_code_snippet.html language="shell" code="bundle exec rake check" %}
 
 This should be run on every commit (ideally before merging a pull request) using a CI system
 such as [GitHub Actions](https://github.com/features/actions), [Buildkite](https://buildkite.com/),

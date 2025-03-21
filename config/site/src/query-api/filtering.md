@@ -7,9 +7,7 @@ menu_order: 2
 ---
 Use `filter:` on a root query field to narrow down the returned results:
 
-```graphql
-{{ site.data.music_queries.filtering.FindArtist }}
-```
+{% include copyable_code_snippet.html language="graphql" code=site.data.music_queries.filtering.FindArtist %}
 
 As shown here, filters have two basic parts:
 
@@ -22,14 +20,10 @@ As shown here, filters have two basic parts:
 Filters with a value of `null` or empty object (`{}`) match all documents. When negated with `not`, no documents are matched.
 The filters in this query match all documents:
 
-```graphql
-{{ site.data.music_queries.filtering.EmptyFilters }}
-```
+{% include copyable_code_snippet.html language="graphql" code=site.data.music_queries.filtering.EmptyFilters %}
 
 This particularly comes in handy when using [query variables](https://graphql.org/learn/queries/#variables).
 It allows a query to flexibly support a wide array of filters without requiring them to all be used for an
 individual request.
 
-```graphql
-{{ site.data.music_queries.filtering.FindArtists }}
-```
+{% include copyable_code_snippet.html language="graphql" code=site.data.music_queries.filtering.FindArtists %}
