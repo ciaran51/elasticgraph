@@ -266,6 +266,171 @@ module ElasticGraph
           end
         end
 
+        describe "#filter_results" do
+          def response_of(*hits)
+            build_response(Support::HashUtil.deep_merge(raw_data, {"hits" => {"hits" => hits}}))
+          end
+
+          it "returns the matching results" do
+            response = response_of(
+              bob = {"_id" => "B", "_source" => {"id" => "B", "name" => "Bob", "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "name" => "Judy", "age" => 43}},
+              eileen = {"_id" => "E", "_source" => {"id" => "E", "name" => "Eileen", "age" => 12}}
+            )
+
+            filtered = response.filter_results("name", ["Bob", "Eileen"].to_set)
+
+            expect(filtered.documents.map(&:payload)).to eq [bob.fetch("_source"), eileen.fetch("_source")]
+          end
+
+          it "ignores values that do not match any results" do
+            response = response_of(
+              bob = {"_id" => "B", "_source" => {"id" => "B", "name" => "Bob", "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "name" => "Judy", "age" => 43}},
+              {"_id" => "E", "_source" => {"id" => "E", "name" => "Eileen", "age" => 12}}
+            )
+
+            filtered = response.filter_results("name", ["Bob", "Hellen"].to_set)
+
+            expect(filtered.documents.map(&:payload)).to eq [bob.fetch("_source")]
+          end
+
+          it "raises an error if the given field isn't in `_source`" do
+            response = response_of(
+              {"_id" => "B", "_source" => {"id" => "B", "name" => "Bob", "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "name" => "Judy", "age" => 43}},
+              {"_id" => "E", "_source" => {"id" => "E", "name" => "Eileen", "age" => 12}}
+            )
+
+            expect {
+              response.filter_results("address", ["Bob", "Hellen"].to_set)
+            }.to raise_error a_string_including("address")
+          end
+
+          it "can filter on `id` without a value in `_source` since it can use `_id`, allowing us to avoid requesting `id` values" do
+            response = response_of(
+              {"_id" => "B"},
+              {"_id" => "J"},
+              {"_id" => "E"}
+            )
+
+            filtered = response.filter_results("id", ["B", "E", "F"].to_set)
+
+            expect(filtered.documents.map(&:id)).to eq ["B", "E"]
+          end
+
+          it "returns an empty result when given no filter values" do
+            response = response_of(
+              {"_id" => "B", "_source" => {}},
+              {"_id" => "J", "_source" => {}},
+              {"_id" => "E", "_source" => {}}
+            )
+
+            filtered = response.filter_results("id", [].to_set)
+
+            expect(filtered).to be_empty
+          end
+
+          it "filters on the intersection of values when the named field is a list, to align with Elasticsearch/OpenSearch term filtering semantics" do
+            response = response_of(
+              match1 = {"_id" => "B", "_source" => {"id" => "B", "foo_ids" => [1, 17], "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "foo_ids" => [2, 20], "age" => 43}},
+              match2 = {"_id" => "E", "_source" => {"id" => "E", "foo_ids" => [3, 19, 47], "age" => 12}}
+            )
+
+            filtered = response.filter_results("foo_ids", [1, 17, 19].to_set)
+
+            expect(filtered.documents.map(&:payload)).to eq [match1.fetch("_source"), match2.fetch("_source")]
+          end
+
+          it "can filter on a nested path" do
+            response = response_of(
+              bob = {"_id" => "B", "_source" => {"id" => "B", "info" => {"name" => "Bob"}, "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "info" => {"name" => "Judy"}, "age" => 43}},
+              eileen = {"_id" => "E", "_source" => {"id" => "E", "info" => {"name" => "Eileen"}, "age" => 12}}
+            )
+
+            filtered = response.filter_results("info.name", ["Bob", "Eileen"].to_set)
+
+            expect(filtered.documents.map(&:payload)).to eq [bob.fetch("_source"), eileen.fetch("_source")]
+          end
+
+          it "preserves the `decoded_cursor_factory` that was on the original documents" do
+            response = response_of(
+              {"_id" => "B", "_source" => {"id" => "B", "name" => "Bob", "age" => 17}},
+              {"_id" => "J", "_source" => {"id" => "J", "name" => "Judy", "age" => 43}},
+              {"_id" => "E", "_source" => {"id" => "E", "name" => "Eileen", "age" => 12}}
+            )
+            expect(response.map(&:decoded_cursor_factory)).to eq([decoded_cursor_factory] * 3)
+
+            filtered = response.filter_results("name", ["Bob", "Eileen"].to_set)
+
+            expect(filtered.map(&:decoded_cursor_factory)).to eq([decoded_cursor_factory] * 2)
+          end
+
+          it "preserves the response metadata that was on the original response" do
+            metadata = {
+              "took" => 50,
+              "timed_out" => false,
+              "_shards" => {"total" => 5, "successful" => 5, "skipped" => 0, "failed" => 0},
+              "hits" => {"total" => nil}
+            }
+            response = build_response(metadata.merge({
+              "hits" => {
+                "hits" => [
+                  {"_id" => "a", "_source" => {"id" => "a", "name" => "HuaweiP Smart"}},
+                  {"_id" => "b", "_source" => {"id" => "b", "name" => "iPhone"}}
+                ]
+              }
+            }))
+
+            filtered = response.filter_results("id", ["b"].to_set)
+
+            expect(filtered.metadata).to eq metadata
+          end
+
+          it "clears the `total_document_count` because it cannot be provided accurately" do
+            response = build_response({
+              "hits" => {
+                "total" => {
+                  "value" => 17,
+                  "relation" => "eq"
+                },
+                "hits" => [
+                  {"_id" => "a", "_source" => {"id" => "a", "name" => "HuaweiP Smart"}},
+                  {"_id" => "b", "_source" => {"id" => "b", "name" => "iPhone"}}
+                ]
+              }
+            })
+            expect(response.total_document_count).to eq 17
+
+            filtered = response.filter_results("id", ["b"].to_set)
+
+            expect { filtered.total_document_count }.to raise_error Errors::CountUnavailableError
+          end
+
+          it "clears aggregations because it cannot be provided accurately" do
+            response = build_response({
+              "aggregations" => {},
+              "hits" => {
+                "total" => {
+                  "value" => 17,
+                  "relation" => "eq"
+                },
+                "hits" => [
+                  {"_id" => "a", "_source" => {"id" => "a", "name" => "HuaweiP Smart"}},
+                  {"_id" => "b", "_source" => {"id" => "b", "name" => "iPhone"}}
+                ]
+              }
+            })
+            expect(response.aggregations).to eq({})
+
+            filtered = response.filter_results("id", ["b"].to_set)
+
+            expect { filtered.aggregations }.to raise_error Errors::AggregationsUnavailableError
+          end
+        end
+
         def raw_data_with_docs(count)
           documents = raw_data.fetch("hits").fetch("hits").first(count)
           raw_data.merge("hits" => raw_data.fetch("hits").merge("hits" => documents))
