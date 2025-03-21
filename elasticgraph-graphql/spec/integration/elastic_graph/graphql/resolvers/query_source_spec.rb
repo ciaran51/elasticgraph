@@ -37,7 +37,7 @@ module ElasticGraph
           )
 
           # Perform any cached calls to the datastore to prevent them from alter interacting with the
-          # `query_datastore` assertion below.
+          # `perform_datastore_msearch` assertion below.
           pre_cache_index_state(graphql)
           query_tracker = QueryDetailsTracker.empty
 
@@ -49,7 +49,7 @@ module ElasticGraph
 
             expect(widget_results.first.fetch("id")).to eq widget.fetch(:id)
             expect(component_results.first.fetch("id")).to eq component.fetch(:id)
-          }.to query_datastore(components_def.cluster_to_query, 1).time
+          }.to perform_datastore_msearch(components_def.cluster_to_query, 1).time.and perform_datastore_search(components_def.cluster_to_query, 2).times
         end
       end
     end

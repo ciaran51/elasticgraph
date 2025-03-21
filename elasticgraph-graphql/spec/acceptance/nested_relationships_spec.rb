@@ -91,7 +91,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to query_datastore("main", 1).time
+          }.to perform_datastore_search("main", 1).time
 
           # Test a relates_to_many case (Widget.components) with `id_DESC` sorting.
           expect {
@@ -113,7 +113,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to query_datastore("main", 1).time
+          }.to perform_datastore_search("main", 1).time
 
           # Test a relates_to_many case (Widget.components) with default (non-id) sorting--it has to make 2 queries.
           expect {
@@ -135,7 +135,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to query_datastore("main", 2).times
+          }.to perform_datastore_msearch("main", 2).times.and perform_datastore_search("main", 2).times
 
           # Test a relates_to_many case (Widget.components) with additional requested fields--it has to make 2 queries.
           expect {
@@ -161,7 +161,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to query_datastore("main", 2).time
+          }.to perform_datastore_msearch("main", 2).times.and perform_datastore_search("main", 3).times
 
           # Test a relates_to_many case (Widget.components) with ascending forwards pagination
           paginate_widgets_and_component_ids(backwards: false, first_page: :min, last_page: :max) do |cursor|
@@ -197,7 +197,7 @@ module ElasticGraph
                 "manufacturer" => string_hash_of(manufacturer1, :id)
               }
             ]
-          }.to query_datastore("main", 1).time
+          }.to perform_datastore_search("main", 1).time
         end
 
         it "supports loading bi-directional relationships, starting from either end", :expect_search_routing do
@@ -226,7 +226,7 @@ module ElasticGraph
                   ))
                 ))
               )
-            }.to query_datastore("main", 5).times
+            }.to perform_datastore_msearch("main", 5).times.and perform_datastore_search("main", 10).times
 
             expect_to_have_routed_to_shards_with("main",
               # Root `widgets` query isn't filtering on anything and uses no routing.
@@ -267,7 +267,7 @@ module ElasticGraph
                     ))
                   )))
               )
-            }.to query_datastore("main", 5).times
+            }.to perform_datastore_msearch("main", 5).times.and perform_datastore_search("main", 11).times
 
             expect_to_have_routed_to_shards_with("main",
               # Root `addresses` query isn't filtering on anything and uses no routing.
@@ -460,7 +460,7 @@ module ElasticGraph
                 }
               }
             ]
-          }.to query_datastore("main", 3).times
+          }.to perform_datastore_msearch("main", 3).times.and perform_datastore_search("main", 3).times
         end
 
         def query_all_relationship_levels_from_widgets(component_args: {}, part_args: {})

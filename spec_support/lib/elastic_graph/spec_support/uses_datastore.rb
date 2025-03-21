@@ -370,10 +370,19 @@ RSpec.shared_context "datastore support", :capture_logs do
     end
   end
 
-  def query_datastore(cluster_name, n)
-    change { datastore_requests(cluster_name).count }.by(n).tap do |matcher|
-      matcher.extend QueryDatastoreMatcherFluency
-    end
+  def perform_datastore_msearch(cluster_name, n)
+    change {
+      datastore_requests(cluster_name).count { |r| r.url.path == "/_msearch" }
+    }.by(n).tap { |matcher| matcher.extend QueryDatastoreMatcherFluency }
+  end
+
+  def perform_datastore_search(cluster_name, n)
+    change {
+      datastore_requests(cluster_name)
+        .select { |r| r.url.path == "/_msearch" }
+        .map { |r| r.body.lines.size / 2 } # each search within an msearch takes up 2 lines (header line + body line)
+        .sum
+    }.by(n).tap { |matcher| matcher.extend QueryDatastoreMatcherFluency }
   end
 
   def expect_to_have_routed_to_shards_with(cluster_name, *index_routing_value_pairs)

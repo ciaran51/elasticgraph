@@ -24,7 +24,7 @@ module ElasticGraph
         let(:indexer) { build_indexer(datastore_core: graphql.datastore_core) }
 
         before do
-          # Perform any cached calls to the datastore to happen before our `query_datastore`
+          # Perform any cached calls to the datastore to happen before our `perform_datastore_msearch`
           # matcher below which tries to assert which specific requests get made, since index definitions
           # have caching behavior that can make the presence or absence of that request slightly non-deterministic.
           pre_cache_index_state(graphql)
@@ -600,7 +600,7 @@ module ElasticGraph
             expect(datastore_msearch_requests("main").size).to eq(1)
             # ...with 2 searches (1 for the `id` queries, one for the `total_edge_count`)
             expect(performed_search_metadata("main")).to have_total_widget_searches(2)
-          }.to query_datastore("main", 1).time
+          }.to perform_datastore_msearch("main", 1).time
         end
 
         def execute(query, **options)
@@ -608,7 +608,7 @@ module ElasticGraph
 
           expect {
             response = graphql.graphql_query_executor.execute(query, **options)
-          }.to query_datastore("main", 1).time.or query_datastore("main", 0).times
+          }.to perform_datastore_msearch("main", 1).time.or perform_datastore_msearch("main", 0).times
 
           response
         end

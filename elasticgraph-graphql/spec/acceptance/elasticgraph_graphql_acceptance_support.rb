@@ -33,8 +33,8 @@ module ElasticGraph
     end
 
     before do
-      # Perform any cached calls to the datastore to happen before our `query_datastore`
-      # matcher below which tries to assert which specific requests get made, since index definitions
+      # Perform any cached calls to the datastore to happen before our `perform_datastore_msearch`
+      # matcher in some tests which tries to assert which specific requests get made, since index definitions
       # have caching behavior that can make the presence or absence of that request slightly non-deterministic.
       pre_cache_index_state(graphql)
     end

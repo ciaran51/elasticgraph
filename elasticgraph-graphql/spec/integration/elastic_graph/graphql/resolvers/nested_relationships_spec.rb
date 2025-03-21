@@ -731,14 +731,14 @@ module ElasticGraph
         def resolve(*args, requested_fields: ["id", "created_at"], **options)
           result = nil
 
-          # Perform any cached calls to the datastore to happen before our `query_datastore`
+          # Perform any cached calls to the datastore to happen before our `perform_datastore_search`
           # matcher below which tries to assert which specific requests get made, since index definitions
           # have caching behavior that can make the presence or absence of that request slightly non-deterministic.
           pre_cache_index_state(graphql)
 
           expect {
             result = super(*args, query_overrides: {requested_fields: requested_fields}, **options)
-          }.to query_datastore("main", 0).times.or query_datastore("main", 1).time
+          }.to perform_datastore_search("main", 0).times.or perform_datastore_search("main", 1).time
 
           result
         end
