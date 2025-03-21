@@ -105,7 +105,6 @@ module ElasticGraph
         let(:response) { build_response(raw_data) }
 
         it "builds from a raw datastore JSON response" do
-          expect(response.raw_data).to eq raw_data
           expect(response.documents.size).to eq 3
         end
 
@@ -129,8 +128,25 @@ module ElasticGraph
           )
         end
 
-        it "exposes a `total_document_count` based on `hits.total`" do
-          expect(response.total_document_count).to eq 17
+        describe "#total_document_count" do
+          it "returns the `hits.total` value" do
+            expect(response.total_document_count).to eq 17
+          end
+
+          it "raises an error if it is unavailable because the query wasn't configured to request it" do
+            response = build_response(Support::HashUtil.deep_merge(raw_data, {"hits" => {"total" => nil}}))
+
+            expect {
+              response.total_document_count
+            }.to raise_error Errors::CountUnavailableError
+          end
+
+          it "allows the caller to provide a default which is used if the value is unavailable" do
+            no_total_count_response = build_response(Support::HashUtil.deep_merge(raw_data, {"hits" => {"total" => nil}}))
+
+            expect(no_total_count_response.total_document_count(default: 487)).to eq 487
+            expect(response.total_document_count(default: 487)).to eq 17
+          end
         end
 
         it "avoids mutating the raw data used to build the object" do
@@ -202,7 +218,7 @@ module ElasticGraph
           it "creates a response matching the structure from the datastore using the given index and ids" do
             response = SearchResponse.synthesize_from_ids("widgets", %w[abc def ghi])
 
-            expect(response.raw_data).to eq({
+            expected_response = SearchResponse.build({
               "took" => 0,
               "timed_out" => false,
               "_shards" => {
@@ -245,6 +261,8 @@ module ElasticGraph
                 ]
               }
             })
+
+            expect(response).to eq(expected_response)
           end
         end
 

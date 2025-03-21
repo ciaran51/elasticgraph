@@ -55,17 +55,16 @@ module ElasticGraph
           end
 
           private_class_method def self.extract_buckets_from(search_response, for_query:)
-            search_response.raw_data.dig(
-              "aggregations",
+            search_response.aggregations.dig(
               for_query.name,
               "buckets"
-            ) || [build_bucket(for_query, search_response.raw_data)]
+            ) || [build_bucket(for_query, search_response)]
           end
 
           private_class_method def self.build_bucket(query, response)
             defaults = {
               "key" => query.groupings.to_h { |g| [g.key, nil] },
-              "doc_count" => response.dig("hits", "total", "value") || 0
+              "doc_count" => response.total_document_count(default: 0)
             }
 
             empty_bucket_computations = query.computations.to_h do |computation|
@@ -74,7 +73,7 @@ module ElasticGraph
 
             defaults
               .merge(empty_bucket_computations)
-              .merge(response["aggregations"] || {})
+              .merge(response.aggregations)
           end
         end
       end

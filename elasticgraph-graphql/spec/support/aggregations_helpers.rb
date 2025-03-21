@@ -159,7 +159,7 @@ module ElasticGraph
     # This helper method is used from our unit and integration tests for `DatastoreQuery` to verify that
     # that requirement is satisfied.
     def verify_aggregations_satisfy_optimizer_requirements(aggregations, for_query:)
-      return if aggregations.nil?
+      return if aggregations.nil? || aggregations.empty?
 
       actual_agg_names = aggregations.keys.map do |key|
         GraphQL::Aggregation::Key.extract_aggregation_name_from(key)

@@ -49,7 +49,7 @@ module ElasticGraph
           .first
           .tap do |response|
             # To ensure that aggregations always satisfy the `QueryOptimizer` requirements, we validate all queries here.
-            aggregations = response.raw_data["aggregations"]
+            aggregations = response.aggregations
             verify_aggregations_satisfy_optimizer_requirements(aggregations, for_query: query)
           end
       end
