@@ -196,7 +196,7 @@ module ElasticGraph
         end
 
         client_names_and_results = Support::Threading.parallel_map(ops_by_client_name) do |(client_name, all_ops)|
-          # @type block: [String, Symbol, Array[untyped] | Hash[_Operation, Array[Integer]]]
+          # @type block: [::String, ::Symbol, ::Array[untyped] | ::Hash[_Operation, ::Array[::Integer]]]
 
           ops, unversioned_ops = all_ops.partition(&:versioned?)
 
