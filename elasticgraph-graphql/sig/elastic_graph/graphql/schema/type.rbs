@@ -11,6 +11,7 @@ module ElasticGraph
         def unwrap_fully: () -> Type
         def field_named: (::String) -> Field
         def object?: () -> bool
+        def collection?: () -> bool
         def relay_connection?: () -> bool
         def abstract?: () -> bool
         def enum?: () -> bool
