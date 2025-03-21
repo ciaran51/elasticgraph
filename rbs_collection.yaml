@@ -22,6 +22,12 @@ gems:
   # it is included.
   - name: httpx
     ignore: true
+  # Ignore steep because we are not using them as library in this project.
+  - name: steep
+    ignore: true
+  # Ignore rbs because we are not using them as library in this project.
+  - name: rbs
+    ignore: true
 
   # Use `ignore: false` to tell rbs collection to pull the RBS signatures from these gems.
   - name: aws-sdk-cloudwatch

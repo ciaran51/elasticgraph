@@ -196,6 +196,8 @@ module ElasticGraph
         end
 
         client_names_and_results = Support::Threading.parallel_map(ops_by_client_name) do |(client_name, all_ops)|
+          # @type block: [String, Symbol, Array[untyped] | Hash[_Operation, Array[Integer]]]
+
           ops, unversioned_ops = all_ops.partition(&:versioned?)
 
           msearch_response =
@@ -296,7 +298,11 @@ module ElasticGraph
         end
 
         if failures.empty?
-          client_names_and_results.each_with_object(_ = {}) do |(client_name, _success_or_failure, results), accum|
+          # All results are success and the third element of the tuple is a hash.
+          # Assign the results to narrow down the type.
+          success_results = client_names_and_results # : ::Array[[::String, ::Symbol, ::Hash[_Operation, ::Array[::Integer]]]]
+
+          success_results.each_with_object(_ = {}) do |(client_name, _success_or_failure, results), accum|
             results.each do |op, version|
               (accum[op] ||= {})[client_name] = version
             end
