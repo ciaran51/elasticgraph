@@ -23,7 +23,7 @@ PATH
       apollo-federation (~> 3.10)
       elasticgraph-graphql (= 0.19.1.1)
       elasticgraph-support (= 0.19.1.1)
-      graphql (~> 2.4.14)
+      graphql (~> 2.4.15)
 
 PATH
   remote: elasticgraph-datastore_core
@@ -54,7 +54,7 @@ PATH
     elasticgraph-graphql (0.19.1.1)
       elasticgraph-datastore_core (= 0.19.1.1)
       elasticgraph-schema_artifacts (= 0.19.1.1)
-      graphql (~> 2.4.14)
+      graphql (~> 2.4.15)
 
 PATH
   remote: elasticgraph-health_check
@@ -143,7 +143,7 @@ PATH
     elasticgraph-query_registry (0.19.1.1)
       elasticgraph-graphql (= 0.19.1.1)
       elasticgraph-support (= 0.19.1.1)
-      graphql (~> 2.4.14)
+      graphql (~> 2.4.15)
       rake (~> 13.2, >= 13.2.1)
 
 PATH
@@ -168,7 +168,7 @@ PATH
       elasticgraph-json_schema (= 0.19.1.1)
       elasticgraph-schema_artifacts (= 0.19.1.1)
       elasticgraph-support (= 0.19.1.1)
-      graphql (~> 2.4.14)
+      graphql (~> 2.4.15)
       rake (~> 13.2, >= 13.2.1)
 
 PATH
@@ -312,7 +312,7 @@ GEM
     google-protobuf (4.29.3-arm64-darwin)
       bigdecimal
       rake (>= 13)
-    graphql (2.4.14)
+    graphql (2.4.15)
       base64
       fiber-storage
       logger
@@ -592,7 +592,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws_lambda_ric (~> 3.0)
-  benchmark-ips (~> 2.13)
+  benchmark-ips (~> 2.14)
   coderay (~> 1.1, >= 1.1.3)
   elasticgraph (= 0.19.1.1)!
   elasticgraph-admin (= 0.19.1.1)!
@@ -624,7 +624,7 @@ DEPENDENCIES
   html-proofer (~> 5.0, >= 5.0.10)
   httpx (~> 1.4, >= 1.4.1)
   jekyll (~> 4.4, >= 4.4.1)
-  memory_profiler (~> 1.0)
+  memory_profiler (~> 1.1)
   method_source (~> 1.1)
   nokogiri (~> 1.18, >= 1.18.4)
   rack-test (~> 2.2)
