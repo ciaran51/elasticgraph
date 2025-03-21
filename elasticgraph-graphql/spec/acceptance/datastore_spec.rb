@@ -76,7 +76,7 @@ module ElasticGraph
             "widgets" => {case_correctly("total_edge_count") => 0},
             case_correctly("widget_currencies") => {case_correctly("total_edge_count") => 0}
           )
-        }.to query_datastore("main", 1).time
+        }.to perform_datastore_msearch("main", 1).time.and perform_datastore_search("main", 8).times
       end
 
       it "handles queries against non-existing fields in the datastore gracefully--such as when a new field is added to a rollover index template after the template has been used" do
