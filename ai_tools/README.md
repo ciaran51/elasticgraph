@@ -20,4 +20,4 @@ You can use the MCP server with a variety of tools and platforms, including:
 
 ## Additional Resources
 
-- ElasticGraph follows [llmstxt.org](https://llmstxt.org/) and publishes all documenation concatenated into one `llms-full.txt` file: https://block.github.io/elasticgraph/llms-full.txt
+- ElasticGraph follows [llmstxt.org](https://llmstxt.org/) and publishes all documentation concatenated into one `llms-full.txt` file: https://block.github.io/elasticgraph/llms-full.txt
