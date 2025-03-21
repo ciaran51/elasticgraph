@@ -63,21 +63,25 @@ module ElasticGraph
 
         # Normalizes the given documents, ensuring it has the expected cardinality.
         def normalize_documents(response, &handle_warning)
-          doc_cardinality.normalize(response, handle_warning: handle_warning, &:id)
+          doc_cardinality.normalize(response, handle_warning: handle_warning) { |doc| (_ = doc).id }
         end
 
         private
 
         def normalize_ids(id_or_ids, &handle_warning)
-          id_cardinality.normalize(id_or_ids, handle_warning: handle_warning, &:itself)
+          id_cardinality.normalize(id_or_ids, handle_warning: handle_warning) { |id| id }
         end
 
         module Cardinality
           module Many
             def self.normalize(list_or_scalar, handle_warning:)
-              return list_or_scalar if list_or_scalar.is_a?(Enumerable)
-              handle_warning.call("scalar instead of a list")
-              Array(list_or_scalar)
+              case list_or_scalar
+              when ::Enumerable
+                list_or_scalar
+              else
+                handle_warning.call("scalar instead of a list")
+                Array(list_or_scalar)
+              end
             end
 
             def self.blank_value
@@ -87,9 +91,13 @@ module ElasticGraph
 
           module One
             def self.normalize(list_or_scalar, handle_warning:, &deterministic_comparator)
-              return list_or_scalar unless list_or_scalar.is_a?(Enumerable)
-              handle_warning.call("list of more than one item instead of a scalar") if list_or_scalar.size > 1
-              list_or_scalar.min_by(&deterministic_comparator)
+              case list_or_scalar
+              when ::Enumerable
+                handle_warning.call("list of more than one item instead of a scalar") if (_ = list_or_scalar).size > 1
+                list_or_scalar.min_by(&deterministic_comparator)
+              else
+                list_or_scalar
+              end
             end
 
             def self.blank_value

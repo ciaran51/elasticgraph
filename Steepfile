@@ -41,7 +41,6 @@ target :elasticgraph_gems do
     elasticgraph-graphql/lib/elastic_graph/graphql/resolvers/nested_relationships.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema/field.rb
-    elasticgraph-graphql/lib/elastic_graph/graphql/schema/relation_join.rb
     elasticgraph-graphql/lib/elastic_graph/graphql/schema/type.rb
   ])
 

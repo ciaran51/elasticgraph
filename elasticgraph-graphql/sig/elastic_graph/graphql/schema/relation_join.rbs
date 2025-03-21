@@ -1,0 +1,94 @@
+# Copyright 2024 - 2025 Block, Inc.
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
+#
+# frozen_string_literal: true
+
+module ElasticGraph
+  class GraphQL
+    class Schema
+      class RelationJoinSupertype < Data
+        def initialize: (
+          field: Field,
+          document_id_field_name: ::String,
+          filter_id_field_name: ::String,
+          id_cardinality: RelationJoin::cardinality,
+          doc_cardinality: RelationJoin::cardinality,
+          additional_filter: ::Hash[::String, untyped],
+          foreign_key_nested_paths: ::Array[::String]
+        ) -> void
+
+        def self.new: (
+          field: Field,
+          document_id_field_name: ::String,
+          filter_id_field_name: ::String,
+          id_cardinality: RelationJoin::cardinality,
+          doc_cardinality: RelationJoin::cardinality,
+          additional_filter: ::Hash[::String, untyped],
+          foreign_key_nested_paths: ::Array[::String]
+        ) -> RelationJoin | (
+          Field,
+          ::String,
+          ::String,
+          RelationJoin::cardinality,
+          RelationJoin::cardinality,
+          ::Hash[::String, untyped],
+          ::Array[::String]
+        ) -> RelationJoin
+
+        attr_reader field: Field
+        attr_reader document_id_field_name: ::String
+        attr_reader filter_id_field_name: ::String
+        attr_reader id_cardinality: RelationJoin::cardinality
+        attr_reader doc_cardinality: RelationJoin::cardinality
+        attr_reader additional_filter: ::Hash[::String, untyped]
+        attr_reader foreign_key_nested_paths: ::Array[::String]
+      end
+
+      class RelationJoin < RelationJoinSupertype
+        type cardinality = singleton(Cardinality::One) | singleton(Cardinality::Many)
+
+        def self.from: (Field) -> RelationJoin?
+
+        def blank_value: () -> (nil | DatastoreResponse::SearchResponse)
+
+        def extract_id_or_ids_from: (
+          ::Hash[::String, untyped],
+          ^(document: ::Hash[::String, untyped], problem: ::String) -> void
+        ) -> (nil | ::String | ::Enumerable[::String])
+
+        def normalize_documents: (
+          DatastoreResponse::SearchResponse
+        ) { (::String) -> void }-> (nil | untyped)
+
+        private
+
+        def normalize_ids: (
+          ::String | ::Array[::String] id_or_ids,
+        ) { (::String) -> void } -> (nil | ::String | ::Enumerable[::String])
+
+        module Cardinality
+          module Many
+            def self.normalize: [T] (
+              T | ::Enumerable[T] list_or_scalar,
+              handle_warning: ^(::String) -> void
+            ) { (T) -> untyped } -> ::Enumerable[T]
+
+            def self.blank_value: () -> DatastoreResponse::SearchResponse
+          end
+
+          module One
+            def self.normalize: [T] (
+              T | ::Array[T] list_or_scalar,
+              handle_warning: ^(::String) -> void
+            ) { (T) -> untyped } -> T?
+
+            def self.blank_value: () -> nil
+          end
+        end
+      end
+    end
+  end
+end
