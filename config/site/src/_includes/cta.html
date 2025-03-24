@@ -8,10 +8,6 @@
       Try some <a href="{% link query-api/overview.md %}" class="text-white underline hover:no-underline">example queries</a> by visiting the
       <a href="{{ site.localhost_eg_url }}" class="text-white underline hover:no-underline">local GraphiQL UI</a> after booting locally with this command:
     </p>
-    <div class="flex justify-center mb-4">
-      <div class="inline-block">
-        {% include code-box.html command=site.demo_oneliner full_width=true %}
-      </div>
-    </div>
+    {% include copyable_code_snippet.html language="shell" code=site.demo_oneliner font_size="text-xs" style="dark" %}
   </div>
 </section>

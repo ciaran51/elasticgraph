@@ -193,12 +193,13 @@ module ElasticGraph
     end
 
     def extract_code_blocks(doc)
-      doc.css("figure.highlight").filter_map do |figure|
-        if (code = figure.css("code").first)
-          lang = code["data-lang"]
-          text = code.text.strip
+      doc.css("div.highlighter-rouge").map do |container|
+        if (code = container.css("code"))
+          unless (lang = container.attributes.fetch("class").value[/language-(\w+)/, 1])
+            raise "Cannot identify the code language for snippet: #{container.inspect}"
+          end
 
-          "```#{lang}\n#{text}\n```\n"
+          "```#{lang}\n#{code.text.strip}\n```\n"
         end
       end
     end
