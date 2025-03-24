@@ -17,16 +17,16 @@ ElasticGraph supports aggregations on these nested fields via `subAggregations`.
 to aggregate directly on the data of one of these fields. For example, this query returns the
 total sales for all albums of all artists:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.TotalAlbumSales }}
-{% endhighlight %}
+```
 
 Sub-aggregations can also be performed under the groupings of an outer aggregation. For example,
 this query returns the total album sales grouped by the home country of the artist:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.TotalAlbumSalesByArtistHomeCountry }}
-{% endhighlight %}
+```
 
 Sub-aggregation nodes offer the standard set of aggregation operations:
 
@@ -40,25 +40,25 @@ Sub-aggregation nodes offer the standard set of aggregation operations:
 The data included in a sub-aggregation can be filtered. For example, this query gets the total
 sales of all albums released in the 21st century:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.TwentyFirstCenturyAlbumSales }}
-{% endhighlight %}
+```
 
 ### Sub-Aggregation Limitations
 
 Sub-aggregation pagination support is limited. You can use `first` to request how many
 nodes are returned, but there is no `pageInfo` and you cannot request the next page of data:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.AlbumSalesByReleaseMonth }}
-{% endhighlight %}
+```
 
 Sub-aggregation counts are approximate. Instead of `count`, ElasticGraph offers `countDetail`
 with multiple subfields:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.AlbumCount }}
-{% endhighlight %}
+```
 
 `approximateValue`
 : The (approximate) count of documents in this aggregation bucket.

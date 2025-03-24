@@ -8,9 +8,9 @@ menu_order: 1
 Aggregated values can be computed from all values of a particular field from all documents backing an aggregation node.
 Here's an example:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.BluegrassArtistLifetimeSales }}
-{% endhighlight %}
+```
 
 This example query aggregates the values of the `Artist.lifetimeSales` field using all 4 of the standard numeric
 aggregated values: `min`, `max`, `avg`, and `sum`. These are qualified with `approximate` or `exact` to indicate
@@ -32,9 +32,9 @@ the level of precision they offer. The documentation for `approximateSum` and `e
 
 Besides these standard numeric aggregated values, ElasticGraph offers one more:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.aggregations.SkaArtistHomeCountries }}
-{% endhighlight %}
+```
 
 The `approximateDistinctValueCount` field uses the [HyperLogLog++ algorithm](https://research.google.com/pubs/archive/40671.pdf)
 to provide an approximate count of distinct values for the field. In this case, it can give us an idea of how many countries ska

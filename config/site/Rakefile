@@ -269,29 +269,6 @@ module ElasticGraph
           run_jekyll :serve
         end
 
-        desc "Validates the markdown of the website"
-        task :validate_markdown do
-          files_needing_fixes = ::Dir["#{__dir__}/src/**/*.md"].select do |file|
-            ::File.read(file).include?("```")
-          end
-
-          if files_needing_fixes.any?
-            abort <<~EOS
-              Failure: #{files_needing_fixes.size} files have code snippets using triple backticks (```) but we have standardized
-              on Jekyll's code snippet highlight:
-
-              https://jekyllrb.com/docs/liquid/tags/#code-snippet-highlighting
-              {% highlight language %}
-              some code
-              {% endhighlight %}
-
-              To fix, update the following files to use the Jekyll syntax instead of triple backticks:
-
-              #{files_needing_fixes.sort.map { |f| "- #{f}" }.join("\n")}
-            EOS
-          end
-        end
-
         desc "Validate the site's HTML output"
         task :validate_html_output do
           require "html-proofer"
@@ -329,10 +306,11 @@ module ElasticGraph
         end
 
         desc "Perform validations of the website, including doc tests and doc coverage"
-        task validate: [:validate_markdown, :build, :validate_html_output, :docs_coverage, :doctest]
+        task validate: [:build, :validate_html_output, :docs_coverage, :doctest]
 
         task build_css: :npm_install do
           require "rouge"
+          require_relative "support/syntax_theme"
           build_css
         end
 
@@ -414,8 +392,11 @@ module ElasticGraph
     def build_css
       ::Dir.chdir(SITE_SOURCE_DIR) do
         sh "npm run build:css"
-        # tulip appears to provide the best looking syntax highlighting theme of all the built-in rouge themes.
-        ::File.write("assets/css/highlight.css", ::Rouge::Theme.find("tulip").render(scope: ".highlight"))
+
+        ::Dir.chdir(SITE_SOURCE_DIR) do
+          sh "npm run build:css"
+          ::File.write("assets/css/highlight.css", ::ElasticGraph::SyntaxTheme.new.render)
+        end
       end
     end
 

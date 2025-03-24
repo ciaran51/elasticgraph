@@ -11,6 +11,6 @@ ElasticGraph offers a standard set of comparison filter predicates:
 
 Here's an example:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.filtering.FindArtistsFormedIn90s }}
-{% endhighlight %}
+```

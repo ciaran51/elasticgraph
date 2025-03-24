@@ -19,14 +19,14 @@ Before you begin, ensure you have the following installed on your system:
 
 Confirm these are installed using your terminal:
 
-{% highlight shell %}
+```shell
 $ ruby -v
 ruby 3.4.1 (2024-12-25 revision 48d4efcb85) +PRISM [arm64-darwin24]
 $ docker compose version
 Docker Compose version v2.32.4-desktop.1
 $ git -v
 git version 2.46.0
-{% endhighlight %}
+```
 
 {: .alert-note}
 **Note**{: .alert-title}
@@ -36,11 +36,11 @@ You don't need these exact versions (these are just examples). Your Ruby version
 
 Run the following command in your terminal:
 
-{% highlight shell %}
+```shell
 $ gem exec elasticgraph new path/to/project --datastore elasticsearch
 # or
 $ gem exec elasticgraph new path/to/project --datastore opensearch
-{% endhighlight %}
+```
 
 {: .alert-note}
 **Note**{: .alert-title}
@@ -62,10 +62,10 @@ This will:
 The initial project skeleton comes with everything you need to run ElasticGraph locally.
 Confirm it works by running the following:
 
-{% highlight shell %}
+```shell
 $ cd path/to/project
 $ bundle exec rake boot_locally
-{% endhighlight %}
+```
 
 This will:
 
@@ -77,9 +77,9 @@ This will:
 
 Run some example queries in GraphiQL to confirm it's working. Here's an example query to get you started:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.filtering.FindArtistsFormedIn90s }}
-{% endhighlight %}
+```
 
 Visit the [Query API docs]({% link query-api.md %}) for other example queries that work against the example schema.
 
@@ -91,7 +91,7 @@ worked in an ElasticGraph project before).
 
 Let's add a `Venue.yearOpened` field to our schema. Here's a git diff showing what to change:
 
-{% highlight diff %}
+```diff
 diff --git a/config/schema/artists.rb b/config/schema/artists.rb
 index 77e63de..7999fe4 100644
 --- a/config/schema/artists.rb
@@ -106,18 +106,18 @@ index 77e63de..7999fe4 100644
      t.field "location", "GeoLocation"
      t.field "capacity", "Int"
      t.relates_to_many "featuredArtists", "Artist", via: "tours.shows.venueId", dir: :in, singular: "featuredArtist"
-{% endhighlight %}
+```
 
 Next, rebuild the project:
 
-{% highlight shell %}
+```shell
 $ bundle exec rake build
-{% endhighlight %}
+```
 
 This will re-generate the schema artifacts, run the test suite, and fail. The failing test will indicate
 that the `:venue` factory is missing the new field. To fix it, define `yearOpened` on the `:venue` factory in the `factories.rb` file under `lib`:
 
-{% highlight diff %}
+```diff
 diff --git a/lib/my_eg_project/factories.rb b/lib/my_eg_project/factories.rb
 index 0d8659c..509f274 100644
 --- a/lib/my_eg_project/factories.rb
@@ -130,7 +130,7 @@ index 0d8659c..509f274 100644
      location { build(:geo_location) }
      capacity { Faker::Number.between(from: 200, to: 100_000) }
    end
-{% endhighlight %}
+```
 
 Re-run `bundle exec rake build` and everything should pass. You can also run `bundle exec rake boot_locally`
 and query your new field to confirm the fake values being generated for it.
@@ -143,9 +143,9 @@ Congratulations! You've set up ElasticGraph locally and run your first queries. 
 
 Delete the `artist` schema definition:
 
-{% highlight shell %}
+```shell
 $ rm config/schema/artists.rb
-{% endhighlight %}
+```
 
 Then define your own schema in a Ruby file under `config/schema`.
 
@@ -157,9 +157,9 @@ Then define your own schema in a Ruby file under `config/schema`.
 
 Your ElasticGraph project includes a command that's designed to be run on CI:
 
-{% highlight shell %}
+```shell
 $ bundle exec rake check
-{% endhighlight %}
+```
 
 This should be run on every commit (ideally before merging a pull request) using a CI system
 such as [GitHub Actions](https://github.com/features/actions), [Buildkite](https://buildkite.com/),

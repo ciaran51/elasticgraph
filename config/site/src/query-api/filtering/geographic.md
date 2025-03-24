@@ -11,6 +11,6 @@ The `GeoLocation` type supports a special predicate:
 
 Here's an example of this predicate:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.filtering.FindSeattleVenues }}
-{% endhighlight %}
+```
