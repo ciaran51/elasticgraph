@@ -14,9 +14,9 @@ ElasticGraph supports a couple predicates for filtering on list fields:
 When filtering on a list field, use `anySatisfy` to find records with matching list elements.
 This query, for example, will find artists that released a platinum-selling album in the 1990s:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.filtering.ArtistsWithPlatinum90sAlbum }}
-{% endhighlight %}
+```
 
 {: .alert-warning}
 **Warning**{: .alert-title}
@@ -30,6 +30,6 @@ their albums will be returned--even ones that sold poorly or were released outsi
 
 If you'd rather filter on the _size_ of a list, use `count`:
 
-{% highlight graphql %}
+```graphql
 {{ site.data.music_queries.filtering.FindProlificArtists }}
-{% endhighlight %}
+```

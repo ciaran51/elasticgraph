@@ -14,11 +14,11 @@ Build faster with ElasticGraph using AI tools. Here's how to get started with Ch
 
 ### Copy the prompt
 
-{% highlight text %}
+```text
 I'm building with ElasticGraph. Here's the documentation:
 
 [the contents of llms-full.txt go here]
-{% endhighlight %}
+```
 
 <button id="copy-button" class="btn-primary">Copy this prompt</button>
 
@@ -43,9 +43,9 @@ The [elasticgraph-mcp-server](https://pypi.org/project/elasticgraph-mcp-server/)
 
 Install and run the MCP server, for example as a [Goose extension](https://block.github.io/goose/docs/getting-started/using-extensions), using:
 
-{% highlight bash %}
+```bash
 uvx elasticgraph-mcp-server
-{% endhighlight %}
+```
 
 Full documentation for [elasticgraph-mcp-server](https://pypi.org/project/elasticgraph-mcp-server/).
 
