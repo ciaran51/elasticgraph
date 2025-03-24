@@ -7,6 +7,7 @@ module ElasticGraph
       def use_updates_for_indexing?: () -> bool
       def routing_value_for_prepared_record: (::Hash[::String, untyped], ?route_with_path: ::String?, ?id_path: ::String) -> ::String?
       def has_custom_routing?: () -> bool
+      def max_result_window: () -> ::Integer
       def searches_could_hit_incomplete_docs?: () -> bool
       def cluster_to_query: () -> ::String
       def clusters_to_index_into: () -> ::Array[::String]
@@ -26,6 +27,7 @@ module ElasticGraph
       def current_sources: () -> ::Set[::String]
       def fields_by_path: () -> ::Hash[::String, SchemaArtifacts::RuntimeMetadata::IndexField]
       def env_index_config: () -> Configuration::IndexDefinition
+      def env_agnostic_settings: () -> ::Hash[::String, untyped]
       def defined_clusters: () -> ::Set[::String]
       def datastore_clients_by_name: () -> ::Hash[::String, DatastoreCore::_Client]
       def rollover_index_template?: () -> bool
@@ -48,7 +50,8 @@ module ElasticGraph
         name: ::String,
         runtime_metadata: SchemaArtifacts::RuntimeMetadata::IndexDefinition,
         config: DatastoreCore::Config,
-        datastore_clients_by_name: ::Hash[::String, DatastoreCore::_Client]
+        datastore_clients_by_name: ::Hash[::String, DatastoreCore::_Client],
+        schema_artifacts: schemaArtifacts
       ) -> indexDefinition
     end
   end

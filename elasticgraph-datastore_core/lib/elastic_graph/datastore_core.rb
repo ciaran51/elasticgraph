@@ -49,7 +49,8 @@ module ElasticGraph
             name: name,
             runtime_metadata: index_def_metadata,
             config: config,
-            datastore_clients_by_name: clients_by_name
+            datastore_clients_by_name: clients_by_name,
+            schema_artifacts: schema_artifacts
           )
 
           [name, index_def]

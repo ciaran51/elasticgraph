@@ -76,6 +76,10 @@ module ElasticGraph
           end
 
           it "ignores non-existing index template and index" do
+            allow(datastore_core.schema_artifacts).to receive(:index_templates).and_wrap_original do |original|
+              original.call.merge("does_not_exist" => {"template" => {"settings" => {}}})
+            end
+
             index_def_not_exist = index_def_named("does_not_exist", rollover: {
               timestamp_field_path: "created_at", frequency: :monthly
             })
@@ -573,7 +577,8 @@ module ElasticGraph
             name: name,
             config: datastore_core.config,
             runtime_metadata: runtime_metadata,
-            datastore_clients_by_name: datastore_core.clients_by_name
+            datastore_clients_by_name: datastore_core.clients_by_name,
+            schema_artifacts: datastore_core.schema_artifacts
           )
         end
       end

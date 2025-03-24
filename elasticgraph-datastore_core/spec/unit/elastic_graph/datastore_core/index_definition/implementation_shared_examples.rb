@@ -74,6 +74,28 @@ module ElasticGraph
           end
         end
 
+        describe "#max_result_window" do
+          it "returns the default (10000) when it has not been explicitly configured on the index definition" do
+            index = define_index
+
+            expect(index.max_result_window).to eq 10000
+          end
+
+          it "respects an override configured in the env-agnostic schema definition" do
+            index = define_index(max_result_window: 9876)
+
+            expect(index.max_result_window).to eq 9876
+          end
+
+          it "respects an override configured in an env-specific settings file" do
+            index = define_index("my_type", max_result_window: 9876, config_overrides: {index_definitions: {
+              "my_type" => config_index_def_of(setting_overrides: {"max_result_window" => 1234})
+            }})
+
+            expect(index.max_result_window).to eq 1234
+          end
+        end
+
         describe "#cluster_to_query" do
           it "references query_cluster from config" do
             index = define_index("my_type", config_overrides: {index_definitions: {
