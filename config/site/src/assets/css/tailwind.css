@@ -28,6 +28,21 @@
         content: none;
       }
     }
+
+    pre.highlight {
+      margin-top: 18px;
+      margin-bottom: 18px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+  }
+
+  .alert-tip div.highlight pre.highlight {
+    margin-bottom: 0px;
+  }
+
+  .alert-tip div.highlight {
+    margin-bottom: 0px;
   }
 }
 
