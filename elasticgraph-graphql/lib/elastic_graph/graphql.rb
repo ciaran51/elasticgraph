@@ -79,7 +79,8 @@ module ElasticGraph
           monotonic_clock: monotonic_clock,
           logger: logger,
           slow_query_threshold_ms: @config.slow_query_latency_warning_threshold_in_ms,
-          datastore_search_router: datastore_search_router
+          datastore_search_router: datastore_search_router,
+          config: config
         )
       end
     end

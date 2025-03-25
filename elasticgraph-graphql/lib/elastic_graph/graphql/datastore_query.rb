@@ -230,6 +230,10 @@ module ElasticGraph
         )
       end
 
+      def effective_size
+        document_paginator.effective_size
+      end
+
       private
 
       def merge_attribute(attribute, other_value)

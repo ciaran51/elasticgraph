@@ -16,7 +16,7 @@ module ElasticGraph
       RSpec.describe QuerySource, :factories, :uses_datastore do
         let(:graphql) { build_graphql }
 
-        it "batches up multiple queries, returning a chainable promise for each" do
+        it "batches up multiple queries, sending an msearch request containing them all to the datastore" do
           index_into(
             graphql,
             widget = build(:widget),

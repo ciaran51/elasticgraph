@@ -18,12 +18,13 @@ module ElasticGraph
       # @dynamic schema
       attr_reader :schema
 
-      def initialize(schema:, monotonic_clock:, logger:, slow_query_threshold_ms:, datastore_search_router:)
+      def initialize(schema:, monotonic_clock:, logger:, slow_query_threshold_ms:, datastore_search_router:, config:)
         @schema = schema
         @monotonic_clock = monotonic_clock
         @logger = logger
         @slow_query_threshold_ms = slow_query_threshold_ms
         @datastore_search_router = datastore_search_router
+        @config = config
       end
 
       # Executes the given `query_string` using the provided `variables`.
@@ -60,11 +61,13 @@ module ElasticGraph
           operation_name: operation_name,
           client: client,
           context: context.merge({
+            logger: @logger,
             monotonic_clock_deadline: timeout_in_ms&.+(start_time_in_ms),
             elastic_graph_schema: @schema,
             schema_element_names: @schema.element_names,
             elastic_graph_query_tracker: query_tracker,
-            datastore_search_router: @datastore_search_router
+            datastore_search_router: @datastore_search_router,
+            nested_relationship_resolver_mode: @config.nested_relationship_resolver_mode
           }.compact)
         )
 
