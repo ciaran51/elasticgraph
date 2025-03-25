@@ -5,6 +5,7 @@
   },
   "scripts": {
     "build:css": "npx @tailwindcss/cli -i ./src/assets/css/tailwind.css -o ./src/assets/css/main.css --minify",
+    "serve:css": "npx @tailwindcss/cli -i ./src/assets/css/tailwind.css -o ./src/assets/css/main.css --watch",
     "format:md": "npx prettier --write \"src/**/*.md\""
   }
 }

@@ -44,11 +44,7 @@ module ElasticGraph
     require_relative "../../script/list_eg_gems"
     DOCUMENTED_GEMS = ::ElasticGraphGems.list - undocumented_gems
 
-    attr_accessor :disable_updates_on_file_recreates
-
     def initialize
-      self.disable_updates_on_file_recreates = false
-
       namespace :site do
         task build_docs: [:unpack_doc_archives] do
           # Clean the docs output directory
@@ -237,32 +233,9 @@ module ElasticGraph
             end
           end
 
-          # Recompile CSS when any of the inputs change.
-          css_input_files = [
-            SITE_CONFIG_DIR / "tailwind.config.js",
-            SITE_CONFIG_DIR / "package.json",
-            SITE_SOURCE_DIR / "assets" / "css" / "tailwind.css"
-          ].map(&:to_s)
-
-          page_input_globs = [SITE_SOURCE_DIR / "**/*.{html,md}"].map(&:to_s)
-          css_output_file = (SITE_SOURCE_DIR / "assets" / "css" / "main.css").to_s
-          watch_files(
-            "Rebuilding css",
-            page_input_globs + css_input_files,
-            exclude: css_output_file
-          ) do
-            # For reasons I don't understand, `::Filewatcher` reports that hundreds of files are deleted and recreated
-            # every time we run `build_css`. To avoid getting in an infinite loop, we disable updates on file recreates
-            # while `build_css` runs and for 10 seconds afterwards.
-            self.disable_updates_on_file_recreates = true
-
-            begin
-              build_css
-            ensure
-              ::Thread.new do
-                sleep 10
-                self.disable_updates_on_file_recreates = false
-              end
+          ::Thread.new do
+            ::Dir.chdir(SITE_SOURCE_DIR) do
+              sh "npm run serve:css"
             end
           end
 
@@ -311,7 +284,11 @@ module ElasticGraph
         task build_css: :npm_install do
           require "rouge"
           require_relative "support/syntax_theme"
-          build_css
+
+          ::Dir.chdir(SITE_SOURCE_DIR) do
+            sh "npm run build:css"
+            ::File.write("assets/css/highlight.css", ::ElasticGraph::SyntaxTheme.new.render)
+          end
         end
 
         # When we are releasing gems, these dependencies aren't available.
@@ -334,7 +311,13 @@ module ElasticGraph
                 end
                 ::ElasticGraph::QueryRegistry::RakeTasks.from_yaml_file(settings_file, queries_dir)
 
-                task "query_registry:validate_queries" => ["schema_artifacts:dump", "query_registry:dump_variables:all"]
+                task "query_registry:validate_queries" => ["print_dir", "schema_artifacts:dump", "query_registry:dump_variables:all"]
+
+                task :print_dir do
+                  puts
+                  puts "CURRENT_DIR: #{Dir.pwd}"
+                  puts
+                end
 
                 task compile_queries: "query_registry:validate_queries" do
                   queries_by_name_by_category = queries_dir.children.to_h do |category_path|
@@ -358,18 +341,11 @@ module ElasticGraph
     def watch_files(description, *args, **kwargs)
       ::Thread.new do
         ::Filewatcher.new(*args, **kwargs).watch do |changes|
-          effective_changes =
-            if disable_updates_on_file_recreates
-              changes.reject { |file, event| event == :deleted || event == :created }
-            else
-              changes
-            end
-
-          changed_files = effective_changes.map do |file, _|
+          changed_files = changes.map do |file, _|
             ::Pathname.new(file).relative_path_from(REPO_ROOT)
           end.sort
 
-          changed_file_descriptions = effective_changes.map do |file, event|
+          changed_file_descriptions = changes.map do |file, event|
             relative_path = ::Pathname.new(file).relative_path_from(REPO_ROOT)
             "#{relative_path} (#{event})"
           end.sort
@@ -385,17 +361,6 @@ module ElasticGraph
             puts "#{changed_file_descriptions.size} files changed (#{details}). #{description}..."
             yield changed_files
           end
-        end
-      end
-    end
-
-    def build_css
-      ::Dir.chdir(SITE_SOURCE_DIR) do
-        sh "npm run build:css"
-
-        ::Dir.chdir(SITE_SOURCE_DIR) do
-          sh "npm run build:css"
-          ::File.write("assets/css/highlight.css", ::ElasticGraph::SyntaxTheme.new.render)
         end
       end
     end
