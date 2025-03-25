@@ -217,6 +217,7 @@ module ElasticGraph
           decoded_cursor_factory: decoded_cursor_factory,
           schema_element_names: schema_element_names,
           size_multiplier: size_multiplier,
+          max_effective_size: search_index_definitions.map { |i| i.max_result_window }.min,
           paginator: Paginator.new(
             default_page_size: default_page_size,
             max_page_size: max_page_size,

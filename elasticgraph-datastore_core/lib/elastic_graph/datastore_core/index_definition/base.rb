@@ -46,6 +46,12 @@ module ElasticGraph
           route_with != "id"
         end
 
+        def max_result_window
+          @max_result_window ||= flattened_env_setting_overrides.fetch("index.max_result_window") do
+            env_agnostic_settings.fetch("index.max_result_window")
+          end
+        end
+
         # Indicates if a search on this index definition may hit incomplete documents. An incomplete document
         # can occur when multiple event types flow into the same index. An index that has only one source type
         # can never have incomplete documents, but an index that has 2 or more sources can have incomplete

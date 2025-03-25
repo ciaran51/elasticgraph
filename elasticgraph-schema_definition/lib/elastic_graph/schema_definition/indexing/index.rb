@@ -248,7 +248,9 @@ module ElasticGraph
           "index.mapping.ignore_malformed" => false,
           "index.mapping.coerce" => false,
           "index.number_of_replicas" => 1,
-          "index.number_of_shards" => 1
+          "index.number_of_shards" => 1,
+          # 10K is the default: https://www.elastic.co/guide/en/elasticsearch/reference/8.17/index-modules.html#dynamic-index-settings
+          "index.max_result_window" => 10000
         }
 
         def mappings

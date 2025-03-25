@@ -1250,6 +1250,7 @@ index_templates:
         index.mapping.coerce: false
         index.number_of_replicas: 1
         index.number_of_shards: 1
+        index.max_result_window: 10000
   widget_currencies:
     index_patterns:
     - widget_currencies_rollover__*
@@ -1318,6 +1319,7 @@ index_templates:
         index.mapping.coerce: false
         index.number_of_replicas: 1
         index.number_of_shards: 1
+        index.max_result_window: 10000
   widgets:
     index_patterns:
     - widgets_rollover__*
@@ -1462,6 +1464,7 @@ index_templates:
         index.mapping.coerce: false
         index.number_of_replicas: 1
         index.number_of_shards: 3
+        index.max_result_window: 10000
 indices:
   addresses:
     aliases: {}
@@ -1503,6 +1506,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   components:
     aliases: {}
     mappings:
@@ -1559,6 +1563,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   electrical_parts:
     aliases: {}
     mappings:
@@ -1587,6 +1592,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   manufacturers:
     aliases: {}
     mappings:
@@ -1611,6 +1617,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   mechanical_parts:
     aliases: {}
     mappings:
@@ -1639,6 +1646,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   sponsors:
     aliases: {}
     mappings:
@@ -1660,6 +1668,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
   widget_workspaces:
     aliases: {}
     mappings:
@@ -1688,6 +1697,7 @@ indices:
       index.mapping.coerce: false
       index.number_of_replicas: 1
       index.number_of_shards: 1
+      index.max_result_window: 10000
 scripts:
   update_WidgetCurrency_from_Widget_0f26b3e9ea093af29e5cef02a25e75ca:
     context: update

@@ -18,7 +18,7 @@ module ElasticGraph
     # This module contains common implementation logic for both the rollover and non-rollover
     # case, as well as a `with` factory method.
     module IndexDefinition
-      def self.with(name:, runtime_metadata:, config:, datastore_clients_by_name:)
+      def self.with(name:, runtime_metadata:, config:, datastore_clients_by_name:, schema_artifacts:)
         if (env_index_config = config.index_definitions[name]).nil?
           raise Errors::ConfigError, "Configuration does not provide an index definition for `#{name}`, " \
             "but it is required so we can identify the datastore cluster(s) to query and index into."
@@ -36,14 +36,20 @@ module ElasticGraph
         }
 
         if (rollover = runtime_metadata.rollover)
+          env_agnostic_settings = schema_artifacts.index_templates.fetch(name).fetch("template").fetch("settings")
+
           RolloverIndexTemplate.new(
+            env_agnostic_settings: env_agnostic_settings,
             timestamp_field_path: rollover.timestamp_field_path,
             frequency: rollover.frequency,
-            index_args: common_args,
+            index_args: common_args.merge(env_agnostic_settings: env_agnostic_settings),
             **common_args
           )
         else
-          Index.new(**common_args)
+          Index.new(
+            env_agnostic_settings: schema_artifacts.indices.fetch(name).fetch("settings"),
+            **common_args
+          )
         end
       end
     end

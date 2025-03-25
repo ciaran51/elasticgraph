@@ -58,6 +58,10 @@ module ElasticGraph
           end
 
           it "ignores non-existing index" do
+            allow(datastore_core.schema_artifacts).to receive(:indices).and_wrap_original do |original|
+              original.call.merge("does_not_exist" => {"settings" => {}})
+            end
+
             index_def_not_exist = index_def_named("does_not_exist")
 
             expect {
@@ -90,7 +94,8 @@ module ElasticGraph
             name: name,
             config: datastore_core.config,
             runtime_metadata: runtime_metadata,
-            datastore_clients_by_name: datastore_core.clients_by_name
+            datastore_clients_by_name: datastore_core.clients_by_name,
+            schema_artifacts: datastore_core.schema_artifacts
           )
         end
       end
