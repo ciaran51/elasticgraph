@@ -229,7 +229,7 @@ module ElasticGraph
 
           # Next, we produce a separate response for each id set by filtering the results to the ones that match the ids in the set.
           filtered_responses_by_id_set = id_sets.to_h do |id_set|
-            filtered_response = response.filter_results(@join.filter_id_field_name, id_set, @query.effective_size)
+            filtered_response = response.filter_results(@join.filter_id_field_name.split("."), id_set, @query.effective_size)
             [id_set, filtered_response]
           end
 

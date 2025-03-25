@@ -109,7 +109,7 @@ module ElasticGraph
         # the separate responses would have been if we hadn't combined into a single query.
         def filter_results(field_path, values, size)
           filter =
-            if field_path == "id"
+            if field_path == ["id"]
               # `id` filtering is a very common case, and we want to avoid having to request
               # `id` within `_source`, given it's available as `_id`.
               ->(hit) { values.include?(hit.fetch("_id")) }

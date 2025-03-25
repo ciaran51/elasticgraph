@@ -52,8 +52,8 @@ module ElasticGraph
 
         def value_for(event_or_prepared_record)
           case cardinality
-          when :many then Support::HashUtil.fetch_leaf_values_at_path(event_or_prepared_record, source_path) { [] }
-          when :one then Support::HashUtil.fetch_value_at_path(event_or_prepared_record, source_path) { nil }
+          when :many then Support::HashUtil.fetch_leaf_values_at_path(event_or_prepared_record, source_path.split(".")) { [] }
+          when :one then Support::HashUtil.fetch_value_at_path(event_or_prepared_record, source_path.split(".")) { nil }
           end
         end
       end

@@ -371,11 +371,11 @@ module ElasticGraph
             }
           }
 
-          expect(HashUtil.fetch_value_at_path(hash, "other")).to eq 1
-          expect(HashUtil.fetch_value_at_path(hash, "foo.other")).to eq 2
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.bazz")).to eq 12
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.other")).to eq 3
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.goo")).to eq nil
+          expect(HashUtil.fetch_value_at_path(hash, ["other"])).to eq 1
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "other"])).to eq 2
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "bazz"])).to eq 12
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "other"])).to eq 3
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "goo"])).to eq nil
         end
 
         it "returns an array of values if that's what's at the given path" do
@@ -391,11 +391,11 @@ module ElasticGraph
             }
           }
 
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.bazz")).to eq [12, 3]
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "bazz"])).to eq [12, 3]
         end
 
         it "returns a hash of data if that's what's at the given path" do
-          expect(HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, "foo")).to eq({"bar" => 3})
+          expect(HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, ["foo"])).to eq({"bar" => 3})
         end
 
         it "raises a clear error when a key is not found, providing the missing key path in the error" do
@@ -412,26 +412,26 @@ module ElasticGraph
           }
 
           expect {
-            HashUtil.fetch_value_at_path(hash, "bar.bazz")
-          }.to raise_error KeyError, a_string_including('"bar"')
+            HashUtil.fetch_value_at_path(hash, ["bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('["bar"]')
 
           expect {
-            HashUtil.fetch_value_at_path(hash, "foo.bazz.bar")
-          }.to raise_error KeyError, a_string_including('"foo.bazz"')
+            HashUtil.fetch_value_at_path(hash, ["foo", "bazz", "bar"])
+          }.to raise_error KeyError, a_string_including('["foo", "bazz"]')
 
           expect {
-            HashUtil.fetch_value_at_path(hash, "foo.bar.bazz2")
-          }.to raise_error KeyError, a_string_including('"foo.bar.bazz2"')
+            HashUtil.fetch_value_at_path(hash, ["foo", "bar", "bazz2"])
+          }.to raise_error KeyError, a_string_including('["foo", "bar", "bazz2"]')
         end
 
         it "raises a clear error when the value at a parent key is not a hash" do
           expect {
-            HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, "foo.bar.bazz")
-          }.to raise_error KeyError, a_string_including('Value at key "foo.bar" is not a `Hash` as expected; instead, was a `Integer`')
+            HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, ["foo", "bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('Value at key ["foo", "bar"] is not a `Hash` as expected; instead, was a `Integer`')
 
           expect {
-            HashUtil.fetch_value_at_path({"foo" => 3}, "foo.bar.bazz")
-          }.to raise_error KeyError, a_string_including('Value at key "foo" is not a `Hash` as expected; instead, was a `Integer`')
+            HashUtil.fetch_value_at_path({"foo" => 3}, ["foo", "bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('Value at key ["foo"] is not a `Hash` as expected; instead, was a `Integer`')
         end
 
         it "allows a block to be passed to provide a default value for missing keys" do
@@ -447,28 +447,28 @@ module ElasticGraph
             }
           }
 
-          expect(HashUtil.fetch_value_at_path(hash, "unknown") { 42 }).to eq 42
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.unknown") { 37 }).to eq 37
-          expect(HashUtil.fetch_value_at_path(hash, "foo.bar.unknown.bazz") { |key| "#{key} is missing" }).to eq "foo.bar.unknown is missing"
+          expect(HashUtil.fetch_value_at_path(hash, ["unknown"]) { 42 }).to eq 42
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "unknown"]) { 37 }).to eq 37
+          expect(HashUtil.fetch_value_at_path(hash, ["foo", "bar", "unknown", "bazz"]) { |key| "#{key.inspect} is missing" }).to eq '["foo", "bar", "unknown"] is missing'
         end
 
         it "does not use a provided block when for cases where a parent key is not a hash" do
           expect {
-            HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, "foo.bar.bazz") { 3 }
-          }.to raise_error KeyError, a_string_including('Value at key "foo.bar" is not a `Hash` as expected; instead, was a `Integer`')
+            HashUtil.fetch_value_at_path({"foo" => {"bar" => 3}}, ["foo", "bar", "bazz"]) { 3 }
+          }.to raise_error KeyError, a_string_including('Value at key ["foo", "bar"] is not a `Hash` as expected; instead, was a `Integer`')
         end
       end
 
       describe ".fetch_leaf_values_at_path" do
         it "returns a list of values at the identified key" do
-          values = HashUtil.fetch_leaf_values_at_path({"foo" => 17}, "foo")
+          values = HashUtil.fetch_leaf_values_at_path({"foo" => 17}, ["foo"])
           expect(values).to eq [17]
 
-          values = HashUtil.fetch_leaf_values_at_path({"foo" => [17]}, "foo")
+          values = HashUtil.fetch_leaf_values_at_path({"foo" => [17]}, ["foo"])
           expect(values).to eq [17]
         end
 
-        it "handles nested dot-separated keys by recursing through a nested hash" do
+        it "handles nested paths by recursing through a nested hash" do
           hash = {
             "other" => 1,
             "foo.bar.bazz" => "should not be returned",
@@ -481,24 +481,24 @@ module ElasticGraph
             }
           }
 
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
 
           expect(values).to eq [12]
         end
 
         it "returns `[]` when a parent key has an explicit `nil` value" do
           hash = {"foo" => {"bar" => nil}}
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
           expect(values).to eq []
 
           hash = {"foo" => nil}
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
           expect(values).to eq []
         end
 
         it "returns `[]` when a the nested path has an explicit `nil` value" do
           hash = {"foo" => {"bar" => nil}}
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar"])
           expect(values).to eq []
         end
 
@@ -515,7 +515,7 @@ module ElasticGraph
             }
           }
 
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
 
           expect(values).to eq [12, 3]
         end
@@ -530,7 +530,7 @@ module ElasticGraph
             }
           }
 
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
 
           expect(values).to eq [12, 3]
         end
@@ -556,7 +556,7 @@ module ElasticGraph
             ]
           }
 
-          values = HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz")
+          values = HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz"])
 
           expect(values).to eq [12, 3, 4, 7, 1, 9, 7]
         end
@@ -575,16 +575,16 @@ module ElasticGraph
           }
 
           expect {
-            HashUtil.fetch_leaf_values_at_path(hash, "bar.bazz")
-          }.to raise_error KeyError, a_string_including('"bar"')
+            HashUtil.fetch_leaf_values_at_path(hash, ["bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('["bar"]')
 
           expect {
-            HashUtil.fetch_leaf_values_at_path(hash, "foo.bazz.bar")
-          }.to raise_error KeyError, a_string_including('"foo.bazz"')
+            HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bazz", "bar"])
+          }.to raise_error KeyError, a_string_including('["foo", "bazz"]')
 
           expect {
-            HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz2")
-          }.to raise_error KeyError, a_string_including('"foo.bar.bazz2"')
+            HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz2"])
+          }.to raise_error KeyError, a_string_including('["foo", "bar", "bazz2"]')
         end
 
         it "allows a default value block to be provided just like with `Hash#fetch`" do
@@ -600,27 +600,27 @@ module ElasticGraph
             }
           }
 
-          expect(HashUtil.fetch_leaf_values_at_path(hash, "bar.bazz") { [] }).to eq []
-          expect(HashUtil.fetch_leaf_values_at_path(hash, "foo.bazz.bar") { [] }).to eq []
-          expect(HashUtil.fetch_leaf_values_at_path(hash, "foo.bazz.bar") { 3 }).to eq [3]
-          expect(HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz2") { "abc" }).to eq ["abc"]
-          expect(HashUtil.fetch_leaf_values_at_path(hash, "foo.bar.bazz2") { |missing_key| missing_key }).to eq ["foo.bar.bazz2"]
+          expect(HashUtil.fetch_leaf_values_at_path(hash, ["bar", "bazz"]) { [] }).to eq []
+          expect(HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bazz", "bar"]) { [] }).to eq []
+          expect(HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bazz", "bar"]) { 3 }).to eq [3]
+          expect(HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz2"]) { "abc" }).to eq ["abc"]
+          expect(HashUtil.fetch_leaf_values_at_path(hash, ["foo", "bar", "bazz2"]) { |missing_key| missing_key }).to eq ["foo", "bar", "bazz2"]
         end
 
         it "raises a clear error when the value at a parent key is not a hash" do
           expect {
-            HashUtil.fetch_leaf_values_at_path({"foo" => {"bar" => 3}}, "foo.bar.bazz")
-          }.to raise_error KeyError, a_string_including('Value at key "foo.bar" is not a `Hash` as expected; instead, was a `Integer`')
+            HashUtil.fetch_leaf_values_at_path({"foo" => {"bar" => 3}}, ["foo", "bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('Value at key ["foo", "bar"] is not a `Hash` as expected; instead, was a `Integer`')
 
           expect {
-            HashUtil.fetch_leaf_values_at_path({"foo" => 3}, "foo.bar.bazz")
-          }.to raise_error KeyError, a_string_including('Value at key "foo" is not a `Hash` as expected; instead, was a `Integer`')
+            HashUtil.fetch_leaf_values_at_path({"foo" => 3}, ["foo", "bar", "bazz"])
+          }.to raise_error KeyError, a_string_including('Value at key ["foo"] is not a `Hash` as expected; instead, was a `Integer`')
         end
 
         it "raises a clear error when the key is not a full path to a leaf" do
           expect {
-            HashUtil.fetch_leaf_values_at_path({"foo" => {"bar" => 3}}, "foo")
-          }.to raise_error KeyError, a_string_including('Key was not a path to a leaf field: "foo"')
+            HashUtil.fetch_leaf_values_at_path({"foo" => {"bar" => 3}}, ["foo"])
+          }.to raise_error KeyError, a_string_including('Key was not a path to a leaf field: ["foo"]')
         end
       end
     end

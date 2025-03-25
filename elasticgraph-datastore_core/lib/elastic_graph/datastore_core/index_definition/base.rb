@@ -36,10 +36,10 @@ module ElasticGraph
             raise Errors::ConfigError, "`#{self}` uses custom routing, but `route_with_path` is misconfigured (was `nil`)"
           end
 
-          config_routing_value = Support::HashUtil.fetch_value_at_path(prepared_record, route_with_path).to_s
+          config_routing_value = Support::HashUtil.fetch_value_at_path(prepared_record, route_with_path.split(".")).to_s
           return config_routing_value unless ignored_values_for_routing.include?(config_routing_value)
 
-          Support::HashUtil.fetch_value_at_path(prepared_record, id_path).to_s
+          Support::HashUtil.fetch_value_at_path(prepared_record, id_path.split(".")).to_s
         end
 
         def has_custom_routing?
