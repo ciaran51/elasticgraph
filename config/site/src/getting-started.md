@@ -19,14 +19,12 @@ Before you begin, ensure you have the following installed on your system:
 
 Confirm these are installed using your terminal:
 
-```shell
-$ ruby -v
+{% include copyable_code_snippet.html language="shell" code="$ ruby -v
 ruby 3.4.1 (2024-12-25 revision 48d4efcb85) +PRISM [arm64-darwin24]
 $ docker compose version
 Docker Compose version v2.32.4-desktop.1
 $ git -v
-git version 2.46.0
-```
+git version 2.46.0" %}
 
 {: .alert-note}
 **Note**{: .alert-title}
@@ -83,22 +81,20 @@ worked in an ElasticGraph project before).
 
 Let's add a `Venue.yearOpened` field to our schema. Here's a git diff showing what to change:
 
-```diff
-diff --git a/config/schema/artists.rb b/config/schema/artists.rb
+{% include copyable_code_snippet.html language="diff" code="diff --git a/config/schema/artists.rb b/config/schema/artists.rb
 index 77e63de..7999fe4 100644
 --- a/config/schema/artists.rb
 +++ b/config/schema/artists.rb
 @@ -56,6 +56,9 @@ ElasticGraph.define_schema do |schema|
-   schema.object_type "Venue" do |t|
-     t.field "id", "ID"
-     t.field "name", "String"
-+    t.field "yearOpened", "Int" do |f|
+   schema.object_type \"Venue\" do |t|
+     t.field \"id\", \"ID\"
+     t.field \"name\", \"String\"
++    t.field \"yearOpened\", \"Int\" do |f|
 +      f.json_schema minimum: 1900, maximum: 2100
 +    end
-     t.field "location", "GeoLocation"
-     t.field "capacity", "Int"
-     t.relates_to_many "featuredArtists", "Artist", via: "tours.shows.venueId", dir: :in, singular: "featuredArtist"
-```
+     t.field \"location\", \"GeoLocation\"
+     t.field \"capacity\", \"Int\"
+     t.relates_to_many \"featuredArtists\", \"Artist\", via: \"tours.shows.venueId\", dir: :in, singular: \"featuredArtist\"" %}
 
 Next, rebuild the project:
 
@@ -107,20 +103,18 @@ Next, rebuild the project:
 This will re-generate the schema artifacts, run the test suite, and fail. The failing test will indicate
 that the `:venue` factory is missing the new field. To fix it, define `yearOpened` on the `:venue` factory in the `factories.rb` file under `lib`:
 
-```diff
-diff --git a/lib/my_eg_project/factories.rb b/lib/my_eg_project/factories.rb
+{% include copyable_code_snippet.html language="diff" code="diff --git a/lib/my_eg_project/factories.rb b/lib/my_eg_project/factories.rb
 index 0d8659c..509f274 100644
 --- a/lib/my_eg_project/factories.rb
 +++ b/lib/my_eg_project/factories.rb
 @@ -95,6 +95,7 @@ FactoryBot.define do
-       "#{city_name} #{venue_type}"
+       \"#{city_name} #{venue_type}\"
      end
 
 +    yearOpened { Faker::Number.between(from: 1900, to: 2025) }
      location { build(:geo_location) }
      capacity { Faker::Number.between(from: 200, to: 100_000) }
-   end
-```
+   end" %}
 
 Re-run `bundle exec rake build` and everything should pass. You can also run `bundle exec rake boot_locally`
 and query your new field to confirm the fake values being generated for it.

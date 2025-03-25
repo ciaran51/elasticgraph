@@ -20,7 +20,30 @@
 <div class="relative {% if include.style == 'dark' %}bg-gray-800 dark:bg-gray-900 text-white py-3 px-6 rounded-sm not-prose mx-auto max-w-3xl{% endif %}">
   <div class="absolute right-2 top-2 z-10">
     <div class="relative">
-      <button onclick="copyToClipboard(this, {{ code | jsonify | escape }})"
+      {% if include.language == "shell" %}
+        {% assign lines = code | newline_to_br | split: "<br />" %}
+        {% assign has_prompt = false %}
+        {% assign clipboard_lines = "" %}
+        {% for line in lines %}
+          {% if line contains "$" %}
+            {% assign has_prompt = true %}
+            {% assign cmd = line | split: "$" | last | strip %}
+            {% assign clipboard_lines = clipboard_lines | append: cmd | append: "
+" %}
+          {% endif %}
+        {% endfor %}
+        {% if has_prompt %}
+          {% assign clipboard_content = clipboard_lines %}
+          {% assign display_content = code %}
+        {% else %}
+          {% assign clipboard_content = code %}
+          {% assign display_content = "$ " | append: code %}
+        {% endif %}
+      {% else %}
+        {% assign clipboard_content = code %}
+        {% assign display_content = code %}
+      {% endif %}
+      <button onclick="copyToClipboard(this, {{ clipboard_content | jsonify | escape }})"
         class="{% if include.style == 'dark' %}text-white hover:text-blue-300{% else %}text-gray-400 hover:text-blue-300{% endif %} transition-all cursor-pointer"
         aria-label="Copy code">
         <span class="sr-only">Copy code</span>
@@ -33,12 +56,7 @@
   </div>
 
   <div class="{% if include.font_size %}{{ include.font_size }}{% endif %}">
-    {% if include.language == "shell" %}
-      {% capture shell_display %}$ {{ code }}{% endcapture %}
-      {% capture md_include %}{% include code_block.md language=include.language code=shell_display %}{% endcapture %}
-    {% else %}
-      {% capture md_include %}{% include code_block.md language=include.language code=code %}{% endcapture %}
-    {% endif %}
+    {% capture md_include %}{% include code_block.md language=include.language code=display_content %}{% endcapture %}
     {{ md_include | markdownify }}
   </div>
 </div>
