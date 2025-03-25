@@ -15,6 +15,7 @@ module ElasticGraph
 
         @query: DatastoreQuery
         @join: Schema::RelationJoin
+        @filter_id_field_name_path: ::Array[::String]
         @context: ::GraphQL::Query::Context
         @schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
         @logger: ::Logger

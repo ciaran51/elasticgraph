@@ -63,6 +63,7 @@ module ElasticGraph
         def initialize(query:, join:, context:, monotonic_clock:, mode:)
           @query = query
           @join = join
+          @filter_id_field_name_path = @join.filter_id_field_name.split(".")
           @context = context
           @schema_element_names = @context.fetch(:schema_element_names)
           @logger = context.fetch(:logger)
@@ -229,7 +230,7 @@ module ElasticGraph
 
           # Next, we produce a separate response for each id set by filtering the results to the ones that match the ids in the set.
           filtered_responses_by_id_set = id_sets.to_h do |id_set|
-            filtered_response = response.filter_results(@join.filter_id_field_name.split("."), id_set, @query.effective_size)
+            filtered_response = response.filter_results(@filter_id_field_name_path, id_set, @query.effective_size)
             [id_set, filtered_response]
           end
 
