@@ -46,6 +46,11 @@
         <a href="{% link query-api.md %}" class="text-base {{ site.style.link }}">Query API</a>
         <a href="{% link guides.md %}" class="text-base {{ site.style.link }}">Guides</a>
         <a href="{% link api-docs.md %}" class="text-base {{ site.style.link }}">API Docs</a>
+        <a href="{{ site.github_url }}" target="_blank" class="text-base {{ site.style.link }} inline-flex items-center space-x-2" rel="noopener">
+          {% include icons/github.svg %}
+          <span>GitHub</span>
+        </a>
+        <a href="{% link about.md %}" class="text-base {{ site.style.link }}">About</a>
 
         <!-- Mobile Search -->
         <form action="{{ '/search/' | relative_url }}" method="get" class="relative">
@@ -54,15 +59,6 @@
                         bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200
                         focus:outline-none focus:ring-2 focus:ring-blue-500">
         </form>
-
-        <!-- Mobile Additional Links -->
-        <div class="flex flex-col space-y-4 pt-2">
-          <a href="{{ site.github_url }}" target="_blank" class="text-base {{ site.style.link }} inline-flex items-center space-x-2" rel="noopener">
-            {% include icons/github.svg %}
-            <span>GitHub</span>
-          </a>
-          <a href="{% link about.md %}" class="text-base {{ site.style.link }}">About</a>
-        </div>
       </div>
     </div>
   </div>
