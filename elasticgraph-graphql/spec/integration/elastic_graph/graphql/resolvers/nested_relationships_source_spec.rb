@@ -290,7 +290,7 @@ module ElasticGraph
             # Simulate a difference by modifying the optimized result we get.
             allow(QuerySource).to receive(:execute_one).and_wrap_original do |original, *args, **kwargs, &block|
               response = original.call(*args, **kwargs, &block)
-              response.filter_results("id", response.documents.map(&:id).drop(1), 10)
+              response.filter_results(["id"], response.documents.map(&:id).drop(1), 10)
             end
 
             index_into(

@@ -179,7 +179,7 @@ module ElasticGraph
 
         def rollover_index_suffix_for_record(record, timestamp_field_path:)
           timestamp_value = ::DateTime.iso8601(
-            Support::HashUtil.fetch_value_at_path(record, timestamp_field_path)
+            Support::HashUtil.fetch_value_at_path(record, timestamp_field_path.split("."))
           ).to_time
 
           if (matching_custom_range = env_index_config.custom_timestamp_range_for(timestamp_value))

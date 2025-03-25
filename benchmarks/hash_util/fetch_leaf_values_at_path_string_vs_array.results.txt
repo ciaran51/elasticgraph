@@ -1,0 +1,25 @@
+Warming up...
+
+ruby 3.3.4 (2024-07-09 revision be1089c8ec) [arm64-darwin23]
+Warming up --------------------------------------
+        string paths     5.965T i/100ms
+         array paths     6.316T i/100ms
+Calculating -------------------------------------
+        string paths    312.682Q (±20.7%) i/s    (0.00 ns/i) - 1276595515482903296.000 in   4.965231s
+         array paths    440.823Q (± 9.6%) i/s    (0.00 ns/i) - 2072252242907665920.000 in   4.946308s
+
+Comparison:
+         array paths: 440823259534524544.0 i/s
+        string paths: 312682103498048448.0 i/s - 1.41x  slower
+
+
+Memory usage comparison:
+----------------------
+
+String paths:
+  Allocated strings: 120000
+  Allocated memory: 8000000 bytes
+
+Array paths:
+  Allocated strings: 20000
+  Allocated memory: 800000 bytes

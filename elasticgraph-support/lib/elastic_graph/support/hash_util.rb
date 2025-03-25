@@ -110,35 +110,31 @@ module ElasticGraph
       end
 
       # Fetches a list of (potentially) nested value from a hash. The `key_path` is expected
-      # to be a string with dots between the nesting levels (e.g. `foo.bar`). Returns `[]` if
-      # the value at any parent key is `nil`. Returns a flat array of values if the structure
-      # at any level is an array.
+      # to be an array of path parts. Returns `[]` if the value at any parent key is `nil`.
+      # Returns a flat array of values if the structure at any level is an array.
       #
       # Raises an error if the key is not found unless a default block is provided.
       # Raises an error if any parent value is not a hash as expected.
       # Raises an error if the provided path is not a full path to a leaf in the nested structure.
       def self.fetch_leaf_values_at_path(hash, key_path, &default)
-        do_fetch_leaf_values_at_path(hash, key_path.split("."), 0, &default)
+        do_fetch_leaf_values_at_path(hash, key_path, 0, &default)
       end
 
-      # Fetches a single value from the hash at the given path. The `key_path` is expected
-      # to be a string with dots between the nesting levels (e.g. `foo.bar`).
+      # Fetches a single value from the hash at the given path. The `path_parts` is expected to be an array.
       #
       # If any parent value is not a hash as expected, raises an error.
       # If the key at any level is not found, yields to the provided block (which can provide a default value)
       # or raises an error if no block is provided.
-      def self.fetch_value_at_path(hash, key_path)
-        path_parts = key_path.split(".")
-
+      def self.fetch_value_at_path(hash, path_parts)
         path_parts.each.with_index(1).reduce(hash) do |inner_hash, (key, num_parts)|
           if inner_hash.is_a?(::Hash)
             inner_hash.fetch(key) do
-              missing_path = path_parts.first(num_parts).join(".")
+              missing_path = path_parts.first(num_parts)
               return yield missing_path if block_given?
               raise KeyError, "Key not found: #{missing_path.inspect}"
             end
           else
-            raise KeyError, "Value at key #{path_parts.first(num_parts - 1).join(".").inspect} is not a `Hash` as expected; " \
+            raise KeyError, "Value at key #{path_parts.first(num_parts - 1).inspect} is not a `Hash` as expected; " \
               "instead, was a `#{(_ = inner_hash).class}`"
           end
         end
@@ -205,7 +201,7 @@ module ElasticGraph
       private_class_method def self.do_fetch_leaf_values_at_path(object, path_parts, level_index, &default)
         if level_index == path_parts.size
           if object.is_a?(::Hash)
-            raise KeyError, "Key was not a path to a leaf field: #{path_parts.join(".").inspect}"
+            raise KeyError, "Key was not a path to a leaf field: #{path_parts.inspect}"
           else
             return Array(object)
           end
@@ -219,7 +215,7 @@ module ElasticGraph
           if object.key?(key)
             do_fetch_leaf_values_at_path(object.fetch(key), path_parts, level_index + 1, &default)
           else
-            missing_path = path_parts.first(level_index + 1).join(".")
+            missing_path = path_parts.first(level_index + 1)
             if default
               Array(default.call(missing_path))
             else
@@ -233,7 +229,7 @@ module ElasticGraph
         else
           # Note: we intentionally do not put the value (`current_level_hash`) in the
           # error message, as that would risk leaking PII. But the class of the value should be OK.
-          raise KeyError, "Value at key #{path_parts.first(level_index).join(".").inspect} is not a `Hash` as expected; " \
+          raise KeyError, "Value at key #{path_parts.first(level_index).inspect} is not a `Hash` as expected; " \
             "instead, was a `#{object.class}`"
         end
       end

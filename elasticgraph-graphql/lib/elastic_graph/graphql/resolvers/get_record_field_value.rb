@@ -29,7 +29,7 @@ module ElasticGraph
               object
             end
 
-          value = Support::HashUtil.fetch_value_at_path(data, field_name) { nil }
+          value = Support::HashUtil.fetch_value_at_path(data, field_name.split(".")) { nil }
           value = [] if value.nil? && field.type.list?
 
           if field.type.relay_connection?

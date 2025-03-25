@@ -32,8 +32,8 @@ module ElasticGraph
 
       def self.flatten_and_stringify_keys: [K] (::Hash[K, untyped], ?prefix: ::String?) -> ::Hash[::String, untyped]
       def self.deep_merge: [K, V] (::Hash[K, V], ::Hash[K, V]) -> ::Hash[K, V]
-      def self.fetch_leaf_values_at_path: (::Hash[::String, untyped], ::String) ?{ (String) -> untyped } -> ::Array[untyped]
-      def self.fetch_value_at_path: (::Hash[::String, untyped], ::String) ?{ (String) -> untyped } -> untyped
+      def self.fetch_leaf_values_at_path: (::Hash[::String, untyped], ::Array[::String]) ?{ (::Array[::String]) -> untyped } -> ::Array[untyped]
+      def self.fetch_value_at_path: (::Hash[::String, untyped], ::Array[::String]) ?{ (::Array[::String]) -> untyped } -> untyped
 
       private
 
@@ -42,7 +42,7 @@ module ElasticGraph
       def self.recursively_prune_if: (::Hash[untyped, untyped], (^(::String) -> void)?) { (untyped) -> bool } -> ::Hash[untyped, untyped]
       def self.recursively_transform: (untyped, ?::String?) { (key, value, ::Hash[key, value], ::String) -> void } -> untyped
       def self.populate_flat_hash: [K] (::Hash[K, untyped], ::String, ::Hash[::String, untyped]) -> void
-      def self.do_fetch_leaf_values_at_path: (untyped, ::Array[::String], ::Integer) ?{ (String) -> untyped } -> ::Array[untyped]
+      def self.do_fetch_leaf_values_at_path: (untyped, ::Array[::String], ::Integer) ?{ (::Array[::String]) -> untyped } -> ::Array[untyped]
     end
   end
 end

@@ -16,7 +16,7 @@ module ElasticGraph
 
         def each: () { (Document) -> void } -> void | () -> Enumerator[Document, void]
 
-        def filter_results: (::String, ::Set[untyped], ::Integer) -> SearchResponse
+        def filter_results: (::Array[::String], ::Set[untyped], ::Integer) -> SearchResponse
         def total_document_count: (?default: ::Integer?) -> ::Integer
         def aggregations: () -> ::Hash[::String, untyped]
       end
