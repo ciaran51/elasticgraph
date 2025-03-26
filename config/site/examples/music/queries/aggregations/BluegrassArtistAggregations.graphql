@@ -2,7 +2,7 @@ query BluegrassArtistAggregations($cursor: Cursor) {
   artistAggregations(
     first: 10
     after: $cursor
-    filter: {bio: {description: {matchesQuery: {query: "bluegrass"}}}}
+    filter: {genres: {anySatisfy: {equalToAnyOf: [BLUEGRASS]}}}
   ) {
     pageInfo {
       hasNextPage

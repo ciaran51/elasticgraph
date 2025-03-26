@@ -1,6 +1,6 @@
 query SkaArtistHomeCountries {
   artistAggregations(
-    filter: {bio: {description: {matchesQuery: {query: "ska"}}}}
+    filter: {genres: {anySatisfy: {equalToAnyOf: [SKA]}}}
   ) {
     nodes {
       groupedBy {

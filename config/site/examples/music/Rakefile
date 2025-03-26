@@ -160,8 +160,6 @@ namespace :example_queries do
     "AccordionAndViolinStrictSearch",
     "AccordionOrViolinSearch",
     "AnyOfGotcha",
-    "BluegrassArtistAggregations",
-    "BluegrassArtistLifetimeSales",
     "FindArtist",
     "FindMarch2025Shows",
     "FindProlificArtists",
@@ -169,8 +167,7 @@ namespace :example_queries do
     "FindSeattleVenues",
     "FindUnnamedArtists",
     "FindU2OrRadiohead",
-    "PhraseSearch",
-    "SkaArtistHomeCountries"
+    "PhraseSearch"
   ].to_set
 
   desc "Validate that all example queries return non-empty results"
