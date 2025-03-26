@@ -162,7 +162,6 @@ namespace :example_queries do
     "AnyOfGotcha",
     "FindMarch2025Shows",
     "FindProlificArtists",
-    "FindRecentAccordionArtists",
     "FindSeattleVenues",
     "FindUnnamedArtists",
     "PhraseSearch"
