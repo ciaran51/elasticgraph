@@ -364,6 +364,110 @@ module ElasticGraph
       end
 
       describe "`all_of` operator" do
+        it "produces a separate bool subfilter for each clause" do
+          query = new_query(filter: {"all_of" => [
+            {"color" => {"equal_to_any_of" => ["RED"]}},
+            {"size" => {"gt" => 10}}
+          ]})
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {terms: {"color" => ["RED"]}}
+                  ]
+                }
+              },
+              {
+                bool: {
+                  filter: [
+                    {range: {"size" => {gt: 10}}}
+                  ]
+                }
+              }
+            ]
+          })
+        end
+
+        it "allows ANDing two subfilters on the same field" do
+          query = new_query(filter: {
+            "all_of" => [
+              {"color" => {"equal_to_any_of" => ["RED"]}},
+              {"color" => {"not" => {"equal_to_any_of" => ["GREEN"]}}}
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      {terms: {"color" => ["RED"]}}
+                    ]
+                  }
+                },
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        bool: {
+                          filter: [
+                            {terms: {"color" => ["GREEN"]}}
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          )
+        end
+
+        it "allows an AND of multiple OR subfilters (i.e. allOf of anyOfs)" do
+          query = new_query(filter: {
+            "all_of" => [
+              {
+                "any_of" => [
+                  {"color" => {"equal_to_any_of" => ["RED"]}},
+                  {"size" => {"gt" => 10}}
+                ]
+              },
+              {
+                "any_of" => [
+                  {"color" => {"equal_to_any_of" => ["BLUE"]}},
+                  {"size" => {"lt" => 5}}
+                ]
+              }
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {bool: {filter: [{terms: {"color" => ["RED"]}}]}},
+                    {bool: {filter: [{range: {"size" => {gt: 10}}}]}}
+                  ]
+                }
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {bool: {filter: [{terms: {"color" => ["BLUE"]}}]}},
+                    {bool: {filter: [{range: {"size" => {lt: 5}}}]}}
+                  ]
+                }
+              }
+            ]
+          })
+        end
+
         it "can be used to wrap multiple `any_satisfy` expressions to require multiple sub-filters to be satisfied by a list element" do
           query = new_query(filter: {
             "tags" => {"all_of" => [
@@ -372,10 +476,96 @@ module ElasticGraph
             ]}
           })
 
-          expect(datastore_body_of(query)).to query_datastore_with({bool: {filter: [
-            {terms: {"tags" => ["a", "b"]}},
-            {terms: {"tags" => ["c", "d"]}}
-          ]}})
+          expect(datastore_body_of(query)).to query_datastore_with({bool: {
+            filter: [
+              {bool: {filter: [{terms: {"tags" => ["a", "b"]}}]}},
+              {bool: {filter: [{terms: {"tags" => ["c", "d"]}}]}}
+            ]
+          }})
+        end
+
+        it "handles `not` within `all_of` operator" do
+          query = new_query(filter: {
+            "all_of" => [
+              {"amount_cents" => {"gt" => 50}},
+              {"not" => {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["foo"]}}}}
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {range: {"amount_cents" => {gt: 50}}}
+                  ]
+                }
+              },
+              {
+                bool: {
+                  must_not: [
+                    {bool: {filter: [{terms: {"tags" => ["foo"]}}]}}
+                  ]
+                }
+              }
+            ]
+          })
+        end
+
+        it "handles empty predicates" do
+          query = new_query(filter: {
+            "all_of" => [
+              {},
+              {"amount_cents" => {"gt" => 50}}
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {bool: {filter: [{range: {"amount_cents" => {gt: 50}}}]}}
+            ]
+          })
+
+          query = new_query(filter: {
+            "all_of" => [
+              {"amount_cents" => {}},
+              {"amount_cents" => {"gt" => 50}}
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {bool: {filter: [{range: {"amount_cents" => {gt: 50}}}]}}
+            ]
+          })
+        end
+
+        it "handles not with empty predicate" do
+          query = new_query(filter: {
+            "all_of" => [
+              {"not" => {}},
+              {"amount_cents" => {"gt" => 50}}
+            ]
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with(bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {match_none: {}}
+                  ]
+                }
+              },
+              {
+                bool: {
+                  filter: [
+                    {range: {"amount_cents" => {gt: 50}}}
+                  ]
+                }
+              }
+            ]
+          })
         end
 
         it "is treated as `true` when `null` is passed" do
@@ -416,20 +606,6 @@ module ElasticGraph
               gt: 30,
               lt: 60
             }}}]}})
-          end
-
-          it "can be used within an `all_of` to require multiple sub-filters to be satisfied by a list element" do
-            query = new_query(filter: {
-              "tags" => {"all_of" => [
-                {"any_satisfy" => {"equal_to_any_of" => ["a", "b"]}},
-                {"any_satisfy" => {"equal_to_any_of" => ["c", "d"]}}
-              ]}
-            })
-
-            expect(datastore_body_of(query)).to query_datastore_with({bool: {filter: [
-              {terms: {"tags" => ["a", "b"]}},
-              {terms: {"tags" => ["c", "d"]}}
-            ]}})
           end
 
           context "when using `snake_case` schema names" do
@@ -1353,6 +1529,26 @@ module ElasticGraph
           query2 = new_query(filter: inner_filter)
 
           expect(datastore_body_of(query1)).to eq(datastore_body_of(query2))
+        end
+
+        specify "`not: {all_of: [...]}` returns only the documents that are unmatched by `all_of: [...]`" do
+          query = new_query(filter: {
+            "not" => {
+              "all_of" => [
+                {"age" => {"equal_to_any_of" => [25, 30]}},
+                {"height" => {"gt" => 10}}
+              ]
+            }
+          })
+
+          expect(datastore_body_of(query)).to query_datastore_with({bool: {
+            must_not: [{bool: {
+              filter: [
+                {bool: {filter: [{terms: {"age" => [25, 30]}}]}},
+                {bool: {filter: [{range: {"height" => {gt: 10}}}]}}
+              ]
+            }}]
+          }})
         end
       end
 
