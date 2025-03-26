@@ -1,10 +1,32 @@
 # TODO: replace this file with one that defines the schema for your own dataset.
 ElasticGraph.define_schema do |schema|
+  schema.enum_type "MusicGenre" do |t|
+    t.value "ALTERNATIVE"
+    t.value "BLUES"
+    t.value "BLUEGRASS"
+    t.value "CLASSICAL"
+    t.value "COUNTRY"
+    t.value "ELECTRONIC"
+    t.value "FOLK"
+    t.value "HIP_HOP"
+    t.value "INDIE"
+    t.value "JAZZ"
+    t.value "METAL"
+    t.value "POP"
+    t.value "PUNK"
+    t.value "REGGAE"
+    t.value "RNB"
+    t.value "ROCK"
+    t.value "SKA"
+    t.value "SOUL"
+  end
+
   schema.object_type "Artist" do |t|
     t.field "id", "ID"
     t.field "name", "String"
     t.field "lifetimeSales", "JsonSafeLong"
     t.field "bio", "ArtistBio"
+    t.field "genres", "[MusicGenre!]!"
 
     t.field "albums", "[Album!]!" do |f|
       f.mapping type: "nested"

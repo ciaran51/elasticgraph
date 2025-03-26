@@ -18,6 +18,17 @@ FactoryBot.define do
 
     bio { build(:artist_bio) }
 
+    genres do
+      # Available genres from the MusicGenre enum
+      all_genres = %w[
+        ALTERNATIVE BLUES BLUEGRASS CLASSICAL COUNTRY ELECTRONIC FOLK HIP_HOP
+        INDIE JAZZ METAL POP PUNK REGGAE RNB ROCK SKA SOUL
+      ]
+
+      # Pick 1-3 random genres
+      Faker::Base.sample(all_genres, Faker::Number.between(from: 1, to: 3)).uniq
+    end
+
     albums do
       Faker::Number.between(from: 1, to: 6).times.map { build(:album) }
     end

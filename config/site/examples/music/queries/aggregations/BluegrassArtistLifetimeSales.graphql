@@ -1,6 +1,6 @@
 query BluegrassArtistLifetimeSales {
   artistAggregations(
-    filter: {bio: {description: {matchesQuery: {query: "bluegrass"}}}}
+    filter: {genres: {anySatisfy: {equalToAnyOf: [BLUEGRASS]}}}
   ) {
     nodes {
       groupedBy {
