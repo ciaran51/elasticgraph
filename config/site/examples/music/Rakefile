@@ -160,13 +160,11 @@ namespace :example_queries do
     "AccordionAndViolinStrictSearch",
     "AccordionOrViolinSearch",
     "AnyOfGotcha",
-    "FindArtist",
     "FindMarch2025Shows",
     "FindProlificArtists",
     "FindRecentAccordionArtists",
     "FindSeattleVenues",
     "FindUnnamedArtists",
-    "FindU2OrRadiohead",
     "PhraseSearch"
   ].to_set
 
