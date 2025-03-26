@@ -10,16 +10,16 @@ ElasticGraph supports two conjunction predicates:
 {% include filtering_predicate_definitions/conjunctions.md %}
 
 By default, multiple filters are ANDed together. For example, this query finds artists
-formed after the year 2000 with "accordion" in their bio:
+formed after the year 2000 with `BLUES` as one of their genres:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindRecentAccordionArtists" %}
+{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindModernBluesArtists" %}
 
 ### ORing subfilters with `anyOf`
 
-To instead find artists formed after the year 2000 OR with "accordion" in their bio, you
-can pass the sub-filters as a list to `anyOf`:
+To instead find artists who were formed after the year 2000 OR play `BLUES` music, you
+can pass the sub-filters as a list-of-objects to `anyOf`:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindRecentOrAccordionArtists" %}
+{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindModernOrBluesArtists" %}
 
 `anyOf` is available at all levels of the filtering structure so that you can OR
 sub-filters anywhere you like.

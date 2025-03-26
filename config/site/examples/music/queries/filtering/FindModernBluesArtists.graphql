@@ -1,0 +1,14 @@
+query FindModernBluesArtists {
+  artists(filter: {
+    bio: {yearFormed: {gt: 2000}}
+    genres: {anySatisfy: {equalToAnyOf: [BLUES]}}
+  }) {
+    nodes {
+      name
+      bio {
+        yearFormed
+        description
+      }
+    }
+  }
+}
