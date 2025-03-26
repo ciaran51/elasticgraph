@@ -13,7 +13,11 @@ RSpec.describe "ElasticGraph project" do
 
   # TODO: update this spec as needed to generate example fake data for your dataset.
   it "generates a batch of valid records from `FakeDataBatchGenerator`" do
-    batch = <%= ElasticGraph.setup_env.app_module %>::FakeDataBatchGenerator.generate(artists: 20, venues: 5)
-    expect(batch.size).to eq(25)
+    batch = <%= ElasticGraph.setup_env.app_module %>::FakeDataBatchGenerator.generate(venues: 5)
+
+    expect(batch.map { |r| r.fetch(:__typename) }.tally).to match({
+      "Artist" => a_value > 100,
+      "Venue" => 5
+    })
   end
 end

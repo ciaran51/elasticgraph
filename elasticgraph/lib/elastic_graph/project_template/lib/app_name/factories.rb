@@ -34,7 +34,10 @@ FactoryBot.define do
     end
 
     tours do
-      Faker::Number.between(from: 0, to: 4).times.map { build(:tour, venueIds: venueIds) }
+      Faker::Number.between(from: 0, to: 4).times.map do
+        song = Faker::Base.sample(albums.flat_map { |a| a.fetch(:tracks).map { |t| t.fetch(:name) } })
+        build(:tour, venueIds: venueIds, name: "The #{song} Tour")
+      end
     end
 
     transient do

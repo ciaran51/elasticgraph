@@ -43,7 +43,7 @@ ElasticGraph::Local::RakeTasks.new(
 
   # TODO: replace this with a fake data generator for your own dataset.
   tasks.define_fake_data_batch_for :artists do
-    <%= ElasticGraph.setup_env.app_module %>::FakeDataBatchGenerator.generate(artists: 100, venues: 10)
+    <%= ElasticGraph.setup_env.app_module %>::FakeDataBatchGenerator.generate(venues: 100)
   end
 end
 
