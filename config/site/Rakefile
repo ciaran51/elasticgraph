@@ -296,8 +296,65 @@ module ElasticGraph
           )
         end
 
+        desc "Validate that all pages have proper frontmatter with permalink"
+        task :validate_page_frontmatter do
+          require "yaml"
+
+          # Find all markdown and HTML files in src directory
+          src_dir = SITE_SOURCE_DIR
+          pages = Dir.glob("#{src_dir}/**/*").reject do |file|
+            # Skip directories, files in directories that don't contain pages, a couple specific files, and js/css assets.
+            File.directory?(file) ||
+              %w[/_data/ /docs/ /_includes/ /_layouts/ /_plugins/ /_config.yaml docker-compose.yaml].any? { |dir| file.include?(dir) } ||
+              %w[.js .css].include?(File.extname(file))
+          end
+
+          # Check each page to make sure the frontmatter specifies a `permalink`. This matters because it ensures consistent behavior
+          # when serving the site locally (e.g. for development) and on GitHub pages. We've discovered that when serving the site locally
+          # through jekyll, the server is more "forgiving" than GitHub pages. For example, the local server served `search.html` from
+          # `/search/` and `/search`, but on GitHub pages it only served from `/search`.Requiring a permalink set on each page forces us
+          # to explicitly pick what URL the page is served from, and will help ensure consistent behavior between local development and
+          # GitHub pages.
+          failed_pages = pages.filter_map do |page|
+            content = File.read(page)
+            relative_path = Pathname.new(page).relative_path_from(src_dir)
+
+            # Check if file has frontmatter (content between --- markers)
+            if content =~ /\A---\s*\n(.*?)\n---\s*\n/m
+              frontmatter = YAML.safe_load($1)
+
+              if !frontmatter.key?("permalink")
+                [relative_path, "Missing permalink in frontmatter"]
+              elsif frontmatter["permalink"].nil?
+                [relative_path, "Permalink is null"]
+              elsif frontmatter["permalink"].strip.empty?
+                [relative_path, "Permalink is empty"]
+              end
+            else
+              [relative_path, "No frontmatter found"]
+            end
+          end
+
+          unless failed_pages.empty?
+            abort <<~MESSAGE
+              The following pages have invalid frontmatter:
+
+              #{failed_pages.map { |path, error| "#{path}: #{error}" }.join("\n")}
+
+              All pages must have frontmatter with an explicit permalink.
+              Add frontmatter at the top of the file like this:
+
+              ---
+              permalink: /your/path/
+              ---
+            MESSAGE
+          end
+
+          puts "All pages have valid frontmatter with permalinks!"
+        end
+
         desc "Perform validations of the website, including doc tests and doc coverage"
-        task validate: [:build, :validate_html_output, :docs_coverage, :doctest]
+        task validate: [:build, :validate_html_output, :docs_coverage, :doctest, :validate_page_frontmatter]
 
         task build_css: :npm_install do
           require "rouge"
