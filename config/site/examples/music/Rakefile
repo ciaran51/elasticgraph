@@ -157,14 +157,10 @@ namespace :example_queries do
   # Queries that are known to fail and will be fixed in a follow-up PR
   allowed_failures = [
     # TODO: Remove these once fixed
-    "AccordionAndViolinStrictSearch",
-    "AccordionOrViolinSearch",
-    "AnyOfGotcha",
     "FindMarch2025Shows",
     "FindProlificArtists",
     "FindSeattleVenues",
-    "FindUnnamedArtists",
-    "PhraseSearch"
+    "FindUnnamedArtists"
   ].to_set
 
   desc "Validate that all example queries return non-empty results"

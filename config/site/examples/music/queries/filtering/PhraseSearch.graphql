@@ -3,7 +3,7 @@ query PhraseSearch {
     bio: {
       description:{
         matchesPhrase: {
-          phrase: "Ed Sullivan Show"
+          phrase: "pioneers in jazz"
         }
       }
     }
