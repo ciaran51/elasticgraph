@@ -48,6 +48,13 @@ module ElasticGraph
           negate: bool
         ) -> setType[S]
 
+        def filter_value_set_for_all_of: (
+          ::Array[::Hash[::String, untyped]],
+          ::Array[::String],
+          ::Array[::String],
+          negate: bool
+        ) -> setType[S]
+
         def filter_value_set_for_field_filter: (
           ::String,
           untyped

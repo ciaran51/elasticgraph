@@ -296,6 +296,60 @@ module ElasticGraph
         })).to search_all_shards
       end
 
+      context "when `all_of` is used" do
+        it "searches the shards identified by the set intersection of filter values when all clauses filter on the same field" do
+          expect(shard_routing_for(["name"], {"all_of" => [
+            {"name" => {"equal_to_any_of" => ["abc", "def"]}},
+            {"name" => {"equal_to_any_of" => ["def", "ghi"]}}
+          ]})).to search_shards_identified_by "def"
+        end
+
+        it "correctly handles negated subfilters" do
+          expect(shard_routing_for(["name"], {"all_of" => [
+            {"name" => {"not" => {"equal_to_any_of" => ["abc"]}}},
+            {"name" => {"equal_to_any_of" => ["def", "ghi"]}}
+          ]})).to search_shards_identified_by "def", "ghi"
+        end
+
+        it "searches only the identified shards when filtering on the routing field" do
+          expect(shard_routing_for(["name"], {"all_of" => [
+            {"name" => {"equal_to_any_of" => ["abc", "def"]}},
+            {"id" => {"equal_to_any_of" => ["123"]}}
+          ]})).to search_shards_identified_by "abc", "def"
+        end
+
+        it "searches all shards when we have an empty `all_of: []` filter" do
+          expect(shard_routing_for(["name"], {
+            "all_of" => []
+          })).to search_all_shards
+        end
+
+        it "searches all shards when we have an `all_of: [{field: nil}]` filter" do
+          expect(shard_routing_for(["name"], {
+            "all_of" => [{"name" => nil}]
+          })).to search_all_shards
+        end
+
+        it "searches no shards when there is no intersection between filter values" do
+          expect(shard_routing_for(["name"], {"all_of" => [
+            {"name" => {"equal_to_any_of" => ["abc", "def"]}},
+            {"name" => {"equal_to_any_of" => ["ghi", "jkl"]}}
+          ]})).to search_no_shards
+        end
+
+        it "searches shards identified by combining intersections and unions when operators are nested" do
+          expect(shard_routing_for(["name"], {
+            "any_of" => [
+              {"name" => {"equal_to_any_of" => ["abc"]}},
+              {"all_of" => [
+                {"name" => {"equal_to_any_of" => ["def", "ghi"]}},
+                {"name" => {"equal_to_any_of" => ["ghi", "jkl"]}}
+              ]}
+            ]
+          })).to search_shards_identified_by "abc", "ghi"
+        end
+      end
+
       describe "not" do
         it "searches all shards when there are values in an `equal_to_any_of` filter" do
           expect(shard_routing_for(["name"],
@@ -500,6 +554,25 @@ module ElasticGraph
             ["name"],
             {"not" => {"not" => {"name" => {"not" => {"equal_to_any_of" => ["abc", "def"]}}}}}
           )).to search_all_shards
+        end
+
+        it "searches all shards when negating an all_of filter" do
+          expect(shard_routing_for(["name"], {
+            "not" => {"all_of" => [
+              {"name" => {"equal_to_any_of" => ["abc", "def"]}},
+              {"name" => {"equal_to_any_of" => ["def", "ghi"]}}
+            ]}
+          })).to search_all_shards
+        end
+
+        it "handles negated empty all_of filters correctly" do
+          expect(shard_routing_for(["name"], {
+            "name" => {
+              "not" => {
+                "all_of" => []
+              }
+            }
+          })).to search_no_shards
         end
       end
 
