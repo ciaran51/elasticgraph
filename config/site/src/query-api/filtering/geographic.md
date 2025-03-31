@@ -11,4 +11,4 @@ The `GeoLocation` type supports a special predicate:
 
 Here's an example of this predicate:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindAsianVenues" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.FindAsianVenues" %}

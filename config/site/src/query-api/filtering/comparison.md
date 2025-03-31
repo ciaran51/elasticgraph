@@ -11,4 +11,4 @@ ElasticGraph offers a standard set of comparison filter predicates:
 
 Here's an example:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindArtistsFormedIn90s" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.FindArtistsFormedIn90s" %}

@@ -23,7 +23,7 @@ All three support the standard set of [equality]({% link query-api/filtering/equ
 [comparison]({% link query-api/filtering/comparison.md %}) predicates. When using comparison
 predicates to cover a range, it's usually simplest to pair `gte` with `lt`:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.Find2024Shows" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.Find2024Shows" %}
 
 In addition, `DateTime` fields support one more filtering operator:
 
@@ -31,4 +31,4 @@ In addition, `DateTime` fields support one more filtering operator:
 
 For example, you could use it to find shows that started between noon and 3 pm on any date:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindEarlyAfternoonShows" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.FindEarlyAfternoonShows" %}

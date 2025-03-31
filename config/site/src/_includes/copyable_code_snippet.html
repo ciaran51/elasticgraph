@@ -4,15 +4,16 @@
   Parameters:
     language: The language for syntax highlighting (e.g., "graphql", "ruby", "shell")
     code: Raw code to display
-    music_query: Name of a query from site.data.music_queries (e.g. "filtering.FindArtist")
+    data: path to a code snippet available under `site.data` (e.g  "music_queries.filtering.FindArtist")
     font_size: Optional font size class (e.g., "text-xs", "text-sm", etc)
     style: Optional "dark" for dark background style
 {% endcomment %}
-{% if include.music_query %}
-  {% assign parts = include.music_query | split: "." %}
-  {% assign section = parts[0] %}
-  {% assign name = parts[1] %}
-  {% assign code = site.data.music_queries[section][name] %}
+{% if include.data %}
+  {% assign parts = include.data | split: "." %}
+  {% assign code = site.data %}
+  {% for part in parts %}
+    {% assign code = code[part] %}
+  {% endfor %}
 {% else %}
   {% assign code = include.code %}
 {% endif %}
@@ -44,7 +45,7 @@
         {% assign display_content = code %}
       {% endif %}
       <button onclick="copyToClipboard(this, {{ clipboard_content | jsonify | escape }})"
-        class="{% if include.style == 'dark' %}text-white hover:text-blue-300{% else %}text-gray-400 hover:text-blue-300{% endif %} transition-all cursor-pointer"
+        class="{% if include.style == 'dark' %}text-white hover:text-blue-300{% else %}text-gray-400 hover:text-blue-300{% endif %} transition-all cursor-pointer copy-to-clipboard"
         aria-label="Copy code">
         <span class="sr-only">Copy code</span>
         {% include icons/document-duplicate.svg %}
