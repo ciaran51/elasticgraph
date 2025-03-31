@@ -394,13 +394,7 @@ module ElasticGraph
                 end
                 ::ElasticGraph::QueryRegistry::RakeTasks.from_yaml_file(settings_file, queries_dir)
 
-                task "query_registry:validate_queries" => ["print_dir", "schema_artifacts:dump", "query_registry:dump_variables:all"]
-
-                task :print_dir do
-                  puts
-                  puts "CURRENT_DIR: #{Dir.pwd}"
-                  puts
-                end
+                task "query_registry:validate_queries" => ["schema_artifacts:dump", "query_registry:dump_variables:all"]
 
                 task compile_queries: "query_registry:validate_queries" do
                   queries_by_name_by_category = queries_dir.children.to_h do |category_path|
