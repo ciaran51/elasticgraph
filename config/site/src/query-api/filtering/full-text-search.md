@@ -13,7 +13,7 @@ ElasticGraph supports two full-text search filtering predicates:
 
 `matchesQuery` is the more lenient of the two predicates. It's designed to match broadly. Here's an example:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.AccordionOrViolinSearch" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.AccordionOrViolinSearch" %}
 
 This query will match artists with bios like:
 
@@ -26,16 +26,16 @@ Notably, the description needs `accordion` OR `violin`, but not both. In additio
 mentioned "viola" since it supports fuzzy matching by default and "viola" is only 2 edits away from "violin". Arguments
 are supported to control both aspects to make matching stricter:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.AccordionAndViolinStrictSearch" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.AccordionAndViolinStrictSearch" %}
 
 ### Matches Phrase
 
 `matchesPhrase` is even stricter: it requires all terms _in the provided order_ (`matchesQuery` doesn't care about order). It's particularly useful when you want to search on a particular multi-word expression:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.PhraseSearch" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.PhraseSearch" %}
 
 ### Bypassing matchesPhrase and matchesQuery
 
 In order to make a `matchesPhrase` or `matchesQuery` filter optional, you can supply `null` to the `MatchesQueryFilterInput` parameter, like this:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.OptionalMatchingFilter" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.OptionalMatchingFilter" %}

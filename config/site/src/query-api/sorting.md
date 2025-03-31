@@ -7,7 +7,7 @@ menu_order: 4
 ---
 Use `orderBy:` on a root query field to control how the results are sorted:
 
-{% include copyable_code_snippet.html language="graphql" music_query="sorting.ListArtists" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.sorting.ListArtists" %}
 
 This query, for example, would sort by `name` (ascending), with `bio.yearFormed` (descending) as a tie breaker.
 When no `orderBy:` argument is provided, ElasticGraph will sort according to the

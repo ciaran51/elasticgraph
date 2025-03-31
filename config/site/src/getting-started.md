@@ -69,7 +69,7 @@ This will:
 
 Run some example queries in GraphiQL to confirm it's working. Here's an example query to get you started:
 
-{% include copyable_code_snippet.html language="graphql" music_query="filtering.FindArtistsFormedIn90s" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.filtering.FindArtistsFormedIn90s" %}
 
 Visit the [Query API docs]({% link query-api.md %}) for other example queries that work against the example schema.
 

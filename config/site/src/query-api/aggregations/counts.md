@@ -7,7 +7,7 @@ menu_order: 2
 ---
 The aggregations API allows you to count documents within a grouping:
 
-{% include copyable_code_snippet.html language="graphql" music_query="aggregations.ArtistCountsByCountry" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.aggregations.ArtistCountsByCountry" %}
 
 This query, for example, returns a grouping for each country, and provides a count of how many artists
 call each country home.

@@ -9,7 +9,7 @@ To provide pagination, ElasticGraph implements the [Relay GraphQL Cursor Connect
 Specification](https://relay.dev/graphql/connections.htm). Here's an example query showing
 pagination in action:
 
-{% include copyable_code_snippet.html language="graphql" music_query="pagination.PaginationExample" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.pagination.PaginationExample" %}
 
 This example uses `first:`, `after:`, and `pageInfo { hasNextPage, endCursor }` to implement forward pagination.
 If `pageInfo.hasNextPage` indicates there is another page, the client can pass `pageInfo.endCursor` as the
@@ -23,7 +23,7 @@ In addition, ElasticGraph offers some additional features beyond the Relay spec.
 As an extension to the Relay spec, ElasticGraph offers a `totalEdgeCount` field alongside `edges` and `pageInfo`.
 It can be used to get a total count of matching records:
 
-{% include copyable_code_snippet.html language="graphql" music_query="pagination.Count21stCenturyArtists" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.pagination.Count21stCenturyArtists" %}
 
 {: .alert-note}
 **Note**{: .alert-title}
@@ -35,4 +35,4 @@ As an alternative to `edges.node`, ElasticGraph offers `nodes`. This is recommen
 a per-node `cursor` (which is available under `edges`) since it removes an extra layer of nesting, providing a simpler
 response structure:
 
-{% include copyable_code_snippet.html language="graphql" music_query="pagination.PaginationNodes" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.pagination.PaginationNodes" %}

@@ -8,7 +8,7 @@ menu_order: 1
 
 ElasticGraph provides an extremely flexible GraphQL query API. As with every GraphQL API, you request the fields you want:
 
-{% include copyable_code_snippet.html language="graphql" music_query="basic.ListArtistAlbums" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.basic.ListArtistAlbums" %}
 
 If you're just getting started with GraphQL, we recommend you review the [graphql.org
 learning materials](https://graphql.org/learn/queries/).

@@ -8,7 +8,7 @@ menu_order: 3
 ElasticGraph offers a powerful aggregations API. Each indexed type gets a corresponding `*Aggregations` field.
 Here's a complete example:
 
-{% include copyable_code_snippet.html language="graphql" music_query="aggregations.BluegrassArtistAggregations" %}
+{% include copyable_code_snippet.html language="graphql" data="music_queries.aggregations.BluegrassArtistAggregations" %}
 
 Aggregation fields support [filtering]({% link query-api/filtering.md %}) and [pagination]({% link query-api/pagination.md %})
 but do _not_ support client-specified [sorting]({% link query-api/sorting.md %})[^1]. Under an aggregations field, each node
