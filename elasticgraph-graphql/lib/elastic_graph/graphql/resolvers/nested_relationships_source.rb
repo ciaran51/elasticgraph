@@ -130,21 +130,23 @@ module ElasticGraph
 
           # To see if we got the same results we only look at the documents, because we expect differences outside
           # of the documents--for example, the `SearchResponse#metadata` will report different `took` values.
-          if original_results.map(&:documents) == optimized_results.map(&:documents)
-            @logger.info({
-              "message_type" => "NestedRelationshipsComparisonResults",
-              "field" => @join.field.description,
-              "original_duration_ms" => original_duration_ms,
-              "optimized_duration_ms" => optimized_duration_ms,
-              "optimized_faster" => (optimized_duration_ms < original_duration_ms)
-            })
+          got_same_results = original_results.map(&:documents) == optimized_results.map(&:documents)
+          message = {
+            "message_type" => "NestedRelationshipsComparisonResults",
+            "field" => @join.field.description,
+            "original_duration_ms" => original_duration_ms,
+            "optimized_duration_ms" => optimized_duration_ms,
+            "optimized_faster" => (optimized_duration_ms < original_duration_ms),
+            "got_same_results" => got_same_results
+          }
+
+          if got_same_results
+            @logger.info(message)
           else
-            @logger.error({
-              "message_type" => "NestedRelationshipsComparisonGotDifferentResults",
-              "field" => @join.field.description,
+            @logger.error(message.merge({
               "original_documents" => loggable_results(original_results),
               "optimized_documents" => loggable_results(optimized_results)
-            })
+            }))
           end
 
           original_results
