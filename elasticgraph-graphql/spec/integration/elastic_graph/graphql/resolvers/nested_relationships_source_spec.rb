@@ -245,8 +245,7 @@ module ElasticGraph
 
         context "when `nested_relationship_resolver_mode` is set to `comparison`" do
           let(:graphql) { build_graphql(nested_relationship_resolver_mode: :comparison) }
-          let(:results_match_message_type) { "NestedRelationshipsComparisonResults" }
-          let(:results_differ_message_type) { "NestedRelationshipsComparisonGotDifferentResults" }
+          let(:comparison_results_message_type) { "NestedRelationshipsComparisonResults" }
 
           it "performs the `:optimized` and `:original` logic and then compares and logs the results" do
             index_into(
@@ -277,13 +276,12 @@ module ElasticGraph
               "total_id_count" => 4
             })]
 
-            expect(logged_jsons_of_type(results_match_message_type)).to match [a_hash_including({
-              "message_type" => results_match_message_type,
+            expect(logged_jsons_of_type(comparison_results_message_type)).to match [a_hash_including({
+              "message_type" => comparison_results_message_type,
               "field" => "Component.widget",
-              "optimized_faster" => (a_value == true).or(a_value == false)
+              "optimized_faster" => (a_value == true).or(a_value == false),
+              "got_same_results" => true
             })]
-
-            expect(logged_jsons_of_type(results_differ_message_type)).to be_empty
           end
 
           it "logs the document differences when there are any" do
@@ -312,7 +310,7 @@ module ElasticGraph
               expect(response3.map(&:id)).to contain_exactly("w1", "w4")
             }.to perform_datastore_search("main", 3).times
               .and perform_datastore_msearch("main", 2).time
-              .and log_warning(a_string_including(results_differ_message_type))
+              .and log_warning(a_string_including(comparison_results_message_type))
 
             expect(logged_jsons_of_type(merged_queries_message_type)).to match [a_hash_including({
               "message_type" => merged_queries_message_type,
@@ -323,21 +321,23 @@ module ElasticGraph
               "total_id_count" => 4
             })]
 
-            expect(logged_jsons_of_type(results_match_message_type)).to be_empty
-            diff_messages = logged_jsons_of_type(results_differ_message_type)
+            comparison_messages = logged_jsons_of_type(comparison_results_message_type)
 
-            expect(diff_messages.size).to eq 1
-            expect(diff_messages.first).to include(
-              "message_type" => results_differ_message_type,
-              "field" => "Component.widget"
-            )
+            expect(comparison_messages).to match [a_hash_including({
+              "message_type" => comparison_results_message_type,
+              "field" => "Component.widget",
+              "optimized_faster" => (a_value == true).or(a_value == false),
+              "got_same_results" => false
+            })]
 
-            expect(diff_messages.dig(0, "original_documents")).to match [
+            expect(comparison_messages.size).to eq 1
+
+            expect(comparison_messages.dig(0, "original_documents")).to match [
               [a_string_including("w1 (hash:"), a_string_including("w4 (hash: ")],
               [a_string_including("w2 (hash:"), a_string_including("w3 (hash: "), a_string_including("w4 (hash: ")]
             ]
 
-            expect(diff_messages.dig(0, "optimized_documents")).to match [
+            expect(comparison_messages.dig(0, "optimized_documents")).to match [
               [a_string_including("w4 (hash: ")],
               [a_string_including("w2 (hash:"), a_string_including("w3 (hash: "), a_string_including("w4 (hash: ")]
             ]
