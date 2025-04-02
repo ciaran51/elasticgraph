@@ -506,7 +506,7 @@ module ElasticGraph
           }])
         end
 
-        it "limits the size of `terms` grouping based on the sub-aggregation `size`" do
+        it "limits the size of a single `terms` grouping based on the sub-aggregation `size`" do
           query = aggregation_query_of(name: "teams", sub_aggregations: [
             nested_sub_aggregation_of(path_in_index: ["seasons_nested"], query: sub_aggregation_query_of(
               name: "seasons_nested",
@@ -525,15 +525,16 @@ module ElasticGraph
               "meta" => outer_meta({"buckets_path" => ["seasons_nested.year"]}, size: 1),
               "seasons_nested.year" => {
                 "meta" => inner_terms_meta({"grouping_fields" => ["seasons_nested.year"], "key_path" => ["key"]}),
-                "buckets" => [term_bucket(2022, 2)],
+                # To support `page_info.has_next_page` we request one additional bucket, so we get back 2 here.
+                "buckets" => [term_bucket(2022, 2), term_bucket(2020, 1)],
                 "doc_count_error_upper_bound" => 0,
-                "sum_other_doc_count" => 2
+                "sum_other_doc_count" => 1
               }
             }.with_missing_value_bucket(0)
           }])
         end
 
-        it "limits the size of a `terms` grouping based on the sub-aggregation `size`" do
+        it "limits the size of multiple `terms` groupings based on the sub-aggregation `size`" do
           query = aggregation_query_of(name: "teams", sub_aggregations: [
             nested_sub_aggregation_of(path_in_index: ["seasons_nested"], query: sub_aggregation_query_of(
               name: "seasons_nested",
@@ -552,20 +553,28 @@ module ElasticGraph
               "meta" => outer_meta({"buckets_path" => ["seasons_nested.year"]}, size: 1),
               "seasons_nested.year" => {
                 "meta" => inner_terms_meta({"buckets_path" => ["seasons_nested.notes"], "grouping_fields" => ["seasons_nested.year"], "key_path" => ["key"]}),
+                # To support `page_info.has_next_page` we request one additional bucket, so we get back 2 here.
                 "buckets" => [
                   term_bucket(2022, 2, {
                     "seasons_nested.notes" => {
                       "meta" => inner_terms_meta({"grouping_fields" => ["seasons_nested.notes"], "key_path" => ["key"]}),
-                      "buckets" => [
-                        term_bucket("new rules", 2)
-                      ],
+                      "buckets" => [term_bucket("new rules", 2)],
+                      "doc_count_error_upper_bound" => 0,
+                      "sum_other_doc_count" => 0
+                    }
+                  }.with_missing_value_bucket(0)),
+                  term_bucket(2020, 1, {
+                    "seasons_nested.notes" => {
+                      "meta" => inner_terms_meta({"grouping_fields" => ["seasons_nested.notes"], "key_path" => ["key"]}),
+                      # To support `page_info.has_next_page` we request one additional bucket, so we get back 2 here.
+                      "buckets" => [term_bucket("old rules", 1), term_bucket("pandemic", 1)],
                       "doc_count_error_upper_bound" => 0,
                       "sum_other_doc_count" => 0
                     }
                   }.with_missing_value_bucket(0))
                 ],
                 "doc_count_error_upper_bound" => 0,
-                "sum_other_doc_count" => 2
+                "sum_other_doc_count" => 1
               }
             }.with_missing_value_bucket(0, {
               "seasons_nested.notes" => {

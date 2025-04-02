@@ -40,6 +40,7 @@ module ElasticGraph
           def extract_buckets: (::String, ::Hash[::String, untyped]) -> ::Array[::Hash[::String, untyped]]
 
           BUCKET_ADAPTERS: ::Hash[::String, groupingAdapter]
+          SINGLETON_BUCKET_DEFAULTS: ::Hash[::String, untyped]
         end
       end
     end

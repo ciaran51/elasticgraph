@@ -33,7 +33,7 @@ module ElasticGraph
           clause_value = work_around_elasticsearch_bug(terms_subclause)
           {
             "terms" => clause_value.merge({
-              "size" => query.paginator.desired_page_size,
+              "size" => query.paginator.requested_page_size,
               "show_term_doc_count_error" => query.needs_doc_count_error
             })
           }

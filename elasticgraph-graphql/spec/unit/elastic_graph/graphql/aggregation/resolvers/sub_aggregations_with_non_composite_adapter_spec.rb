@@ -163,6 +163,95 @@ module ElasticGraph
         end
 
         context "with grouping" do
+          it "resolves all `page_info` fields" do
+            query_with_first = lambda do |first|
+              aggs = {
+                "target:seasons_nested" => {
+                  "meta" => outer_meta({"buckets_path" => ["seasons_nested.year"]}, size: first),
+                  "doc_count" => 4,
+                  "seasons_nested.year" => {
+                    "meta" => inner_terms_meta({"grouping_fields" => ["seasons_nested.year"], "key_path" => ["key"]}),
+                    "doc_count_error_upper_bound" => 0,
+                    "sum_other_doc_count" => 0,
+                    "buckets" => [
+                      {
+                        "key" => 2020,
+                        "doc_count" => 2
+                      },
+                      {
+                        "key" => 2019,
+                        "doc_count" => 1
+                      },
+                      {
+                        "key" => 2022,
+                        "doc_count" => 1
+                      }
+                    ]
+                  }
+                }.with_missing_value_bucket(0)
+              }
+
+              resolve_target_nodes(<<~QUERY, aggs: aggs)
+                target: team_aggregations {
+                  nodes {
+                    sub_aggregations {
+                      seasons_nested(first: #{first}) {
+                        page_info {
+                          has_next_page
+                          has_previous_page
+                          start_cursor
+                          end_cursor
+                        }
+                        nodes {
+                          grouped_by { year }
+                        }
+                      }
+                    }
+                  }
+                }
+              QUERY
+            end
+
+            expect(query_with_first.call(3)).to match [
+              {
+                "sub_aggregations" => {
+                  "seasons_nested" => {
+                    "page_info" => an_object_matching({
+                      "has_next_page" => false, # false since we only got 3 buckets (the requested amount)
+                      "has_previous_page" => false,
+                      "start_cursor" => /\w+/,
+                      "end_cursor" => /\w+/
+                    }),
+                    "nodes" => [
+                      {"grouped_by" => {"year" => 2020}},
+                      {"grouped_by" => {"year" => 2019}},
+                      {"grouped_by" => {"year" => 2022}}
+                    ]
+                  }
+                }
+              }
+            ]
+
+            expect(query_with_first.call(2)).to match [
+              {
+                "sub_aggregations" => {
+                  "seasons_nested" => {
+                    "page_info" => an_object_matching({
+                      "has_next_page" => true, # true since we got more than the 1 bucket we requested
+                      "has_previous_page" => false,
+                      "start_cursor" => /\w+/,
+                      "end_cursor" => /\w+/
+                    }),
+                    "nodes" => [
+                      {"grouped_by" => {"year" => 2020}},
+                      {"grouped_by" => {"year" => 2019}}
+                    ]
+                  }
+                }
+              }
+            ]
+          end
+
           it "resolves a sub-aggregation grouping on one non-date, non-boolean field" do
             aggs = {
               "target:seasons_nested" => {
@@ -632,7 +721,7 @@ module ElasticGraph
               target: team_aggregations {
                 nodes {
                   sub_aggregations {
-                    seasons_nested(first: 3) {
+                    seasons_nested(first: 2) {
                       nodes {
                         grouped_by { note, record { losses } }
                         count_detail { approximate_value }

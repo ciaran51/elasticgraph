@@ -65,15 +65,21 @@ module ElasticGraph
                   sub_agg
                 end
 
-              # When we have a single ungrouped bucket, we never have any error on the `doc_count`.
-              # Our resolver logic expects it to be present, though.
-              [singleton_bucket.merge({"doc_count_error_upper_bound" => 0})]
+              [SINGLETON_BUCKET_DEFAULTS.merge(singleton_bucket)]
             end
           end
 
           BUCKET_ADAPTERS = [CompositeGroupingAdapter, NonCompositeGroupingAdapter].to_h do |adapter|
             [adapter.meta_name, adapter]
           end
+
+          SINGLETON_BUCKET_DEFAULTS = {
+            # When we have a single ungrouped bucket, we never have any error on the `doc_count`.
+            # Our resolver logic expects it to be present, though.
+            "doc_count_error_upper_bound" => 0,
+            # Our resolver logic expects a `key` as it gets used by the `PageInfo` resolver when that's requested.
+            "key" => {}
+          }
         end
       end
     end
