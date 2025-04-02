@@ -12,6 +12,12 @@ require "graphql"
 require "support/graphql"
 
 module ElasticGraph
+  class << self
+    attr_accessor :camel_case_cluster_configured
+  end
+
+  self.camel_case_cluster_configured = false
+
   RSpec.shared_context "ElasticGraph GraphQL acceptance support", :factories, :uses_datastore, :capture_logs, :builds_indexer, :builds_admin do
     include GraphQLSupport
     include PreventSearchesFromUsingWriteRequests
@@ -83,11 +89,16 @@ module ElasticGraph
             end
           }
 
-          admin = BuildsAdmin.build_admin(**extra_build_options) do |config|
-            configure_for_camel_case(config)
-          end
+          # Ensure the cluster isn't configured for a camelCase schema more than once.
+          unless ElasticGraph.camel_case_cluster_configured
+            ElasticGraph.camel_case_cluster_configured = true
 
-          manage_cluster_for(admin: admin, state_file_name: "camelCase_indices.yaml")
+            admin = BuildsAdmin.build_admin(**extra_build_options) do |config|
+              configure_for_camel_case(config)
+            end
+
+            manage_cluster_for(admin: admin, state_file_name: "camelCase_indices.yaml")
+          end
         end
 
         define_method :build_graphql do |**options, &method_block|
