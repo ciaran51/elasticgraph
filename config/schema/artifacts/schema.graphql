@@ -10162,6 +10162,11 @@ type TeamMoneySubAggregationConnection {
   The list of `TeamMoneySubAggregation` results.
   """
   nodes: [TeamMoneySubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 type TeamNestedFields {
@@ -10243,6 +10248,11 @@ type TeamPlayerPlayerSeasonSubAggregationConnection {
   The list of `TeamPlayerPlayerSeasonSubAggregation` results.
   """
   nodes: [TeamPlayerPlayerSeasonSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -10273,6 +10283,11 @@ type TeamPlayerSeasonSubAggregationConnection {
   The list of `TeamPlayerSeasonSubAggregation` results.
   """
   nodes: [TeamPlayerSeasonSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -10303,6 +10318,11 @@ type TeamPlayerSponsorshipSubAggregationConnection {
   The list of `TeamPlayerSponsorshipSubAggregation` results.
   """
   nodes: [TeamPlayerSponsorshipSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -10358,6 +10378,11 @@ type TeamPlayerSubAggregationConnection {
   The list of `TeamPlayerSubAggregation` results.
   """
   nodes: [TeamPlayerSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11164,6 +11189,11 @@ type TeamSponsorshipSubAggregationConnection {
   The list of `TeamSponsorshipSubAggregation` results.
   """
   nodes: [TeamSponsorshipSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11195,6 +11225,11 @@ type TeamTeamSeasonPlayerPlayerSeasonSubAggregationConnection {
   The list of `TeamTeamSeasonPlayerPlayerSeasonSubAggregation` results.
   """
   nodes: [TeamTeamSeasonPlayerPlayerSeasonSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11226,6 +11261,11 @@ type TeamTeamSeasonPlayerSeasonSubAggregationConnection {
   The list of `TeamTeamSeasonPlayerSeasonSubAggregation` results.
   """
   nodes: [TeamTeamSeasonPlayerSeasonSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11257,6 +11297,11 @@ type TeamTeamSeasonPlayerSponsorshipSubAggregationConnection {
   The list of `TeamTeamSeasonPlayerSponsorshipSubAggregation` results.
   """
   nodes: [TeamTeamSeasonPlayerSponsorshipSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11312,6 +11357,11 @@ type TeamTeamSeasonPlayerSubAggregationConnection {
   The list of `TeamTeamSeasonPlayerSubAggregation` results.
   """
   nodes: [TeamTeamSeasonPlayerSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11367,6 +11417,11 @@ type TeamTeamSeasonSponsorshipSubAggregationConnection {
   The list of `TeamTeamSeasonSponsorshipSubAggregation` results.
   """
   nodes: [TeamTeamSeasonSponsorshipSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
@@ -11402,6 +11457,11 @@ type TeamTeamSeasonSubAggregationConnection {
   The list of `TeamTeamSeasonSubAggregation` results.
   """
   nodes: [TeamTeamSeasonSubAggregation!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
 }
 
 """
