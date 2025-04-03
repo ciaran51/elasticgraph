@@ -15,6 +15,7 @@ RSpec::Matchers.define :have_json_schema_like do |type, expected_schema, options
   # TODO: Switch back to an `include_typename` keyword arg once we upgrade to a version that fixes the regression.
   # https://github.com/rspec/rspec-expectations/issues/1451
   include_typename = options.fetch(:include_typename, true)
+  ignore_descriptions = options.fetch(:ignore_descriptions, false)
 
   diffable
 
@@ -39,6 +40,7 @@ RSpec::Matchers.define :have_json_schema_like do |type, expected_schema, options
     @expected = JSON.pretty_generate(modified_expected_schema)
 
     actual_schema = normalize(full_schema.fetch("$defs").fetch(type))
+    actual_schema = strip_descriptions_from(actual_schema) if ignore_descriptions
     @actual = JSON.pretty_generate(actual_schema)
 
     @validator_factory = ElasticGraph::JSONSchema::ValidatorFactory.new(schema: full_schema, sanitize_pii: false)
@@ -138,5 +140,20 @@ RSpec::Matchers.define :have_json_schema_like do |type, expected_schema, options
       }
     })
     new_schema
+  end
+
+  def strip_descriptions_from(object)
+    case object
+    when ::Hash
+      object.filter_map do |key, value|
+        unless key == "description"
+          [key, strip_descriptions_from(value)]
+        end
+      end.to_h
+    when ::Array
+      object.map { |e| strip_descriptions_from(e) }
+    else
+      object
+    end
   end
 end
