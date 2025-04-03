@@ -992,7 +992,8 @@ module ElasticGraph
       end
 
       def terms(terms_hash, size: 50, show_term_doc_count_error: false)
-        terms_hash.merge({"size" => size, "show_term_doc_count_error" => show_term_doc_count_error})
+        # We add 1 to the size because we ask for one more from the datastore to detect `page_info.has_next_page`.
+        terms_hash.merge({"size" => size + 1, "show_term_doc_count_error" => show_term_doc_count_error})
       end
     end
   end

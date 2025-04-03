@@ -124,7 +124,7 @@ module ElasticGraph
                 # a time breaker to ensure deterministic results, but don't particularly care which buckets
                 # come first.
                 [-b.fetch("doc_count"), b.fetch("key_values").map(&:to_s)]
-              end.first(size)
+              end.first(size + 1) # We add 1 so `page_info.has_next_page` detection works.
           end
 
           def missing_bucket_path_from(buckets_path)
