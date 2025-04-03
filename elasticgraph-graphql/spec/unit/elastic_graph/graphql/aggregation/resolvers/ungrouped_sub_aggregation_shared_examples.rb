@@ -12,6 +12,60 @@ module ElasticGraph
       # The CompositeAggregationAdapter and NonCompositeAggregationAdapter deal with the same requests and responses
       # when no groupign is involved, so we can use shared examples for those cases.
       RSpec.shared_examples_for "ungrouped sub-aggregations" do
+        it "resolves all `page_info` fields on ungrouped sub-aggregations" do
+          aggs = {
+            "target:seasons_nested" => {"doc_count" => 423, "meta" => outer_meta},
+            "target:current_players_nested" => {"doc_count" => 201, "meta" => outer_meta}
+          }
+
+          response = resolve_target_nodes(<<~QUERY, aggs: aggs)
+            target: team_aggregations {
+              nodes {
+                sub_aggregations {
+                  seasons_nested {
+                    page_info {
+                      has_next_page
+                      has_previous_page
+                      start_cursor
+                      end_cursor
+                    }
+                  }
+
+                  current_players_nested {
+                    page_info {
+                      has_next_page
+                      has_previous_page
+                      start_cursor
+                      end_cursor
+                    }
+                  }
+                }
+              }
+            }
+          QUERY
+
+          expect(response).to match [{
+            "sub_aggregations" => {
+              "seasons_nested" => {
+                "page_info" => an_object_matching({
+                  "has_next_page" => false,
+                  "has_previous_page" => false,
+                  "start_cursor" => /\w+/,
+                  "end_cursor" => /\w+/
+                })
+              },
+              "current_players_nested" => {
+                "page_info" => an_object_matching({
+                  "has_next_page" => false,
+                  "has_previous_page" => false,
+                  "start_cursor" => /\w+/,
+                  "end_cursor" => /\w+/
+                })
+              }
+            }
+          }]
+        end
+
         it "resolves ungrouped sub-aggregations with just a count_detail under an ungrouped aggregation" do
           aggs = {
             "target:seasons_nested" => {"doc_count" => 423, "meta" => outer_meta},

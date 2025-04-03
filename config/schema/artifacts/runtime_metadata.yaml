@@ -4813,6 +4813,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamNestedFields:
     graphql_fields_by_name:
       current_players:
@@ -4839,6 +4841,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamPlayerSeasonSubAggregation:
     graphql_fields_by_name:
       aggregated_values:
@@ -4852,6 +4856,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamPlayerSponsorshipSubAggregation:
     graphql_fields_by_name:
       aggregated_values:
@@ -4864,6 +4870,8 @@ object_types_by_name:
     elasticgraph_category: nested_sub_aggregation_connection
     graphql_fields_by_name:
       nodes:
+        resolver: object_without_lookahead
+      page_info:
         resolver: object_without_lookahead
   TeamPlayerSubAggregation:
     graphql_fields_by_name:
@@ -4883,6 +4891,8 @@ object_types_by_name:
     elasticgraph_category: nested_sub_aggregation_connection
     graphql_fields_by_name:
       nodes:
+        resolver: object_without_lookahead
+      page_info:
         resolver: object_without_lookahead
   TeamPlayerSubAggregationSubAggregations:
     graphql_fields_by_name:
@@ -5085,6 +5095,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamTeamSeasonPlayerPlayerSeasonSubAggregation:
     graphql_fields_by_name:
       aggregated_values:
@@ -5097,6 +5109,8 @@ object_types_by_name:
     elasticgraph_category: nested_sub_aggregation_connection
     graphql_fields_by_name:
       nodes:
+        resolver: object_without_lookahead
+      page_info:
         resolver: object_without_lookahead
   TeamTeamSeasonPlayerSeasonSubAggregation:
     graphql_fields_by_name:
@@ -5111,6 +5125,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamTeamSeasonPlayerSponsorshipSubAggregation:
     graphql_fields_by_name:
       aggregated_values:
@@ -5123,6 +5139,8 @@ object_types_by_name:
     elasticgraph_category: nested_sub_aggregation_connection
     graphql_fields_by_name:
       nodes:
+        resolver: object_without_lookahead
+      page_info:
         resolver: object_without_lookahead
   TeamTeamSeasonPlayerSubAggregation:
     graphql_fields_by_name:
@@ -5143,6 +5161,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamTeamSeasonPlayerSubAggregationSubAggregations:
     graphql_fields_by_name:
       affiliations:
@@ -5162,6 +5182,8 @@ object_types_by_name:
     graphql_fields_by_name:
       nodes:
         resolver: object_without_lookahead
+      page_info:
+        resolver: object_without_lookahead
   TeamTeamSeasonSubAggregation:
     graphql_fields_by_name:
       aggregated_values:
@@ -5176,6 +5198,8 @@ object_types_by_name:
     elasticgraph_category: nested_sub_aggregation_connection
     graphql_fields_by_name:
       nodes:
+        resolver: object_without_lookahead
+      page_info:
         resolver: object_without_lookahead
   TeamTeamSeasonSubAggregationPlayersObjectAffiliationsSubAggregations:
     graphql_fields_by_name:

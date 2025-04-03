@@ -486,10 +486,8 @@ module ElasticGraph
             f.documentation "The list of `#{type_name}` results."
           end
 
-          if support_pagination
-            t.field @state.schema_elements.page_info, "PageInfo!" do |f|
-              f.documentation "Provides pagination-related information."
-            end
+          t.field @state.schema_elements.page_info, "PageInfo!" do |f|
+            f.documentation "Provides pagination-related information."
           end
 
           if include_total_edge_count

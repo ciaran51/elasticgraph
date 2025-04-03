@@ -61,6 +61,10 @@ module ElasticGraph
                 The list of `TeamPlayerSubAggregation` results.
                 """
                 nodes: [TeamPlayerSubAggregation!]!
+                """
+                Provides pagination-related information.
+                """
+                #{schema_elements.page_info}: PageInfo!
               }
             EOS
 
@@ -121,6 +125,10 @@ module ElasticGraph
                 The list of `TeamPlayerSeasonSubAggregation` results.
                 """
                 nodes: [TeamPlayerSeasonSubAggregation!]!
+                """
+                Provides pagination-related information.
+                """
+                #{schema_elements.page_info}: PageInfo!
               }
             EOS
 
@@ -232,6 +240,10 @@ module ElasticGraph
                 The list of `TeamPlayerSubAggregation` results.
                 """
                 nodes: [TeamPlayerSubAggregation!]!
+                """
+                Provides pagination-related information.
+                """
+                #{schema_elements.page_info}: PageInfo!
               }
             EOS
 

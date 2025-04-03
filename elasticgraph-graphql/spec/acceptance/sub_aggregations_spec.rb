@@ -249,18 +249,18 @@ module ElasticGraph
           verify_aggregate_sibling_and_deeply_nested_grouped_counts_and_aggregated_values
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (single term)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("year", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("year", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq({
             {"year" => 2020} => count_detail_of(2),
             {"year" => 2019} => count_detail_of(1)
           })
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (multiple terms)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("year", "note", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("year", "note", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq(first_two_counts_grouped_by_year_and_note)
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (single term + multiple date fields)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("record { wins, last_win_on { as_date(truncation_unit: MONTH) }, first_win_on { as_date(truncation_unit: MONTH) }}", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("record { wins, last_win_on { as_date(truncation_unit: MONTH) }, first_win_on { as_date(truncation_unit: MONTH) }}", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq(first_two_counts_grouped_by_wins_last_win_on_month_first_win_on_month)
 
           # Test `first: 0` arg on a grouped sub-aggregation (single term)
@@ -301,18 +301,18 @@ module ElasticGraph
           verify_aggregate_sibling_and_deeply_nested_grouped_counts_and_aggregated_values
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (single term)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("year", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("year", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq({
             {"year" => 2020} => count_detail_of(2),
             {"year" => 2019} => count_detail_of(1)
           })
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (multiple terms)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("year", "note", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("year", "note", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq(first_two_counts_grouped_by_year_and_note)
 
           # Test `first: positive-value` arg on a grouped sub-aggregation (single term + multiple date fields)
-          team_seasons_nodes = aggregate_season_counts_grouped_by("record { wins, last_win_on_legacy(granularity: MONTH), first_win_on_legacy(granularity: MONTH) }", first: 2)
+          team_seasons_nodes = aggregate_season_counts_grouped_by("record { wins, last_win_on_legacy(granularity: MONTH), first_win_on_legacy(granularity: MONTH) }", first: 2, seasons_has_next_page: true)
           expect(indexed_counts_from(team_seasons_nodes)).to eq(legacy_first_two_counts_grouped_by_wins_last_win_on_month_first_win_on_month)
 
           # Test `first: 0` arg on a grouped sub-aggregation (single term)
@@ -508,13 +508,26 @@ module ElasticGraph
         end
       end
 
+      let(:page_info_snippet) do
+        <<~EOS
+          page_info {
+            has_next_page
+            has_previous_page
+            start_cursor
+            end_cursor
+          }
+        EOS
+      end
+
       def aggregate_sibling_and_deeply_nested_counts(allow_errors: false)
         response = call_graphql_query(<<~EOS, allow_errors: allow_errors)
           query {
             team_aggregations {
+              #{page_info_snippet}
               nodes {
                 sub_aggregations {
                   current_players_nested {
+                    #{page_info_snippet}
                     nodes {
                       count_detail {
                         ...count_aggregations
@@ -523,6 +536,7 @@ module ElasticGraph
                   }
 
                   seasons_nested {
+                    #{page_info_snippet}
                     nodes {
                       count_detail {
                         ...count_aggregations
@@ -530,6 +544,7 @@ module ElasticGraph
 
                       sub_aggregations {
                         players_nested {
+                          #{page_info_snippet}
                           nodes {
                             count_detail {
                               ...count_aggregations
@@ -537,6 +552,7 @@ module ElasticGraph
 
                             sub_aggregations {
                               seasons_nested {
+                                #{page_info_snippet}
                                 nodes {
                                   count_detail {
                                     ...count_aggregations
@@ -820,10 +836,12 @@ module ElasticGraph
         response = call_graphql_query(<<~EOS)
           query {
             team_aggregations {
+              #{page_info_snippet}
               nodes {
                 sub_aggregations {
                   nested_fields {
                     current_players {
+                      #{page_info_snippet}
                       nodes {
                         count_detail {
                           approximate_value
@@ -834,6 +852,7 @@ module ElasticGraph
                     }
 
                     seasons {
+                      #{page_info_snippet}
                       nodes {
                         count_detail {
                           approximate_value
@@ -994,9 +1013,11 @@ module ElasticGraph
         response = call_graphql_query(<<~EOS)
           query {
             team_aggregations#{graphql_args(team_aggregations)} {
+              #{page_info_snippet}
               nodes {
                 sub_aggregations {
                   seasons_nested#{graphql_args(seasons)} {
+                    #{page_info_snippet}
                     nodes {
                       count_detail {
                         approximate_value
@@ -1006,9 +1027,11 @@ module ElasticGraph
 
                       sub_aggregations {
                         players_nested {
+                          #{page_info_snippet}
                           nodes {
                             sub_aggregations {
                               seasons_nested#{graphql_args(season_player_seasons)} {
+                                #{page_info_snippet}
                                 nodes {
                                   count_detail {
                                     approximate_value
@@ -1040,13 +1063,15 @@ module ElasticGraph
         ]
       end
 
-      def aggregate_season_counts_grouped_by(*grouping_expressions, team_aggregations_args: {}, allow_errors: false, **args)
+      def aggregate_season_counts_grouped_by(*grouping_expressions, team_aggregations_args: {}, allow_errors: false, teams_has_next_page: false, seasons_has_next_page: false, **args)
         response = call_graphql_query(<<~EOS, allow_errors: allow_errors)
           query {
             team_aggregations#{graphql_args(team_aggregations_args)} {
+              #{page_info_snippet}
               nodes {
                 sub_aggregations {
                   seasons_nested#{graphql_args(args)} {
+                    #{page_info_snippet}
                     nodes {
                       grouped_by {
                         #{grouping_expressions.join("\n")}
@@ -1069,8 +1094,8 @@ module ElasticGraph
 
         return response if allow_errors
 
-        team_node = get_single_aggregations_node_from(response, "team_aggregations", parent_field_name: "data")
-        get_aggregations_nodes_from(team_node, "seasons_nested")
+        team_node = get_single_aggregations_node_from(response, "team_aggregations", parent_field_name: "data", has_next_page: teams_has_next_page)
+        get_aggregations_nodes_from(team_node, "seasons_nested", has_next_page: seasons_has_next_page)
       end
 
       def aggregate_teams_grouped_by_league(allow_errors: false)
@@ -1091,13 +1116,17 @@ module ElasticGraph
         response.dig("data", case_correctly("team_aggregations"), "nodes")
       end
 
-      def get_aggregations_nodes_from(response_data, *field_names, parent_field_name: "sub_aggregations")
+      def get_aggregations_nodes_from(response_data, *field_names, parent_field_name: "sub_aggregations", has_next_page: false)
         field_names = field_names.map { |f| case_correctly(f) }
-        response_data.dig(case_correctly(parent_field_name), *field_names, "nodes") || []
+        connection = response_data.dig(case_correctly(parent_field_name), *field_names)
+
+        validate_page_info_on(connection, has_next_page: has_next_page)
+
+        connection.fetch("nodes")
       end
 
-      def get_single_aggregations_node_from(response_data, *field_names, parent_field_name: "sub_aggregations")
-        nodes = get_aggregations_nodes_from(response_data, *field_names, parent_field_name: parent_field_name)
+      def get_single_aggregations_node_from(response_data, *field_names, parent_field_name: "sub_aggregations", has_next_page: false)
+        nodes = get_aggregations_nodes_from(response_data, *field_names, parent_field_name: parent_field_name, has_next_page: has_next_page)
         expect(nodes.size).to be < 2
         nodes.first
       end
@@ -1114,6 +1143,18 @@ module ElasticGraph
           case_correctly("exact_value") => count,
           case_correctly("upper_bound") => count
         }
+      end
+
+      def validate_page_info_on(connection, has_next_page:)
+        nodes = connection.fetch("nodes")
+        page_info = connection.fetch(case_correctly("page_info"))
+
+        expect(page_info).to match({
+          case_correctly("has_previous_page") => false,
+          case_correctly("has_next_page") => has_next_page,
+          case_correctly("end_cursor") => nodes.empty? ? nil : /\w+/,
+          case_correctly("start_cursor") => nodes.empty? ? nil : /\w+/
+        })
       end
     end
   end
