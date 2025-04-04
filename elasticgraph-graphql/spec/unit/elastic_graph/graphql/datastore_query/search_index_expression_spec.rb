@@ -321,6 +321,15 @@ module ElasticGraph
               expect(parts).to target_widget_indices_excluding_all_2021_months_except("03", "04", "05", "06")
             end
 
+            it "excludes indices when negating an all_of filter" do
+              parts = search_index_expression_parts_for({"created_at" => {"not" => {"all_of" => [
+                {"gte" => "2021-03-01T00:00:00Z"},
+                {"lt" => "2021-08-01T00:00:00Z"}
+              ]}}})
+
+              expect(parts).to target_widget_indices_excluding_2021_months("03", "04", "05", "06", "07")
+            end
+
             it "searches all indices when the time range filter matches all timestamps" do
               parts = search_index_expression_parts_for({"created_at" => {"not" => {
                 "lt" => "2021-03-01T00:00:00Z",
@@ -353,6 +362,73 @@ module ElasticGraph
               parts = search_index_expression_parts_for({"created_at" => {operator => nil}})
 
               expect(parts).to target_all_widget_indices
+            end
+          end
+
+          context "when `all_of` is used" do
+            it "ANDs together the date filter criteria from the `all_of` subfilters when determining what indices to exclude" do
+              lt_march_1_2021 = {"lt" => "2021-03-01T00:00:00Z"}
+              gt_jan_15_2021 = {"gt" => "2021-01-15T12:30:00Z"}
+
+              parts1 = search_index_expression_parts_for({"all_of" => [
+                {"created_at" => lt_march_1_2021},
+                {"created_at" => gt_jan_15_2021}
+              ]})
+
+              # Order of subfilters shouldn't matter
+              parts2 = search_index_expression_parts_for({"all_of" => [
+                {"created_at" => gt_jan_15_2021},
+                {"created_at" => lt_march_1_2021}
+              ]})
+
+              # It shouldn't matter if the all_of is nested or on the outside
+              parts3 = search_index_expression_parts_for({"created_at" => {"all_of" => [
+                gt_jan_15_2021,
+                lt_march_1_2021
+              ]}})
+
+              # These are all the same as if we provided them w/o all_of.
+              parts4 = search_index_expression_parts_for({"created_at" => lt_march_1_2021.merge(gt_jan_15_2021)})
+              expect(parts1).to eq(parts2).and eq(parts3).and eq(parts4).and target_widget_indices_excluding_2021_months("03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
+            end
+
+            it "correctly handles negated subfilters" do
+              parts = search_index_expression_parts_for({"created_at" => {"all_of" => [
+                {"not" => {"lt" => "2021-03-01T00:00:00Z"}},
+                {"lt" => "2021-08-01T00:00:00Z"}
+              ]}})
+
+              expect(parts).to target_widget_indices_excluding_all_2021_months_except("03", "04", "05", "06", "07")
+            end
+
+            it "excludes all indices when the `all_of` subfilters are mutually exclusive" do
+              parts = search_index_expression_parts_for({"all_of" => [
+                {"created_at" => {"lt" => "2021-03-01T00:00:00Z"}},
+                {"created_at" => {"gt" => "2021-08-15T12:30:00Z"}}
+              ]})
+
+              expect(parts).to target_no_indices
+            end
+
+            it "excludes no indices when we have an `all_of: []` filter because that will match all results" do
+              parts = search_index_expression_parts_for({"all_of" => []})
+
+              expect(parts).to target_all_widget_indices
+            end
+
+            it "excludes no indices when we have an `all_of: [{field: nil}]` filter because that will match all results" do
+              parts = search_index_expression_parts_for({"all_of" => [{"created_at" => nil}]})
+
+              expect(parts).to target_all_widget_indices
+            end
+
+            it "respects non-nil filters even when some clauses are nil" do
+              parts = search_index_expression_parts_for({"all_of" => [
+                {"created_at" => nil},
+                {"created_at" => {"gt" => "2021-08-15T12:30:00Z"}}
+              ]})
+
+              expect(parts).to target_widget_indices_excluding_2021_months("01", "02", "03", "04", "05", "06", "07")
             end
           end
 
