@@ -68,16 +68,13 @@ module ElasticGraph
                 "patternProperties" => {"^\\w+_at$" => {"type" => "string", "format" => "date-time"}}
               },
               JSON_SCHEMA_VERSION_KEY => {"const" => 42},
-              "message_id" => {
-                "type" => "string",
-                "description" => "The optional ID of the message containing this event from whatever messaging system is being used between the publisher and the ElasticGraph indexer."
-              }
+              "message_id" => {"type" => "string"}
             },
             "additionalProperties" => false,
             "required" => ["op", "type", "id", "version", JSON_SCHEMA_VERSION_KEY],
             "if" => {"properties" => {"op" => {"const" => "upsert"}}},
             "then" => {"required" => ["record"]}
-          }, include_typename: false)
+          }, include_typename: false, ignore_descriptions: true)
         end
 
         %w[ID String].each do |type_name|

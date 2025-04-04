@@ -9,12 +9,17 @@ json_schema_version: 1
 "$defs":
   ElasticGraphEventEnvelope:
     type: object
+    description: Required by ElasticGraph to wrap every data event.
     properties:
       op:
+        description: Indicates what type of operation the event represents. For now,
+          only `upsert` is supported, but we plan to support other operations in the
+          future.
         type: string
         enum:
         - upsert
       type:
+        description: The type of object present in `record`.
         type: string
         enum:
         - Address
@@ -27,28 +32,42 @@ json_schema_version: 1
         - Widget
         - WidgetWorkspace
       id:
+        description: The unique identifier of the record.
         type: string
         maxLength: 8191
       version:
+        description: Used to handle duplicate and out-of-order events. When ElasticGraph
+          ingests multiple events for the same `type` and `id`, the one with the largest
+          `version` will "win".
         type: integer
         minimum: 0
         maximum: 9223372036854775807
       record:
+        description: The record of this event. The payload of this field must match
+          the JSON schema of the named `type`.
         type: object
       latency_timestamps:
+        description: Timestamps from which ElasticGraph measures indexing latency.
+          The `ElasticGraphIndexingLatencies` log message produced for each event
+          will include a measurement from each timestamp included in this map.
         type: object
         additionalProperties: false
         patternProperties:
+          description: A timestamp from which ElasticGraph will measure indexing latency.
+            The timestamp name must end in `_at`.
           "^\\w+_at$":
             type: string
             format: date-time
       json_schema_version:
+        description: The version of the JSON schema the publisher was using when the
+          event was published. ElasticGraph will use the JSON schema matching this
+          version to process the event.
         const: 1
       message_id:
-        type: string
         description: The optional ID of the message containing this event from whatever
           messaging system is being used between the publisher and the ElasticGraph
           indexer.
+        type: string
     additionalProperties: false
     required:
     - op
