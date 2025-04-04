@@ -19,7 +19,7 @@ updates:
     directory: /config/site
     schedule:
       interval: weekly
--
+
   - package-ecosystem: docker
     directory: /elasticgraph-apollo/apollo_tests_implementation
     schedule:
