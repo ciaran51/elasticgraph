@@ -150,6 +150,137 @@ module ElasticGraph
           expect(results).to match_array(ids_of(team1, team2, team3))
         end
 
+        it "behaves the same as specifying multiple fields in an object (both are AND)" do
+          index_into(
+            graphql,
+            t1 = build(:team, id: "t1", past_names: ["foo"], forbes_valuations: [500_000]),
+            build(:team, id: "t2", past_names: ["foo"], forbes_valuations: [50_000]),
+            build(:team, id: "t3", past_names: ["bar"], forbes_valuations: [500_000])
+          )
+
+          filter_fields = {
+            "past_names" => {"any_satisfy" => {"equal_to_any_of" => ["foo"]}},
+            "forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}
+          }
+
+          results_side_by_side = search_with_freeform_filter(filter_fields)
+          expect(results_side_by_side).to match_array(ids_of(t1))
+
+          filter_all_of = {
+            "all_of" => [
+              {
+                "past_names" => {
+                  "any_satisfy" => {"equal_to_any_of" => ["foo"]}
+                }
+              },
+              {
+                "forbes_valuations" => {
+                  "any_satisfy" => {"gt" => 100_000}
+                }
+              }
+            ]
+          }
+
+          results_all_of = search_with_freeform_filter(filter_all_of)
+          expect(results_all_of).to match_array(ids_of(t1))
+        end
+
+        it "handles AND of OR subfilters (allOf of anyOf)" do
+          index_into(
+            graphql,
+            build(:team, id: "t1", past_names: ["foo"], forbes_valuations: [500_000]),
+            t2 = build(:team, id: "t2", past_names: ["foo"], forbes_valuations: [50_000]),
+            t3 = build(:team, id: "t3", past_names: ["bar"], forbes_valuations: [500_000]),
+            build(:team, id: "t4", past_names: ["bar"], forbes_valuations: [50_000])
+          )
+
+          filter = {
+            "all_of" => [
+              {
+                "any_of" => [
+                  {"past_names" => {"any_satisfy" => {"equal_to_any_of" => ["foo"]}}},
+                  {"forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}}
+                ]
+              },
+              {
+                "any_of" => [
+                  {"past_names" => {"any_satisfy" => {"equal_to_any_of" => ["bar"]}}},
+                  {"forbes_valuations" => {"any_satisfy" => {"lt" => 60_000}}}
+                ]
+              }
+            ]
+          }
+
+          results = search_with_freeform_filter(filter)
+          expect(results).to match_array(ids_of(t2, t3))
+        end
+
+        it "handles `not` within `all_of`" do
+          index_into(
+            graphql,
+            t1 = build(:team, id: "t1", past_names: ["foo"], forbes_valuations: [500_000]),
+            build(:team, id: "t2", past_names: ["foo"], forbes_valuations: [50_000]),
+            build(:team, id: "t3", past_names: ["bar"], forbes_valuations: [500_000])
+          )
+
+          filter = {
+            "all_of" => [
+              {"forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}},
+              {"not" => {"past_names" => {"any_satisfy" => {"equal_to_any_of" => ["bar"]}}}}
+            ]
+          }
+
+          results = search_with_freeform_filter(filter)
+          expect(results).to match_array(ids_of(t1))
+        end
+
+        it "handles empty predicates" do
+          index_into(
+            graphql,
+            t1 = build(:team, id: "t1", forbes_valuations: [500_000]),
+            build(:team, id: "t2", forbes_valuations: [50_000])
+          )
+
+          filter = {
+            "all_of" => [
+              {},
+              {"forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}}
+            ]
+          }
+
+          results = search_with_freeform_filter(filter)
+          expect(results).to match_array(ids_of(t1))
+
+          filter = {
+            "all_of" => [
+              {"forbes_valuations" => {}},
+              {"past_names" => {}},
+              {"forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}}
+            ]
+          }
+
+          results = search_with_freeform_filter(filter)
+          expect(results).to match_array(ids_of(t1))
+        end
+
+        it "handles not with empty predicate" do
+          index_into(
+            graphql,
+            build(:team, id: "t1", forbes_valuations: [500_000]),
+            build(:team, id: "t2", forbes_valuations: [50_000])
+          )
+
+          filter = {
+            "all_of" => [
+              {"not" => {}},
+              {"forbes_valuations" => {"any_satisfy" => {"gt" => 100_000}}}
+            ]
+          }
+
+          results = search_with_freeform_filter(filter)
+          expect(results).to eq([])
+        end
+
         def search_datastore(**options, &before_msearch)
           super(index_def_name: "teams", **options, &before_msearch)
         end
@@ -1083,6 +1214,29 @@ module ElasticGraph
           })
 
           expect(inner_not_result).to eq(outer_not_result).and match_array(ids_of(widget1, widget4))
+        end
+
+        specify "`not: {all_of: [...]}` returns only the documents that are unmatched by `all_of: [...]`" do
+          index_into(
+            graphql,
+            widget1 = build(:widget, amount_cents: 100),
+            widget2 = build(:widget, amount_cents: 205, name: "test"),
+            widget3 = build(:widget, amount_cents: 205, name: "test2"),
+            widget4 = build(:widget, amount_cents: 400)
+          )
+
+          all_of_filter = {
+            "all_of" => [
+              {"amount_cents" => {"gt" => 200}},
+              {"name" => {"equal_to_any_of" => ["test"]}}
+            ]
+          }
+
+          results = search_with_freeform_filter(all_of_filter)
+          expect(results).to match_array(ids_of(widget2))
+
+          results = search_with_freeform_filter({"not" => all_of_filter})
+          expect(results).to match_array(ids_of(widget1, widget3, widget4))
         end
 
         it "works correctly when `not` is within `any_of`" do

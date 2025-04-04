@@ -489,6 +489,103 @@ module ElasticGraph
           string_hash_of(widget1, :id, :name),
           string_hash_of(widget2, :id, :name)
         ])
+
+        # Test all_of with complex combinations
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "all_of" => [
+              {
+                "any_of" => [
+                  {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["abc"]}}},
+                  {"amount_cents" => {"gt" => 150}}
+                ]
+              },
+              {
+                "any_of" => [
+                  {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["unfound_tag"]}}},
+                  {"amount_cents" => {"lt" => 150}}
+                ]
+              }
+            ]
+          })
+
+        expect(widgets).to eq([
+          string_hash_of(widget1, :id, :amount_cents)
+        ])
+
+        # Test all_of with not
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "all_of" => [
+              {"amount_cents" => {"gt" => 50}},
+              {"not" => {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["ghi"]}}}}
+            ]
+          },
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to eq([
+          string_hash_of(widget1, :id, :amount_cents),
+          string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        # Test not: {all_of: [...]}
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "not" => {
+              "all_of" => [
+                {"amount_cents" => {"gt" => 150}},
+                {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["ghi"]}}}
+              ]
+            }
+          },
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to eq([
+          string_hash_of(widget1, :id, :amount_cents),
+          string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        # Test all_of with empty filter
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "all_of" => [
+              {}, # matches all documents
+              {"amount_cents" => {"gt" => 150}}
+            ]
+          },
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to eq([
+          string_hash_of(widget2, :id, :amount_cents),
+          string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        # Test all_of with empty predicates
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "all_of" => [
+              {"tags" => {}}, # matches all documents
+              {"amount_cents" => {"gt" => 150}}
+            ]
+          },
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to eq([
+          string_hash_of(widget2, :id, :amount_cents),
+          string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        # Test all_of with not and empty predicates
+        widgets = list_widgets_with(:amount_cents,
+          filter: {
+            "all_of" => [
+              {"not" => {}}, # matches no documents
+              {"amount_cents" => {"gt" => 50}}
+            ]
+          },
+          order_by: [:amount_cents_ASC])
+
+        expect(widgets).to eq([])
       end
 
       it "supports fetching interface fields" do
@@ -810,6 +907,14 @@ module ElasticGraph
           results = query_teams_with(filter: {seasons_nested: {all_of: [{not: nil}]}})
           # No teams should be returned since the `nil` part of the filter expression evaluates to `true`.
           expect(results).to eq []
+
+          # Verify `not: {all_of: [...]}` works as expected
+          results = query_teams_with(filter: {seasons_nested: {not: {all_of: [
+            {any_satisfy: {record: {wins: {gt: 95}}}},
+            {any_satisfy: {record: {wins: {lt: 10}}}}
+          ]}}})
+          # Only t1, t3, and t4 should be returned as they do NOT have both a season with >95 wins AND a season with <10 wins
+          expect(results).to eq [{"id" => "t1"}, {"id" => "t3"}, {"id" => "t4"}]
 
           # Verify `all_of: [{not: null}]` works as expected.
           results = query_teams_with(filter: {seasons_nested: {all_of: [{all_of: nil}]}})
