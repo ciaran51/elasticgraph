@@ -1,285 +1,121 @@
 #!/usr/bin/env ruby
 
-require "erb"
 require "pathname"
 require "rubygems"
 require "yaml"
 
 module ElasticGraph
-  class CIYamlRenderer
+  class CIYamlUpdater
     PROJECT_ROOT = ::Pathname.new(::File.expand_path("..", __dir__))
+    CI_YAML_PATH = PROJECT_ROOT / ".github" / "workflows" / "ci.yaml"
 
-    def initialize(template)
-      @erb = ::ERB.new(template, trim_mode: "-")
+    def initialize
+      @content = CI_YAML_PATH.read
+      @versions_data = load_versions_data
     end
 
-    def render
-      @erb.result(binding)
+    def update
+      write_yaml(updated_content)
+    end
+
+    def verify
+      if @content == updated_content
+        puts "✅ #{CI_YAML_PATH} is up-to-date."
+        true
+      else
+        show_diff
+        false
+      end
     end
 
     private
 
+    def updated_content
+      content = @content.dup
+      content = update_datastore_matrix(content)
+      content = update_primary_datastore(content)
+      update_opensearch_version(content)
+    end
+
+    def show_diff
+      tmp_path = PROJECT_ROOT / "tmp" / "ci.yaml"
+      FileUtils.mkdir_p(tmp_path.dirname)
+      tmp_path.write(updated_content)
+
+      diff = `git diff --no-index #{CI_YAML_PATH} #{tmp_path} #{" --color" unless ENV["CI"]}`
+
+      puts "❌ #{CI_YAML_PATH} is out-of-date. Run `#{__FILE__}` to update it. Diff:"
+      puts
+      puts diff
+    end
+
+    def load_versions_data
+      versions_file = PROJECT_ROOT / "config" / "tested_datastore_versions.yaml"
+      YAML.safe_load_file(versions_file)
+    end
+
     def datastore_versions
-      @datastore_versions ||= datastore_versions_data.flat_map do |backend, versions|
-        versions.map do |version|
-          "#{backend}:#{version}"
-        end
+      @datastore_versions ||= @versions_data.flat_map do |backend, versions|
+        versions.map { |version| "#{backend}:#{version}" }
       end
     end
 
     def primary_datastore_version
       @primary_datastore_version ||= begin
-        primary_version = datastore_versions_data.fetch("elasticsearch").max_by do |version|
-          ::Gem::Version.new(version)
+        primary_version = @versions_data.fetch("elasticsearch").max_by do |version|
+          Gem::Version.new(version)
         end
-
         "elasticsearch:#{primary_version}"
       end
     end
 
     def latest_opensearch_version
-      @latest_opensearch_version ||= datastore_versions_data.fetch("opensearch").max_by do |version|
-        ::Gem::Version.new(version)
+      @latest_opensearch_version ||= @versions_data.fetch("opensearch").max_by do |version|
+        Gem::Version.new(version)
       end
     end
 
-    def datastore_versions_data
-      @datastore_versions_data ||= ::YAML.safe_load_file(datastore_versions_file)
+    def update_datastore_matrix(content)
+      # Find the datastore matrix section and preserve its exact indentation
+      matrix_pattern = /(        datastore:\n)([^\n]*\n)*?        include:/m
+      match = content.match(matrix_pattern)
+      return content unless match
+
+      matrix_start = match[1]
+      new_versions = datastore_versions.map { |v| '          - "' + v + "\"\n" }.join
+      content.sub(matrix_pattern, "#{matrix_start}#{new_versions}        include:")
     end
 
-    def relative_this_script
-      ::Pathname.new(::File.expand_path(__FILE__)).relative_path_from(PROJECT_ROOT)
+    def update_primary_datastore(content)
+      # Update each primary datastore version in the includes section
+      content.gsub(
+        /(?<=datastore: ")[^"]+(?="\n)/,
+        primary_datastore_version
+      )
     end
 
-    def datastore_versions_file
-      PROJECT_ROOT / "config" / "tested_datastore_versions.yaml"
+    def update_opensearch_version(content)
+      # Update the OpenSearch version in the docker-demo job
+      content.sub(
+        /(?<=OPENSEARCH_VERSION: ")[^"]+(?="\n)/,
+        latest_opensearch_version
+      )
     end
 
-    def relative_datastore_versions_file
-      datastore_versions_file.relative_path_from(PROJECT_ROOT)
+    def write_yaml(content)
+      CI_YAML_PATH.write(content)
+      puts "#{CI_YAML_PATH} updated."
     end
   end
 end
 
-renderer = ElasticGraph::CIYamlRenderer.new(DATA.read)
-contents = renderer.render
-file_path = ElasticGraph::CIYamlRenderer::PROJECT_ROOT / ".github" / "workflows" / "ci.yaml"
+updater = ElasticGraph::CIYamlUpdater.new
 
 case ARGV.first
 when "--verify"
-  if file_path.read == contents
-    puts "✅ #{file_path} is up-to-date."
-  else
-    tmp_path = ElasticGraph::CIYamlRenderer::PROJECT_ROOT / "tmp" / "ci.yaml"
-    tmp_path.write(contents)
-
-    diff = `git diff --no-index #{file_path} #{tmp_path} #{" --color" unless ENV["CI"]}`
-
-    puts "❌ #{file_path} is out-of-date. Run `#{__FILE__}` to update it. Diff:"
-    puts
-    puts diff
-    exit(1)
-  end
+  exit(1) unless updater.verify
 when nil
-  file_path.write(contents)
-  puts "#{file_path} updated."
+  updater.update
 else
   raise "Unknown argument: #{ARGV.first}. Expected `--verify` or nothing."
 end
-
-__END__
-# This file is generated by `<%= relative_this_script %>` based on input from `<%= relative_datastore_versions_file %>`.
-# To edit it, make changes to the template at the bottom of `<%= relative_this_script %>` and run it.
-name: ElasticGraph CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-
-env:
-  # It's recommended to run ElasticGraph with this option to get better performance. We want to run
-  # our CI builds with it to ensure that the option always works.
-  RUBYOPT: "--enable-frozen-string-literal"
-  # We use the VCR gem as a local "test accelerator" which caches datastore requests/responses for us.
-  # But in our CI build we don't want to use it at all, so we disable it here.
-  NO_VCR: "1"
-  docker_platforms: linux/amd64,linux/arm64
-
-jobs:
-  ci-check:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        build_part:
-          - run_each_gem_spec
-        ruby:
-          - "3.2"
-          - "3.3"
-          - "3.4"
-        datastore:
-<% datastore_versions.each do |datastore_version| -%>
-          - "<%= datastore_version %>"
-<% end -%>
-        include:
-          # We have 4 build parts. The "primary" one is `run_each_gem_spec`, and we need that to be run on
-          # every supported Ruby version and against every supported datastore. It's not necessary to run
-          # these others against every combination of `ruby` and `datastore` so we just run each with one
-          # configuration here.
-          - build_part: "run_misc_checks"
-            ruby: "3.4"
-            datastore: "<%= primary_datastore_version %>"
-          - build_part: "run_specs_with_vcr"
-            ruby: "3.4"
-            datastore: "<%= primary_datastore_version %>"
-          - build_part: "run_specs_file_by_file"
-            ruby: "3.4"
-            datastore: "<%= primary_datastore_version %>"
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
-        with:
-          egress-policy: audit
-
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
-      - name: Setup Docker Compose
-        uses: KengoTODA/actions-setup-docker-compose@0169fb81f56cb44a908f67a3ec212f3579e2e4fe # main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          git config --global init.defaultBranch main
-
-      - name: Run Build Part
-      # Note: the `10` argument on the end is a number of seconds to sleep after booting the datastore.
-      # We've found that there is a minor race condition where the shards aren't fully ready for the tests
-      # to hit them if we don't wait a bit after booting.
-        run: script/ci_parts/${{ matrix.build_part }} ${{ matrix.datastore }} 10
-
-  docker-demo:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      OPENSEARCH_VERSION: "<%= latest_opensearch_version %>"
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
-        with:
-          egress-policy: audit
-
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
-        with:
-          ruby-version: "3.4"
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-        with:
-          driver: docker-container
-
-      - name: Build OpenSearch image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        with:
-          context: elasticgraph-local/lib/elastic_graph/local/opensearch
-          file: elasticgraph-local/lib/elastic_graph/local/opensearch/Dockerfile
-          push: false
-          load: true
-          build-args: |
-            VERSION=${{ env.OPENSEARCH_VERSION }}
-          tags: |
-            elasticgraph-opensearch-demo:latest
-
-      - name: Build ElasticGraph image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        with:
-          context: .
-          file: config/docker_demo/Dockerfile
-          push: false
-          load: true
-          tags: |
-            elasticgraph-demo:latest
-
-      - name: Test docker images
-        env:
-          NO_BUILD: "true"
-        run: config/docker_demo/test
-
-      - name: Login to GitHub Container Registry
-        if: success() && github.ref == 'refs/heads/main'
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push OpenSearch image
-        if: success() && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        with:
-          context: elasticgraph-local/lib/elastic_graph/local/opensearch
-          file: elasticgraph-local/lib/elastic_graph/local/opensearch/Dockerfile
-          push: true
-          platforms: ${{ env.docker_platforms }}
-          build-args: |
-            VERSION=${{ env.OPENSEARCH_VERSION }}
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/elasticgraph-opensearch-demo:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/elasticgraph-opensearch-demo:latest
-
-      - name: Push ElasticGraph image
-        if: success() && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        with:
-          context: .
-          file: config/docker_demo/Dockerfile
-          push: true
-          platforms: ${{ env.docker_platforms }}
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/elasticgraph-demo:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/elasticgraph-demo:latest
-
-  # An extra job that runs after all the others and provides a single summary status.
-  # This is used by our branch protection rule to block merge until all CI checks passed,
-  # without requiring us to individually list each CI check in the branch protection rule.
-  #
-  # https://github.com/orgs/community/discussions/26822#discussioncomment-3305794
-  all-ci-checks-passed:
-    if: ${{ always() }} # so it runs even if the workflow was cancelled
-    runs-on: ubuntu-latest
-    name: All CI Checks Passed
-    needs: [ci-check, docker-demo]
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
-        with:
-          egress-policy: audit
-
-      - run: |
-          result="${{ needs.ci-check.result }}"
-          docker_result="${{ needs.docker-demo.result }}"
-          if [[ $result == "success" || $result == "skipped" ]] && [[ $docker_result == "success" || $docker_result == "skipped" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
