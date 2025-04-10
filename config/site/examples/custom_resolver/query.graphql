@@ -1,0 +1,7 @@
+query RollDice {
+  # Returns a random number between 1 and 12
+  roll6SidedDice: rollDice
+
+  # Returns a random number between 1 and 20
+  roll10SidedDice: rollDice(sides: 10)
+}

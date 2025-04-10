@@ -3,7 +3,7 @@ layout: markdown
 title: How ElasticGraph Works
 permalink: /guides/how-it-works/
 nav_title: How it Works
-menu_order: 1
+menu_order: 10
 ---
 
 ElasticGraph is a schema-driven framework that helps you build GraphQL APIs backed by Elasticsearch or OpenSearch.
@@ -16,7 +16,7 @@ Here's how it works.
 
 Here's an example of the schema definition API:
 
-{% include copyable_code_snippet.html language="ruby" data="music_simplified.files.schema" %}
+{% include copyable_code_snippet.html language="ruby" data="music_simplified.files.schema_rb" %}
 
 From this schema definition, ElasticGraph generates four different schema artifacts.
 
