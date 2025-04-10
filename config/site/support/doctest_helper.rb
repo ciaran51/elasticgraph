@@ -119,7 +119,7 @@ module ElasticGraph
       # in this context, `eval` is being used and the file doesn't exist! So we have to stub it out here.
       extend ::RSpec::Mocks::ExampleMethods
       allow(::File).to receive(:read).and_wrap_original do |original, file_name|
-        if file_name.include?("(eval at")
+        if file_name.include?("(eval")
           ([file_name] * 10).join("\n")
         else
           original.call(file_name)
