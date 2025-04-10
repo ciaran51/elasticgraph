@@ -3,7 +3,7 @@ layout: markdown
 title: AI Tools
 permalink: /guides/ai-tools/
 nav_title: AI Tools
-menu_order: 2
+menu_order: 30
 ---
 
 Build faster with ElasticGraph using AI tools. Here's how to get started with ChatGPT, Claude, or your preferred LLM.

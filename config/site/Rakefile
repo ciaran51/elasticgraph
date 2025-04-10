@@ -401,11 +401,23 @@ module ElasticGraph
                   tasks.enforce_json_schema_version = false
                 end
 
-                task extract_snippets: ["schema_artifacts:dump"] do
-                  files = ::Dir.glob(::File.join(example_dir, "*.rb")).to_h do |file|
-                    [::File.basename(file).delete_suffix(".rb"), ::File.read(file).strip]
+                task validate: ["schema_artifacts:dump"] do
+                  validation_file = ::File.join(example_dir, "validate.rb")
+                  if ::File.exist?(validation_file)
+                    sh "bundle exec ruby #{validation_file}"
                   end
-                  data = {"files" => files}
+                end
+
+                task extract_snippets: :validate do
+                  files = extract_snippets_from_dir(example_dir) do |file|
+                    ::File.read(file).strip
+                  end
+
+                  snippets = extract_snippets_from_dir(example_dir) do |file|
+                    extract_fenced_snippets_from_file(file)
+                  end
+
+                  data = {"files" => files, "snippets" => snippets}
 
                   ::FileUtils.mkdir_p JEKYLL_DATA_DIR
                   ::File.write(::File.join(JEKYLL_DATA_DIR, "#{schema_name}.yaml"), ::YAML.dump(data))
@@ -433,6 +445,44 @@ module ElasticGraph
           end
         end
       end
+    end
+
+    def extract_snippets_from_dir(dir, &block)
+      Dir.children(dir).filter_map do |child|
+        absolute_child = ::File.join(dir, child)
+
+        child_snippets =
+          if ::File.directory?(absolute_child)
+            extract_snippets_from_dir(absolute_child, &block)
+          else
+            block.call(absolute_child)
+          end
+
+        [child.tr(".", "_"), child_snippets] unless child_snippets.empty?
+      end.to_h
+    end
+
+    def extract_fenced_snippets_from_file(file)
+      snippets = {}
+      current_snippet_name = nil
+      buffer = []
+
+      File.readlines(file).each do |line|
+        if line =~ /:snippet-start:\s*(\S+)/
+          # start a new snippet
+          current_snippet_name = $1
+          buffer = []
+        elsif /:snippet-end:/.match?(line)
+          # end the current snippet
+          snippets[current_snippet_name] = buffer.join.chomp
+          current_snippet_name = nil
+        elsif current_snippet_name
+          # within a snippet
+          buffer << line
+        end
+      end
+
+      snippets
     end
 
     def watch_files(description, *args, **kwargs)
