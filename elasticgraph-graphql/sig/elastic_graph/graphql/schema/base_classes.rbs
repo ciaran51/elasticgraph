@@ -1,0 +1,11 @@
+module ElasticGraph
+  class GraphQL
+    class Schema
+      class BaseField < ::GraphQL::Schema::Field
+      end
+
+      class BaseObject < ::GraphQL::Schema::Object
+      end
+    end
+  end
+end
