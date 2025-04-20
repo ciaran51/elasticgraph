@@ -81,10 +81,6 @@ module ElasticGraph
           EOS
         end
 
-        unless query_tracker.hidden_types.empty?
-          @logger.warn "#{query_tracker.hidden_types.size} GraphQL types were hidden from the schema due to their backing indices being inaccessible: #{query_tracker.hidden_types.sort.join(", ")}"
-        end
-
         duration = @monotonic_clock.now_in_ms - start_time_in_ms
 
         # Note: I also wanted to log the sanitized query if `result` has `errors`, but `GraphQL::Query#sanitized_query`

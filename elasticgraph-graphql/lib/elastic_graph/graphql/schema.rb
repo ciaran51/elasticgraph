@@ -30,6 +30,7 @@ module ElasticGraph
       def initialize(
         graphql_schema_string:,
         config:,
+        logger:,
         runtime_metadata:,
         index_definitions_by_graphql_type:,
         graphql_gem_plugins:,
@@ -67,6 +68,8 @@ module ElasticGraph
         # Pre-load all defined types so that all field extras can get configured as part
         # of loading the schema, before we execute the first query.
         @types_by_name = build_types_by_name
+
+        log_hidden_types(logger)
       end
 
       def type_from(graphql_type)
@@ -135,6 +138,16 @@ module ElasticGraph
             hash[index_def.name] = type
           end
         end.freeze
+      end
+
+      def log_hidden_types(logger)
+        hidden_types = @types_by_name.values.select(&:hidden_from_queries?)
+        return if hidden_types.empty?
+
+        logger.warn(
+          "#{hidden_types.size} GraphQL types were hidden from the schema due to their backing indices being " \
+          "inaccessible: #{hidden_types.map(&:name).sort.join(", ")}"
+        )
       end
     end
   end

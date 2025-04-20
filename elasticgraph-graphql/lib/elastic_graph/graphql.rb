@@ -92,6 +92,7 @@ module ElasticGraph
         Schema.new(
           graphql_schema_string: graphql_schema_string,
           config: config,
+          logger: logger,
           runtime_metadata: runtime_metadata,
           index_definitions_by_graphql_type: @datastore_core.index_definitions_by_graphql_type,
           graphql_gem_plugins: graphql_gem_plugins,

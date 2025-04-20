@@ -8,6 +8,7 @@ module ElasticGraph
       def initialize: (
         graphql_schema_string: ::String,
         config: Config,
+        logger: Logger,
         runtime_metadata: SchemaArtifacts::RuntimeMetadata::Schema,
         index_definitions_by_graphql_type: ::Hash[::String, ::Array[DatastoreCore::_IndexDefinition]],
         graphql_gem_plugins: ::Hash[::Class, ::Hash[::Symbol, untyped]],
@@ -18,6 +19,7 @@ module ElasticGraph
       def type_named: (::String) -> Type
       def field_named: (::String, ::String) -> Field
       def indexed_document_types: () -> ::Array[Type]
+      def log_hidden_types: (Logger) -> void
     end
   end
 end

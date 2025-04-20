@@ -15,7 +15,6 @@ module ElasticGraph
     # Class used to track details of what happens during a single GraphQL query for the purposes of logging.
     # Here we use `Struct` instead of `Data` specifically because it is designed to be mutable.
     class QueryDetailsTracker < Struct.new(
-      :hidden_types,
       :shard_routing_values,
       :search_index_expressions,
       :query_counts_per_datastore_request,
@@ -26,7 +25,6 @@ module ElasticGraph
     )
       def self.empty
         new(
-          hidden_types: ::Set.new,
           shard_routing_values: ::Set.new,
           search_index_expressions: ::Set.new,
           query_counts_per_datastore_request: [],
@@ -42,12 +40,6 @@ module ElasticGraph
           shard_routing_values.merge(queries.flat_map { |q| q.shard_routing_values || [] })
           search_index_expressions.merge(queries.map(&:search_index_expression))
           query_counts_per_datastore_request << queries.size
-        end
-      end
-
-      def record_hidden_type(type)
-        mutex.synchronize do
-          hidden_types << type
         end
       end
 

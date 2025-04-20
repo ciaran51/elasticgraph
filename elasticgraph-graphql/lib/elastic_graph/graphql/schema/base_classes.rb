@@ -24,7 +24,6 @@ module ElasticGraph
 
         def self.visible?(context)
           if context[:elastic_graph_schema]&.type_named(graphql_name)&.hidden_from_queries?
-            context[:elastic_graph_query_tracker].record_hidden_type(graphql_name)
             return false
           end
 
