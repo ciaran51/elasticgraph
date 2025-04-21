@@ -163,6 +163,13 @@ module GraphQL
       def arguments: () -> ::Hash[::String, Argument]
       def owner: () -> _Member
       def introspection?: () -> bool
+      def visible?: (Query::Context) -> bool
+    end
+
+    class Object
+      def self.visible?: (Query::Context) -> bool
+      def self.graphql_name: () -> ::String
+      def self.field_class: (::Class) -> void
     end
 
     interface _Member

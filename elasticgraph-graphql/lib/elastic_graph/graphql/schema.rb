@@ -6,13 +6,12 @@
 #
 # frozen_string_literal: true
 
+require "graphql"
 require "elastic_graph/constants"
 require "elastic_graph/errors"
-require "elastic_graph/graphql/monkey_patches/schema_field"
-require "elastic_graph/graphql/monkey_patches/schema_object"
+require "elastic_graph/graphql/schema/base_classes"
 require "elastic_graph/graphql/schema/field"
 require "elastic_graph/graphql/schema/type"
-require "graphql"
 
 module ElasticGraph
   # Wraps a GraphQL::Schema object in order to provide higher-level, more convenient APIs
@@ -60,6 +59,7 @@ module ElasticGraph
         # variables above we'll get `NoMethodError` on `nil`.
         @graphql_schema = ::GraphQL::Schema.from_definition(
           graphql_schema_string,
+          base_types: {object: BaseObject},
           default_resolve: graphql_adapter,
           using: graphql_gem_plugins
         )
