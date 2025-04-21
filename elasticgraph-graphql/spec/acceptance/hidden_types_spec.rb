@@ -29,7 +29,13 @@ module ElasticGraph
 
           expect {
             restricted_fields_by_type_name = fields_by_type_name_from(graphql_hiding_addresses_and_mechanical_parts)
-          }.to log_warning(a_string_including("2 GraphQL types were hidden", "Address", "MechanicalPart"))
+          }.to log_warning(a_string_including(
+            "4 GraphQL types were hidden",
+            "Address",
+            "MechanicalPart",
+            apply_derived_type_customizations("AddressAggregation"),
+            apply_derived_type_customizations("MechanicalPartAggregation")
+          ))
 
           hidden_types = (all_fields_by_type_name.keys - restricted_fields_by_type_name.keys)
 
