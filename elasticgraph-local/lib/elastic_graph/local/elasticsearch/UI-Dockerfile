@@ -1,2 +1,2 @@
 ARG VERSION=latest
-FROM kibana:${VERSION}
+FROM docker.elastic.co/kibana/kibana:${VERSION}

@@ -95,7 +95,7 @@ module ElasticGraph
       describe "elasticsearch/opensearch tasks" do
         it "times out if booting takes too long" do
           expect {
-            run_rake "elasticsearch:example:8.8.1:daemon", daemon_timeout: 0.1, port: 9615
+            run_rake "elasticsearch:example:9.0.0:daemon", daemon_timeout: 0.1, port: 9615
           }.to raise_error a_string_including("Timed out after 0.1 seconds.")
         end
       end
@@ -123,7 +123,7 @@ module ElasticGraph
               t.index_document_sizes = true
               t.schema_element_name_form = :snake_case
               t.env_port_mapping = {"example" => port}
-              t.elasticsearch_versions = ["8.7.1", "8.8.1"]
+              t.elasticsearch_versions = ["8.18.0", "9.0.0"]
               t.opensearch_versions = ["2.7.0"]
               t.output = output
               t.daemon_timeout = daemon_timeout
