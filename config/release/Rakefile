@@ -18,22 +18,6 @@ require "#{project_root}/script/list_eg_gems"
 # Load tasks from config/site/Rakefile
 load "#{project_root}/config/site/Rakefile"
 
-# The `gem-release` gem is designed to support official SemVer with 3 version parts (+ an optional pre-release suffix).
-# Until we release 1.0.0, we're using 4 parts in our versions (+ an optional pre-release suffix).
-#
-# To make it compatible with our versioning scheme, we replace an internal regex here.
-#
-# Once we release 1.0.0, we can drop this workaround.
-::Gem::Release::Version::Number.class_eval do
-  remove_const :NUMBER
-
-  # standard:disable Lint/ConstantDefinitionInBlock
-  # This was changed from the original, which does not allow the extra version part we have:
-  #                 /^(\d+)\.?(\d+)?\.?(\d+)?(\-|\.)?(\w+)?\.?(\d+)?$/
-  NUMBER = /^(\d+)\.?(\d+)?\.?(\d+)?\.?(\d+)?(\-|\.)?(\w+)?\.?(\d+)?$/ # standard:disable Style/RedundantRegexpEscape
-  # standard:enable Lint/ConstantDefinitionInBlock
-end
-
 bump_version = lambda do |version:, message:|
   ::Dir.chdir(project_root) do
     opts = {
