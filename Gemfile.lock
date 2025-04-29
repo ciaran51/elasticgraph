@@ -71,7 +71,7 @@ PATH
   specs:
     elasticgraph-indexer_autoscaler_lambda (0.19.2.2.pre)
       aws-sdk-cloudwatch (~> 1.112)
-      aws-sdk-lambda (~> 1.148)
+      aws-sdk-lambda (~> 1.149)
       aws-sdk-sqs (~> 1.93)
       elasticgraph-datastore_core (= 0.19.2.2.pre)
       elasticgraph-lambda_support (= 0.19.2.2.pre)
