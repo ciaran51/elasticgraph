@@ -644,7 +644,7 @@ DEPENDENCIES
   rake (~> 13.2, >= 13.2.1)
   rspec (~> 3.13)
   rspec-retry (~> 0.6, >= 0.6.2)
-  rubocop-factory_bot (~> 2.27)
+  rubocop-factory_bot (~> 2.27, >= 2.27.1)
   rubocop-rake (~> 0.6)
   rubocop-rspec (~> 3.6)
   simplecov (~> 0.22)
