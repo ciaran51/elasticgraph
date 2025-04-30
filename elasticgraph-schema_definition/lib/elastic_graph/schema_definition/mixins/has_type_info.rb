@@ -42,7 +42,7 @@ module ElasticGraph
           :norms,
           :null_value,
           :search_analyzer,
-          :type,
+          :type
         ]
 
         # Defines the Elasticsearch/OpenSearch [field mapping type](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/mapping-types.html)
