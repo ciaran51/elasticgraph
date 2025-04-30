@@ -19,7 +19,7 @@ group :development do
   gem "httpx", "~> 1.4", ">= 1.4.1"
   gem "memory_profiler", "~> 1.1"
   gem "method_source", "~> 1.1"
-  gem "rubocop-factory_bot", "~> 2.26", ">= 2.26.1"
+  gem "rubocop-factory_bot", "~> 2.27", ">= 2.27.1"
   gem "rubocop-rake", "~> 0.6"
   gem "rubocop-rspec", "~> 3.6"
   gem "rspec", "~> 3.13"
