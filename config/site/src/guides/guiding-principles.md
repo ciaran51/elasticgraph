@@ -23,7 +23,7 @@ These are the "north stars" that guide ElasticGraph development. They guide the 
   [elasticgraph-health_check](https://github.com/block/elasticgraph/tree/main/elasticgraph-health_check),
   [elasticgraph-query_interceptor](https://github.com/block/elasticgraph/tree/main/elasticgraph-query_interceptor),
   [elasticgraph-query_registry](https://github.com/block/elasticgraph/tree/main/elasticgraph-query_registry),
-  and the various [AWS lambda components](https://github.com/block/elasticgraph/blob/main/CODEBASE_OVERVIEW.md#aws-lambda-integration-libraries-5-gems).
+  and the various [AWS lambda components](https://github.com/block/elasticgraph/blob/main/CODEBASE_OVERVIEW.md).
   In addition, extensions are designed to apply hermetically: when applied to one instance of `ElasticGraph::GraphQL`, `ElasticGraph::Indexer`,
   or `ElasticGraph::SchemaDefinition::API`, they don't apply to any other instances of those classes.
 
