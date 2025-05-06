@@ -26,8 +26,6 @@ jobs:
         build_part:
           - run_each_gem_spec
         ruby:
-          - "3.2"
-          - "3.3"
           - "3.4"
         datastore:
           - "elasticsearch:9.0.0"
