@@ -635,7 +635,47 @@ module ElasticGraph
           end
         end
 
-        %w[String ID Boolean].each do |type|
+        it "defines `StringFilterInput` and `StringListElementFilterInput` inputs (but not a `String` scalar, since it's built in)" do
+          expect(type_named("String")).to eq nil
+
+          expect(type_named("StringFilterInput")).to eq(<<~EOS.strip)
+            input StringFilterInput {
+              #{schema_elements.any_of}: [StringFilterInput!]
+              #{schema_elements.all_of}: [StringFilterInput!]
+              #{schema_elements.not}: StringFilterInput
+              #{schema_elements.equal_to_any_of}: [String]
+              #{schema_elements.contains}: StringContainsFilterInput
+              #{schema_elements.starts_with}: StringStartsWithFilterInput
+            }
+          EOS
+
+          expect(type_named("StringListElementFilterInput")).to eq(<<~EOS.strip)
+            input StringListElementFilterInput {
+              #{schema_elements.any_of}: [StringListElementFilterInput!]
+              #{schema_elements.all_of}: [StringListElementFilterInput!]
+              #{schema_elements.equal_to_any_of}: [String!]
+              #{schema_elements.contains}: StringContainsFilterInput
+              #{schema_elements.starts_with}: StringStartsWithFilterInput
+            }
+          EOS
+
+          expect(type_named("StringContainsFilterInput")).to eq(<<~EOS.strip)
+            input StringContainsFilterInput {
+              #{schema_elements.any_substring_of}: [String!]
+              #{schema_elements.all_substrings_of}: [String!]
+              #{schema_elements.ignore_case}: Boolean! = false
+            }
+          EOS
+
+          expect(type_named("StringStartsWithFilterInput")).to eq(<<~EOS.strip)
+            input StringStartsWithFilterInput {
+              #{schema_elements.any_prefix_of}: [String!]
+              #{schema_elements.ignore_case}: Boolean! = false
+            }
+          EOS
+        end
+
+        %w[ID Boolean].each do |type|
           it "defines `#{type}FilterInput` and `#{type}ListElementFilterInput` inputs (but not a `#{type}` scalar, since it's built in)" do
             expect(type_named(type)).to eq nil
 

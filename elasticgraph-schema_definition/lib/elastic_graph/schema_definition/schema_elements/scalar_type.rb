@@ -39,7 +39,16 @@ module ElasticGraph
       #   @private
       # @!attribute [rw] aggregated_values_customizations
       #   @private
-      class ScalarType < Struct.new(:schema_def_state, :type_ref, :mapping_type, :runtime_metadata, :aggregated_values_customizations)
+      # @!attribute [rw] filter_input_customizations
+      #   @private
+      class ScalarType < Struct.new(
+        :schema_def_state,
+        :type_ref,
+        :mapping_type,
+        :runtime_metadata,
+        :aggregated_values_customizations,
+        :filter_input_customizations
+      )
         # `Struct.new` provides the following methods:
         # @dynamic type_ref, runtime_metadata
         prepend Mixins::VerifiesGraphQLName
@@ -155,6 +164,13 @@ module ElasticGraph
         # @private
         def customize_aggregated_values_type(&block)
           self.aggregated_values_customizations = block
+        end
+
+        # Registers a block which will be used to customize the derived `*FilterInput` object type.
+        #
+        # @private
+        def customize_filter_input_type(&block)
+          self.filter_input_customizations = block
         end
 
         # @private
@@ -284,6 +300,8 @@ module ElasticGraph
                 f.documentation LTE_DOC
               end
             end
+
+            filter_input_customizations&.call(t)
           end
         end
 

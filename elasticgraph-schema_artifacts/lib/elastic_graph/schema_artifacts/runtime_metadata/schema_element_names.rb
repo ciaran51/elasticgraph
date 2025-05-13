@@ -138,7 +138,7 @@ module ElasticGraph
         # Filter arg and operation names:
         :filter,
         :equal_to_any_of, :gt, :gte, :lt, :lte, :matches_phrase, :matches_query, :any_of, :all_of, :not,
-        :time_of_day, :any_satisfy,
+        :time_of_day, :any_satisfy, :contains, :starts_with, :all_substrings_of, :any_substring_of, :ignore_case, :any_prefix_of,
         # Directives
         :eg_latency_slo, :ms,
         # For sorting.

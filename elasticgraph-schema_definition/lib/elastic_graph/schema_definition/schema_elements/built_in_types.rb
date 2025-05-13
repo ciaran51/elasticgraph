@@ -277,7 +277,71 @@ module ElasticGraph
               f.documentation "The input phrase to search for."
             end
 
-            # any_of/all_of/not don't really make sense on this filter because it doesn't make
+            # any_of/all_of/not don't really make sense on this filter because it doesn't make sense
+            # to apply an OR operator or negation to the fields of this type since they are all an
+            # indivisible part of a single filter operation on a specific field. So we remove them
+            # here.
+            remove_any_of_and_all_of_and_not_filter_operators_on(t)
+          end
+
+          register_filter "StringContains" do |t|
+            t.documentation <<~EOS
+              Input type used to specify parameters for the `#{names.contains}` string filtering operator.
+
+              When `null` is passed, matches all documents.
+            EOS
+
+            t.field names.any_substring_of, "[String!]" do |f|
+              f.documentation <<~EOS
+                Matches records where the field value contains one or more of the provided substrings.
+
+                When `null` is passed, matches all documents. When an empty list is passed,
+                this part of the filter matches no documents.
+              EOS
+            end
+
+            t.field names.all_substrings_of, "[String!]" do |f|
+              f.documentation <<~EOS
+                Matches records where the field value contains all of the provided substrings.
+
+                When `null` is passed or an empty list is passed, matches all documents.
+              EOS
+            end
+
+            t.field names.ignore_case, "Boolean!" do |f|
+              f.default false
+              f.documentation "Determines if the substring matching is case-sensitive (the default) or case-insensitive."
+            end
+
+            # any_of/all_of/not don't really make sense on this filter because it doesn't make sense
+            # to apply an OR operator or negation to the fields of this type since they are all an
+            # indivisible part of a single filter operation on a specific field. So we remove them
+            # here.
+            remove_any_of_and_all_of_and_not_filter_operators_on(t)
+          end
+
+          register_filter "StringStartsWith" do |t|
+            t.documentation <<~EOS
+              Input type used to specify parameters for the `#{names.starts_with}` string filtering operator.
+
+              When `null` is passed, matches all documents.
+            EOS
+
+            t.field names.any_prefix_of, "[String!]" do |f|
+              f.documentation <<~EOS
+                Matches records where the field value starts with one or more of the provided prefixes.
+
+                When `null` is passed, matches all documents. When an empty list is passed,
+                this part of the filter matches no documents.
+              EOS
+            end
+
+            t.field names.ignore_case, "Boolean!" do |f|
+              f.default false
+              f.documentation "Determines if the prefix matching is case-sensitive (the default) or case-insensitive."
+            end
+
+            # any_of/all_of/not don't really make sense on this filter because it doesn't make sense
             # to apply an OR operator or negation to the fields of this type since they are all an
             # indivisible part of a single filter operation on a specific field. So we remove them
             # here.
@@ -596,6 +660,24 @@ module ElasticGraph
           schema_def_api.scalar_type "String" do |t|
             t.mapping type: "keyword"
             t.json_schema type: "string"
+
+            t.customize_filter_input_type do |fit|
+              fit.field names.contains, schema_def_state.type_ref("StringContains").as_filter_input.name do |f|
+                f.documentation <<~EOS
+                  Matches documents using substring filtering.
+
+                  When `null` is passed, matches all documents.
+                EOS
+              end
+
+              fit.field names.starts_with, schema_def_state.type_ref("StringStartsWith").as_filter_input.name do |f|
+                f.documentation <<~EOS
+                  Matches documents using prefix filtering.
+
+                  When `null` is passed, matches all documents.
+                EOS
+              end
+            end
           end
         end
 
