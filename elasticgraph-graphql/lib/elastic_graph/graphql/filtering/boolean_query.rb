@@ -13,14 +13,13 @@ module ElasticGraph
       # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
       #
       # It is composed of:
-      #   1) The occurrence type (:must, :filter, :should, or :must_not)
+      #   1) The occurrence type (:filter, :should, or :must_not)
       #   2) A list of query clauses evaluated by the given occurrence type
       #   3) An optional flag indicating whether the occurrence should be negated
+      #
+      # Note: since we never do anything with the score, we always prefer `filter` over `must`. If we ever
+      # decide to do something with the score (such as sorting by it), then we'll want to introduce `must`.
       class BooleanQuery < ::Data.define(:occurrence, :clauses)
-        def self.must(*clauses)
-          new(:must, clauses)
-        end
-
         def self.filter(*clauses)
           new(:filter, clauses)
         end

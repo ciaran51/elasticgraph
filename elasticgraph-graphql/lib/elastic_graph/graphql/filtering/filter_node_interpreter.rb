@@ -90,32 +90,22 @@ module ElasticGraph
             schema_names.gte => ->(field_name, value) { RangeQuery.new(field_name, :gte, value) },
             schema_names.lt => ->(field_name, value) { RangeQuery.new(field_name, :lt, value) },
             schema_names.lte => ->(field_name, value) { RangeQuery.new(field_name, :lte, value) },
+
             schema_names.matches_query => ->(field_name, value) do
               allowed_edits_per_term = value.fetch(schema_names.allowed_edits_per_term).runtime_metadata.datastore_abbreviation
 
-              BooleanQuery.must(
-                {
-                  match: {
-                    field_name => {
-                      query: value.fetch(schema_names.query),
-                      # This is always a string field, even though the value is often an integer
-                      fuzziness: allowed_edits_per_term.to_s,
-                      operator: value[schema_names.require_all_terms] ? "AND" : "OR"
-                    }
-                  }
-                }
-              )
+              BooleanQuery.filter({match: {field_name => {
+                query: value.fetch(schema_names.query),
+                # This is always a string field, even though the value is often an integer
+                fuzziness: allowed_edits_per_term.to_s,
+                operator: value[schema_names.require_all_terms] ? "AND" : "OR"
+              }}})
             end,
+
             schema_names.matches_phrase => ->(field_name, value) {
-              BooleanQuery.must(
-                {
-                  match_phrase_prefix: {
-                    field_name => {
-                      query: value.fetch(schema_names.phrase)
-                    }
-                  }
-                }
-              )
+              BooleanQuery.filter({match_phrase_prefix: {field_name => {
+                query: value.fetch(schema_names.phrase)
+              }}})
             },
 
             # This filter operator wraps a geo distance query:
