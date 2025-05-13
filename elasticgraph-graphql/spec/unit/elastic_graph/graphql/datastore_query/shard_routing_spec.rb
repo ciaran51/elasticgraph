@@ -71,6 +71,9 @@ module ElasticGraph
         expect(shard_routing_for(["name"], {"name" => {"lte" => "abc"}})).to search_all_shards
         expect(shard_routing_for(["name"], {"name" => {"matches_query" => {"query" => "abc"}}})).to search_all_shards
         expect(shard_routing_for(["name"], {"name" => {"matches_phrase" => {"phrase" => "abc"}}})).to search_all_shards
+        expect(shard_routing_for(["name"], {"name" => {"contains" => {"any_substring_of" => ["abc"]}}})).to search_all_shards
+        expect(shard_routing_for(["name"], {"name" => {"contains" => {"all_substrings_of" => ["abc"]}}})).to search_all_shards
+        expect(shard_routing_for(["name"], {"name" => {"starts_with" => {"any_prefix_of" => ["abc"]}}})).to search_all_shards
       end
 
       it "ignores inequality operators on a single `route_with_field_paths` field when that field also has an exact equality operator" do
@@ -446,6 +449,9 @@ module ElasticGraph
           expect(shard_routing_for(["name"], {"name" => {"not" => {"lte" => "abc"}}})).to search_all_shards
           expect(shard_routing_for(["name"], {"name" => {"not" => {"matches_query" => {"query" => "abc"}}}})).to search_all_shards
           expect(shard_routing_for(["name"], {"name" => {"not" => {"matches_phrase" => {"phrase" => "abc"}}}})).to search_all_shards
+          expect(shard_routing_for(["name"], {"name" => {"not" => {"contains" => {"any_substring_of" => ["abc"]}}}})).to search_all_shards
+          expect(shard_routing_for(["name"], {"name" => {"not" => {"contains" => {"all_substrings_of" => ["abc"]}}}})).to search_all_shards
+          expect(shard_routing_for(["name"], {"name" => {"not" => {"starts_with" => {"any_prefix_of" => ["abc"]}}}})).to search_all_shards
         end
 
         it "ignores inequality operators on a single `route_with_field_paths` field when that field also has an exact equality operator" do

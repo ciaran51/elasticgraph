@@ -30,6 +30,118 @@ module ElasticGraph
         expect(results2).to eq(results)
       end
 
+      specify "`contains` filters perform accurate substring filtering" do
+        index_into(
+          graphql,
+          widget1 = build(:widget, id: "w1", name: "A Cool Widget"),
+          widget2 = build(:widget, id: "w2", name: "An Uncool Widget"),
+          widget3 = build(:widget, id: "w3", name: "another Great Widget"),
+          widget4 = build(:widget, id: "w4", name: "Something else cool and wide"),
+          widget5 = build(:widget, id: "w5", name: "other"),
+          widget6 = build(:widget, id: "w6", name: nil)
+        )
+
+        all_widget_ids = ids_of(widget1, widget2, widget3, widget4, widget5, widget6)
+
+        # Empty predicates (neither `any_substring_of` nor `all_substrings_of`).
+        results = search_with_filter("name", "contains", {"ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "contains", {})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "contains", nil)
+        expect(results).to match_array(all_widget_ids)
+
+        # Just `any_substring_of`
+        results = search_with_filter("name", "contains", {"any_substring_of" => ["Co", "Gre"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1, widget3))
+        results = search_with_filter("name", "contains", {"any_substring_of" => ["Co", "Gre"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3, widget4))
+        results = search_with_filter("name", "contains", {"any_substring_of" => ["fantastic"], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"any_substring_of" => [], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"any_substring_of" => nil, "ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "contains", {"any_substring_of" => [""], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3, widget4, widget5))
+        results = search_with_filter("name", "contains", {"any_substring_of" => [" "], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3, widget4))
+
+        # Just `all_substrings_of`
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Co", "dge"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Co", "dge"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["fantastic"], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"all_substrings_of" => [], "ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "contains", {"all_substrings_of" => nil, "ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "contains", {"all_substrings_of" => [""], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3, widget4, widget5))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => [" "], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3, widget4))
+
+        # Both `any_substring_of` and `all_substrings_of`.
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => ["Cool"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => ["Cool"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["fantastic"], "any_substring_of" => ["Cool"], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => ["fantastic"], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"all_substrings_of" => [], "any_substring_of" => ["Cool"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget4))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => [""], "any_substring_of" => ["Cool"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget4))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => [], "ignore_case" => true})
+        expect(results).to be_empty
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => [""], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => nil, "any_substring_of" => ["Cool"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget4))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => ["Wid", "dge"], "any_substring_of" => nil, "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3))
+        results = search_with_filter("name", "contains", {"all_substrings_of" => nil, "any_substring_of" => nil, "ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+      end
+
+      specify "`starts_with` filters perform accurate prefix filtering" do
+        index_into(
+          graphql,
+          widget1 = build(:widget, id: "w1", name: "one two"),
+          widget2 = build(:widget, id: "w2", name: "two one"),
+          widget3 = build(:widget, id: "w3", name: "one three"),
+          widget4 = build(:widget, id: "w4", name: "One four"),
+          widget5 = build(:widget, id: "w5", name: "other")
+        )
+
+        all_widget_ids = ids_of(widget1, widget2, widget3, widget4, widget5)
+
+        # Empty predicates
+        results = search_with_filter("name", "starts_with", {"ignore_case" => true})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "starts_with", {})
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "starts_with", nil)
+        expect(results).to match_array(all_widget_ids)
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => nil, "ignore_case" => false})
+        expect(results).to match_array(all_widget_ids)
+
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => ["one"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1, widget3))
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => ["one"], "ignore_case" => true})
+        expect(results).to match_array(ids_of(widget1, widget3, widget4))
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => ["one tw"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1))
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => ["one", "two"], "ignore_case" => false})
+        expect(results).to match_array(ids_of(widget1, widget2, widget3))
+        results = search_with_filter("name", "starts_with", {"any_prefix_of" => [], "ignore_case" => false})
+        expect(results).to be_empty
+      end
+
       it "routes the request to specific shards when an `equal_to_any_of`/`equalToAnyOf` filter is used on a custom shard routing field", :expect_search_routing do
         index_into(
           graphql,

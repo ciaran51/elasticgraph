@@ -224,6 +224,214 @@ module ElasticGraph
         )
       end
 
+      describe "`contains`" do
+        it "is ignored if it is empty in any form" do
+          query = new_query(filter: {"name" => {"contains" => nil}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {"ignore_case" => true}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => nil}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => nil}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => nil, "all_substrings_of" => nil, "ignore_case" => true}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+        end
+
+        it "translates each `all_substrings_of` value to a wildcard query, which are all ANDed together" do
+          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", "bar", " "]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "* *", case_insensitive: false}}}
+          )
+        end
+
+        it "translates each `any_substring_of` value to a wildcard query under a `should` clause to OR them together" do
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar", " "]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with({bool: {
+            minimum_should_match: 1,
+            should: [
+              {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
+              {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
+              {wildcard: {"name" => {value: "* *", case_insensitive: false}}}
+            ]
+          }})
+        end
+
+        it "supports `all_substrings_of` and `any_substring_of` on the same filter" do
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar"], "all_substrings_of" => ["bazz"]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*bazz*", case_insensitive: false}}},
+            {bool: {
+              minimum_should_match: 1,
+              should: [
+                {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
+                {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}}
+              ]
+            }}
+          )
+        end
+
+        it "returns a query that matches no documents when `any_substring_of` is empty" do
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => []}}})
+
+          expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => [], "all_substrings_of" => ["foo"]}}})
+
+          expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
+        end
+
+        it "ignores `all_substrings_of: []`" do
+          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => []}}})
+
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => []}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
+          )
+        end
+
+        it "avoids an unneeded `should` clause when `any_substring_of` has only one value, preserving the possibility of caching" do
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
+          )
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar", "bazz"]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*bazz*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
+          )
+        end
+
+        it "uses a single wildcard of `*` when given an empty string" do
+          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", ""]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*", case_insensitive: false}}}
+          )
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => [""]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*", case_insensitive: false}}}
+          )
+        end
+
+        it "honors `ignore_case` and defaults it to false" do
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"]}}})
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
+          )
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => true}}})
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*bar*", case_insensitive: true}}},
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: true}}}
+          )
+
+          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => false}}})
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
+            {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
+          )
+        end
+      end
+
+      describe "`starts_with`" do
+        it "is ignored if it is empty in any form" do
+          query = new_query(filter: {"name" => {"starts_with" => nil}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"starts_with" => {}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"starts_with" => {"ignore_case" => true}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => nil}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => nil, "ignore_case" => true}}})
+          expect(datastore_body_of(query)).to not_filter_datastore_at_all
+        end
+
+        it "translates each `any_prefix_of` value to a prefix query under a `should` clause to OR them together" do
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar", " "]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with({bool: {
+            minimum_should_match: 1,
+            should: [
+              {prefix: {"name" => {value: "foo", case_insensitive: false}}},
+              {prefix: {"name" => {value: "bar", case_insensitive: false}}},
+              {prefix: {"name" => {value: " ", case_insensitive: false}}}
+            ]
+          }})
+        end
+
+        it "returns a query that matches no documents when `any_prefix_of` is empty" do
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => []}}})
+
+          expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
+        end
+
+        it "avoids an unneeded `should` clause when `any_prefix_of` has only one value, preserving the possibility of caching" do
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo"]}}})
+
+          expect(datastore_body_of(query)).to filter_datastore_with(
+            {prefix: {"name" => {value: "foo", case_insensitive: false}}}
+          )
+        end
+
+        it "honors `ignore_case` and defaults it to false" do
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"]}}})
+          expect(datastore_body_of(query)).to filter_datastore_with({bool: {
+            minimum_should_match: 1,
+            should: [
+              {prefix: {"name" => {value: "foo", case_insensitive: false}}},
+              {prefix: {"name" => {value: "bar", case_insensitive: false}}}
+            ]
+          }})
+
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => true}}})
+          expect(datastore_body_of(query)).to filter_datastore_with({bool: {
+            minimum_should_match: 1,
+            should: [
+              {prefix: {"name" => {value: "foo", case_insensitive: true}}},
+              {prefix: {"name" => {value: "bar", case_insensitive: true}}}
+            ]
+          }})
+
+          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => false}}})
+          expect(datastore_body_of(query)).to filter_datastore_with({bool: {
+            minimum_should_match: 1,
+            should: [
+              {prefix: {"name" => {value: "foo", case_insensitive: false}}},
+              {prefix: {"name" => {value: "bar", case_insensitive: false}}}
+            ]
+          }})
+        end
+      end
+
       describe "`equal_to_any_of` with `[nil]`" do
         it "builds a `must_not` `exists` condition when given an `equal_to_any_of: [nil]` filter" do
           query = new_query(filter: {"age" => {"equal_to_any_of" => [nil]}})
@@ -1797,7 +2005,7 @@ module ElasticGraph
         def normalize(value)
           case value
           when ::Hash
-            value.sort_by { |k, v| k }.to_h { |k, v| [k, normalize(v)] }
+            value.sort_by { |k, v| k.to_s }.to_h { |k, v| [k, normalize(v)] }
           when ::Array
             value.map { |v| normalize(v) }
           else

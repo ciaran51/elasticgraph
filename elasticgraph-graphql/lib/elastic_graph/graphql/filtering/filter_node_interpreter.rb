@@ -108,6 +108,48 @@ module ElasticGraph
               }}})
             },
 
+            schema_names.contains => ->(field_name, value) {
+              case_insensitive = value[schema_names.ignore_case] || false
+              anded_substrings = value[schema_names.all_substrings_of] || []
+              ored_substrings = value[schema_names.any_substring_of]
+
+              sub_expressions = anded_substrings.map do |substring|
+                substring_clause(field_name, substring, case_insensitive)
+              end
+
+              if ored_substrings
+                should_sub_expressions = ored_substrings.map do |substring|
+                  substring_clause(field_name, substring, case_insensitive)
+                end
+
+                sub_expressions << {bool: {minimum_should_match: 1, should: should_sub_expressions}}
+              end
+
+              if ored_substrings&.empty?
+                BooleanQuery::ALWAYS_FALSE_FILTER
+              elsif sub_expressions.size > 0
+                BooleanQuery.filter(*sub_expressions)
+              end
+            },
+
+            schema_names.starts_with => ->(field_name, value) {
+              case_insensitive = value[schema_names.ignore_case] || false
+              ored_prefixes = value[schema_names.any_prefix_of]
+
+              sub_expressions = (ored_prefixes || []).map do |prefix|
+                {prefix: {field_name => {
+                  value: prefix,
+                  case_insensitive: case_insensitive
+                }}}
+              end
+
+              if ored_prefixes&.empty?
+                BooleanQuery::ALWAYS_FALSE_FILTER
+              elsif sub_expressions.size > 0
+                BooleanQuery.filter({bool: {minimum_should_match: 1, should: sub_expressions}})
+              end
+            },
+
             # This filter operator wraps a geo distance query:
             # https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-geo-distance-query.html
             schema_names.near => ->(field_name, value) do
@@ -150,6 +192,15 @@ module ElasticGraph
               end
             end
           }.freeze
+        end
+
+        def substring_clause(field_name, substring, case_insensitive)
+          {wildcard: {field_name => {
+            # We squeeze("*") to convert "**" to "*", which is not needed for correctness but is a bit simpler.
+            # There's no point in two consecutive "*" wildcards.
+            value: "*#{substring}*".squeeze("*"),
+            case_insensitive: case_insensitive
+          }}}
         end
 
         def to_datastore_value(value)
