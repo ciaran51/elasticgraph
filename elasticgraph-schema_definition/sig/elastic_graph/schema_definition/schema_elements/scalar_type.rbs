@@ -7,6 +7,7 @@ module ElasticGraph
         attr_accessor mapping_type: ::String
         attr_accessor runtime_metadata: SchemaArtifacts::RuntimeMetadata::ScalarType
         attr_accessor aggregated_values_customizations: (^(ObjectType) -> void)?
+        attr_accessor filter_input_customizations: (^(InputType) -> void)?
 
         def initialize: (State, TypeReference) -> void
       end
@@ -24,6 +25,7 @@ module ElasticGraph
         def coerce_with: (::String, defined_at: ::String) -> void
         def prepare_for_indexing_with: (::String, defined_at: ::String) -> void
         def customize_aggregated_values_type: () { (ObjectType) -> void } -> void
+        def customize_filter_input_type: () { (InputType) -> void } -> void
 
         def runtime_metadata: () -> SchemaArtifacts::RuntimeMetadata::ScalarType
         def mapping_options: () -> Mixins::HasTypeInfo::optionsHash

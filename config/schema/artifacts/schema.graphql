@@ -9545,6 +9545,33 @@ type StringConnection {
 }
 
 """
+Input type used to specify parameters for the `contains` string filtering operator.
+
+When `null` is passed, matches all documents.
+"""
+input StringContainsFilterInput {
+  """
+  Matches records where the field value contains all of the provided substrings.
+
+  When `null` is passed or an empty list is passed, matches all documents.
+  """
+  all_substrings_of: [String!]
+
+  """
+  Matches records where the field value contains one or more of the provided substrings.
+
+  When `null` is passed, matches all documents. When an empty list is passed,
+  this part of the filter matches no documents.
+  """
+  any_substring_of: [String!]
+
+  """
+  Determines if the substring matching is case-sensitive (the default) or case-insensitive.
+  """
+  ignore_case: Boolean! = false
+}
+
+"""
 Represents a specific `String` in the context of a `StringConnection`,
 providing access to both the `String` and a pagination `Cursor`.
 
@@ -9592,6 +9619,13 @@ input StringFilterInput {
   any_of: [StringFilterInput!]
 
   """
+  Matches documents using substring filtering.
+
+  When `null` is passed, matches all documents.
+  """
+  contains: StringContainsFilterInput
+
+  """
   Matches records where the field value is equal to any of the provided values.
   This works just like an IN operator in SQL.
 
@@ -9608,6 +9642,13 @@ input StringFilterInput {
   When `null` or an empty object is passed, matches no documents.
   """
   not: StringFilterInput
+
+  """
+  Matches documents using prefix filtering.
+
+  When `null` is passed, matches all documents.
+  """
+  starts_with: StringStartsWithFilterInput
 }
 
 """
@@ -9638,6 +9679,13 @@ input StringListElementFilterInput {
   any_of: [StringListElementFilterInput!]
 
   """
+  Matches documents using substring filtering.
+
+  When `null` is passed, matches all documents.
+  """
+  contains: StringContainsFilterInput
+
+  """
   Matches records where the field value is equal to any of the provided values.
   This works just like an IN operator in SQL.
 
@@ -9646,6 +9694,13 @@ input StringListElementFilterInput {
   list, this part of the filter matches records where the field value is `null`.
   """
   equal_to_any_of: [String!]
+
+  """
+  Matches documents using prefix filtering.
+
+  When `null` is passed, matches all documents.
+  """
+  starts_with: StringStartsWithFilterInput
 }
 
 """
@@ -9696,6 +9751,26 @@ input StringListFilterInput {
   When `null` or an empty object is passed, matches no documents.
   """
   not: StringListFilterInput
+}
+
+"""
+Input type used to specify parameters for the `starts_with` string filtering operator.
+
+When `null` is passed, matches all documents.
+"""
+input StringStartsWithFilterInput {
+  """
+  Matches records where the field value starts with one or more of the provided prefixes.
+
+  When `null` is passed, matches all documents. When an empty list is passed,
+  this part of the filter matches no documents.
+  """
+  any_prefix_of: [String!]
+
+  """
+  Determines if the prefix matching is case-sensitive (the default) or case-insensitive.
+  """
+  ignore_case: Boolean! = false
 }
 
 """

@@ -29,6 +29,12 @@ module ElasticGraph
         attr_reader not: ::String
         attr_reader time_of_day: ::String
         attr_reader any_satisfy: ::String
+        attr_reader contains: ::String
+        attr_reader starts_with: ::String
+        attr_reader all_substrings_of: ::String
+        attr_reader any_substring_of: ::String
+        attr_reader ignore_case: ::String
+        attr_reader any_prefix_of: ::String
 
         attr_reader eg_latency_slo: ::String
         attr_reader ms: ::String

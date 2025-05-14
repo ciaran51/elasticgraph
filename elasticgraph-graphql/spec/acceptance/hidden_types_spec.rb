@@ -120,7 +120,7 @@ module ElasticGraph
               DayOfWeek DayOfWeekGroupingOffsetInput DistanceUnitInput GeoLocationFilterInput GeoLocationDistanceFilterInput
               IntListFilterInput IntListElementFilterInput AggregationCountDetail
               LocalTimeGroupingOffsetInput LocalTimeGroupingTruncationUnitInput LocalTimeUnitInput MatchesQueryFilterInput
-              MatchesPhraseFilterInput MatchesQueryAllowedEditsPerTermInput
+              MatchesPhraseFilterInput MatchesQueryAllowedEditsPerTermInput StringContainsFilterInput StringStartsWithFilterInput
             ]
 
           # The sub-aggregation types are quite complicated and we just add them all here.
