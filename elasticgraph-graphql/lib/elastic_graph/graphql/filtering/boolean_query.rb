@@ -21,7 +21,25 @@ module ElasticGraph
       # decide to do something with the score (such as sorting by it), then we'll want to introduce `must`.
       class BooleanQuery < ::Data.define(:occurrence, :clauses)
         def self.filter(*clauses)
-          new(:filter, clauses)
+          unwrapped_clauses = clauses.map do |clause|
+            __skip__ = case clause
+            in {bool: {minimum_should_match: 1, should: [::Hash => single_should], **nil}, **nil}
+              # This case represents an `anyOf` with a single subfilter (`filter: {anyOf: [X]}`).
+              # Such an expression is semantically equivalent to `filter: X`, and we can unwrap the
+              # should clause in this case since there is only a single one.
+              #
+              # While it adds a bit of complexity to do this unwrapping, we believe it's worth it because
+              # it preserves the datastore's ability to apply caching. As the Elasticsearch documentation[^1]
+              # explains, the results of `filter` clauses can be cached, but not `should` clauses.
+              #
+              # [^1]: https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-bool-query
+              single_should
+            else
+              clause
+            end
+          end
+
+          new(:filter, unwrapped_clauses)
         end
 
         def self.should(*clauses)

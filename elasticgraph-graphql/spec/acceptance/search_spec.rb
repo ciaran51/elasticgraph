@@ -22,7 +22,7 @@ module ElasticGraph
             amount_cents: 100,
             options: build(:widget_options, size: "SMALL", color: "BLUE"),
             cost_currency: "USD",
-            name: "thing1",
+            name: "thing123",
             created_at: "2019-06-02T06:00:00.000Z",
             created_at_time_of_day: "06:00:00",
             tags: ["abc", "def"],
@@ -34,7 +34,7 @@ module ElasticGraph
             amount_cents: 200,
             options: build(:widget_options, size: "SMALL", color: "RED"),
             cost_currency: "USD",
-            name: "thing2",
+            name: "thing234",
             created_at: "2019-07-02T12:00:00.000Z",
             created_at_time_of_day: "12:00:00.1",
             tags: ["ghi", "jkl"],
@@ -66,8 +66,8 @@ module ElasticGraph
             },
             case_correctly("total_edge_count") => 2,
             "edges" => [
-              {"node" => "thing1", "cursor" => /\w+/},
-              {"node" => "thing2", "cursor" => /\w+/}
+              {"node" => "thing123", "cursor" => /\w+/},
+              {"node" => "thing234", "cursor" => /\w+/}
             ]
           },
           case_correctly("widget_options") => {
@@ -135,6 +135,46 @@ module ElasticGraph
         expect(widgets).to match([
           string_hash_of(widget2, :id, :amount_cents),
           string_hash_of(widget3, :id, :amount_cents)
+        ])
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {contains: {any_substring_of: ["NG1", "other"], all_substrings_of: ["ing"]}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to be_empty
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {contains: {any_substring_of: ["NG1", "other"], all_substrings_of: ["ing"], ignore_case: false}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to be_empty
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {contains: {any_substring_of: ["NG1", "other"], all_substrings_of: ["ing"], ignore_case: true}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to match([
+          string_hash_of(widget1, :id, :amount_cents)
+        ])
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {starts_with: {any_prefix_of: ["THING1", "other"]}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to be_empty
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {starts_with: {any_prefix_of: ["THING1", "other"], ignore_case: false}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to be_empty
+
+        widgets = list_widgets_with(:amount_cents,
+          filter: {name: {starts_with: {any_prefix_of: ["THING1", "other"], ignore_case: true}}},
+          order_by: [:amount_cents2_ASC])
+
+        expect(widgets).to match([
+          string_hash_of(widget1, :id, :amount_cents)
         ])
 
         # Verify that we can fetch, filter and sort by a graphql-only field which is an alias for a child field.
@@ -359,7 +399,7 @@ module ElasticGraph
 
         # Test `equal_to_any_of` with `[nil, other_value]`
         widgets = list_widgets_with(:amount_cents,
-          filter: {name: {equal_to_any_of: [nil, "thing2", "", " ", "\n"]}}, # empty strings should be ignored.,
+          filter: {name: {equal_to_any_of: [nil, "thing234", "", " ", "\n"]}}, # empty strings should be ignored.,
           order_by: [:amount_cents_DESC])
 
         expect(widgets).to match([
@@ -379,7 +419,7 @@ module ElasticGraph
 
         # Test `not` with `equal_to_any_of` with `[nil, other_value]`
         widgets = list_widgets_with(:amount_cents,
-          filter: {not: {name: {equal_to_any_of: [nil, "thing1"]}}})
+          filter: {not: {name: {equal_to_any_of: [nil, "thing123"]}}})
 
         expect(widgets).to match([
           string_hash_of(widget2, :id, :amount_cents)
@@ -453,7 +493,7 @@ module ElasticGraph
               case_correctly("has_previous_page") => false
             },
             case_correctly("total_edge_count") => 2,
-            "nodes" => ["thing1", "thing2"]
+            "nodes" => ["thing123", "thing234"]
           },
           case_correctly("widget_options") => {
             "colors" => [enum_value("BLUE"), enum_value("RED")],
@@ -463,18 +503,18 @@ module ElasticGraph
           case_correctly("widget_fee_currencies") => ["CAD", "USD"]
         }])
 
-        full_text_query_search_results = list_widgets_with(:name, filter: {"name_text" => {matches_query: {query: "thing1"}}}, order_by: [:name_ASC])
+        full_text_query_search_results = list_widgets_with(:name, filter: {"name_text" => {matches_query: {query: "thing123"}}}, order_by: [:name_ASC])
         expect(full_text_query_search_results).to match([
           string_hash_of(widget1, :id, :name),
           string_hash_of(widget2, :id, :name)
         ])
 
         # Try passing an explicit `nil` for the `allowed_edits_per_term` parameter; it should get a GraphQL validation error instead of a runtime Exception.
-        response = query_widgets_with(:name, allow_errors: true, filter: {"name_text" => {matches_query: {query: "thing1", allowed_edits_per_term: nil}}}, order_by: [:name_ASC])
+        response = query_widgets_with(:name, allow_errors: true, filter: {"name_text" => {matches_query: {query: "thing123", allowed_edits_per_term: nil}}}, order_by: [:name_ASC])
         expect(response["errors"].size).to eq(1)
         expect(response.dig("errors", 0)).to include("message" => a_string_including("Argument '#{case_correctly "allowed_edits_per_term"}'", "has an invalid value (null)."))
 
-        full_text_query_no_fuzziness_search_results = list_widgets_with(:name, filter: {"name_text" => {matches_query: {query: "thing1", allowed_edits_per_term: :NONE}}}, order_by: [:name_ASC])
+        full_text_query_no_fuzziness_search_results = list_widgets_with(:name, filter: {"name_text" => {matches_query: {query: "thing123", allowed_edits_per_term: :NONE}}}, order_by: [:name_ASC])
         expect(full_text_query_no_fuzziness_search_results).to match([
           string_hash_of(widget1, :id, :name)
         ])
@@ -656,7 +696,7 @@ module ElasticGraph
               :team,
               id: "t2",
               details: build(:team_details, count: 15),
-              past_names: ["Pink Sox"],
+              past_names: ["Pink Sox", "Ace Piloteers"],
               won_championships_at: ["2013-11-27T02:30:00Z", "2013-11-27T22:30:00Z"],
               forbes_valuations: [],
               seasons: [
@@ -692,7 +732,7 @@ module ElasticGraph
               :team,
               details: build(:team_details, count: 12),
               id: "t4",
-              past_names: [],
+              past_names: ["Pill Bugs"],
               won_championships_at: ["2005-10-27T12:30:00Z"],
               forbes_valuations: [42],
               seasons: [build(:team_season, record: build(:team_record, wins: 50, losses: 12))],
@@ -717,6 +757,14 @@ module ElasticGraph
           results = query_teams_with(filter: {past_names: {any_satisfy: {equal_to_any_of: ["Pilots", "Other"]}}})
           # t1 and t3 both have Pilots as a past name.
           expect(results).to eq [{"id" => "t1"}, {"id" => "t3"}]
+          # Verify `any_satisfy: {...}` with substring filtering
+          results = query_teams_with(filter: {past_names: {any_satisfy: {contains: {any_substring_of: ["Pilot"]}}}})
+          # t1, t2, and t3 both have Pilot in a past name.
+          expect(results).to eq [{"id" => "t1"}, {"id" => "t2"}, {"id" => "t3"}]
+          # Verify `any_satisfy: {...}` with substring filtering
+          results = query_teams_with(filter: {past_names: {any_satisfy: {starts_with: {any_prefix_of: ["Pill"]}}}})
+          # t4 has a past name "Pill Bugs"
+          expect(results).to eq [{"id" => "t4"}]
 
           # Verify `any_satisfy: {...}` on a list-of-numbers field with range operators.
           results = query_teams_with(filter: {forbes_valuations: {any_satisfy: {gt: 50_000}}})
@@ -787,8 +835,8 @@ module ElasticGraph
 
           # Verify `count` filtering on a root list-of-scalars field
           results = query_teams_with(filter: {past_names: {count: {gt: 1}}})
-          # t1 has 2 past_names.
-          expect(results).to eq [{"id" => "t1"}]
+          # t1 and t2 have 2 past_names.
+          expect(results).to eq [{"id" => "t1"}, {"id" => "t2"}]
 
           # Verify `count` nil filtering on a root list-of-scalars field
           results = query_teams_with(filter: {past_names: {count: {gt: nil}}})

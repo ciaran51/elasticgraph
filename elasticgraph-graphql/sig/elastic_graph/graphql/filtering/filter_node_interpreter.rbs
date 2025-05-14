@@ -36,6 +36,7 @@ module ElasticGraph
           SchemaArtifacts::RuntimeMetadata::Schema
         ) -> ::Hash[::String, ^(::String, untyped) -> queryClause?]
 
+        def substring_clause: (::String, ::String, bool) -> ::Hash[::Symbol, untyped]
         def to_datastore_value: (untyped) -> untyped
         def nano_of_day_from: (stringHash, ::String) -> ::Integer?
         def list_of_nanos_of_day_from: (stringHash, ::String) -> ::Array[::Integer]?
