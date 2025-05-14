@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Sorting'
 permalink: "/query-api/sorting/"
 nav_title: Sorting
-menu_order: 4
+menu_order: 40
 ---
 Use `orderBy:` on a root query field to control how the results are sorted:
 

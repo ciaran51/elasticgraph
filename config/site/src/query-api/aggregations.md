@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Aggregations'
 permalink: "/query-api/aggregations/"
 nav_title: Aggregations
-menu_order: 3
+menu_order: 30
 ---
 ElasticGraph offers a powerful aggregations API. Each indexed type gets a corresponding `*Aggregations` field.
 Here's a complete example:

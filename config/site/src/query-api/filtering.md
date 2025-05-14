@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Filtering'
 permalink: "/query-api/filtering/"
 nav_title: Filtering
-menu_order: 2
+menu_order: 20
 ---
 Use `filter:` on a root query field to narrow down the returned results:
 

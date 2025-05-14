@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Overview'
 permalink: "/query-api/overview/"
 nav_title: Overview
-menu_order: 1
+menu_order: 10
 ---
 
 ElasticGraph provides an extremely flexible GraphQL query API. As with every GraphQL API, you request the fields you want:

@@ -1,0 +1,16 @@
+query ArtistsPrefixedWithTheCaseInsensitive {
+  artists(filter: {
+    name: {
+      startsWith: {
+        anyPrefixOf: ["the "]
+        ignoreCase: true
+      }
+    }
+  }) {
+    edges {
+      node {
+        name
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: DateTime Filtering'
 permalink: "/query-api/filtering/date-time/"
 nav_title: DateTime
-menu_order: 4
+menu_order: 40
 ---
 ElasticGraph supports three different date/time types:
 

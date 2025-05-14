@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Equality Filtering'
 permalink: "/query-api/filtering/equality/"
 nav_title: Equality
-menu_order: 2
+menu_order: 20
 ---
 The most commonly used predicate supports equality filtering:
 

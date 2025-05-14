@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Comparison Filtering'
 permalink: "/query-api/filtering/comparison/"
 nav_title: Comparison
-menu_order: 3
+menu_order: 30
 ---
 ElasticGraph offers a standard set of comparison filter predicates:
 
