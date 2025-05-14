@@ -3,11 +3,12 @@ layout: query-api
 title: 'ElasticGraph Query API: List Filtering'
 permalink: "/query-api/filtering/list/"
 nav_title: List
-menu_order: 8
+menu_order: 80
 ---
 ElasticGraph supports a couple predicates for filtering on list fields:
 
-{% include filtering_predicate_definitions/list.md %}
+{% include filtering_predicate_definitions/any_satisfy.md %}
+{% include filtering_predicate_definitions/count.md %}
 
 ### Filtering on list elements with `anySatisfy`
 

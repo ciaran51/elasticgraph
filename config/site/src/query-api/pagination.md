@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Pagination'
 permalink: "/query-api/pagination/"
 nav_title: Pagination
-menu_order: 5
+menu_order: 50
 ---
 To provide pagination, ElasticGraph implements the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm). Here's an example query showing

@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Filter Conjunctions'
 permalink: "/query-api/filtering/conjunctions/"
 nav_title: Conjunctions
-menu_order: 8
+menu_order: 80
 ---
 ElasticGraph supports two conjunction predicates:
 

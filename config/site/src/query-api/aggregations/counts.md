@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Aggregation Counts'
 permalink: "/query-api/aggregations/counts/"
 nav_title: Counts
-menu_order: 2
+menu_order: 20
 ---
 The aggregations API allows you to count documents within a grouping:
 

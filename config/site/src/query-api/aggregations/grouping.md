@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Aggregation Grouping'
 permalink: "/query-api/aggregations/grouping/"
 nav_title: Grouping
-menu_order: 3
+menu_order: 30
 ---
 When aggregating documents, the groupings are defined by `groupedBy`. Here's an example:
 

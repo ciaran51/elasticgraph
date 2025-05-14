@@ -1,0 +1,34 @@
+query AverageSongLengthForYouOrEye {
+  artistAggregations {
+    nodes {
+      subAggregations {
+        albums {
+          nodes {
+            subAggregations {
+              tracks(filter: {
+                name: {
+                  contains: {
+                    anySubstringOf: ["you", "eye"]
+                    ignoreCase: true
+                  }
+                }
+              }) {
+                nodes {
+                  groupedBy {
+                    name
+                  }
+
+                  aggregatedValues {
+                    lengthInSeconds {
+                      approximateAvg
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

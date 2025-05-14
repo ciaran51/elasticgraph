@@ -1,0 +1,15 @@
+query ArtistsPrefixedWithThe {
+  artists(filter: {
+    name: {
+      startsWith: {
+        anyPrefixOf: ["The "]
+      }
+    }
+  }) {
+    edges {
+      node {
+        name
+      }
+    }
+  }
+}

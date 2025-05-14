@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Filter Negation'
 permalink: "/query-api/filtering/negation/"
 nav_title: Negation
-menu_order: 7
+menu_order: 70
 ---
 ElasticGraph supports a negation predicate:
 

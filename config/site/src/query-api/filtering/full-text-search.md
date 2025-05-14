@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Full Text Search'
 permalink: "/query-api/filtering/full-text-search/"
 nav_title: Full Text Search
-menu_order: 5
+menu_order: 50
 ---
 ElasticGraph supports two full-text search filtering predicates:
 

@@ -3,7 +3,7 @@ layout: query-api
 title: 'ElasticGraph Query API: Geographic Filtering'
 permalink: "/query-api/filtering/geographic/"
 nav_title: Geographic
-menu_order: 6
+menu_order: 60
 ---
 The `GeoLocation` type supports a special predicate:
 
