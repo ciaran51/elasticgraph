@@ -440,7 +440,7 @@ module ElasticGraph
 
           t.documentation <<~EOS
             Represents a specific `#{type_name}` in the context of a `#{type_ref.as_connection.name}`,
-            providing access to both the `#{type_name}` and a pagination `Cursor`.
+            providing access to both the `#{type_name}` and query-specific information such as the pagination `Cursor`.
 
             See the [Relay GraphQL Cursor Connections
             Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
