@@ -151,6 +151,9 @@ module ElasticGraph
       #   `PageInfo` specification from the [Relay GraphQL Cursor Connections
       #   Specification](https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo).
       #
+      # SearchHighlight
+      # : Provides information about why a document matched a search via highlighted snippets.
+      #
       # @!attribute [rw] schema_def_api
       #   @private
       # @!attribute [rw] schema_def_state
@@ -463,6 +466,23 @@ module ElasticGraph
                 The `Cursor` of the last edge of the current page. This can be passed in the next query as
                 a `after` argument to paginate forwards.
               EOS
+            end
+          end
+
+          register_framework_object_type "SearchHighlight" do |t|
+            t.default_graphql_resolver = :object_without_lookahead
+
+            t.documentation "Provides information about why a document matched a search via highlighted snippets."
+
+            t.field names.path, "[String!]!" do |f|
+              f.documentation <<~EOS
+                Path to a leaf field containing one or more search highlight snippets. The returned list will contain a path segment for
+                each object layer of the schema, from the document root.
+              EOS
+            end
+
+            t.field names.snippets, "[String!]!" do |f|
+              f.documentation "List of snippets containing search highlights from field values at this `path`."
             end
           end
 

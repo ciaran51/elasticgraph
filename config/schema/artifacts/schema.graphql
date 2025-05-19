@@ -145,6 +145,11 @@ Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for mor
 """
 type AddressEdge {
   """
+  Search highlights for this `Address`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
+  """
   The `Cursor` of this `Address`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Address`.
   """
@@ -1147,6 +1152,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type ComponentEdge {
+  """
+  Search highlights for this `Component`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `Component`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Component`.
@@ -2648,6 +2658,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type ElectricalPartEdge {
+  """
+  Search highlights for this `ElectricalPart`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `ElectricalPart`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `ElectricalPart`.
@@ -4338,6 +4353,11 @@ Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for mor
 """
 type ManufacturerEdge {
   """
+  Search highlights for this `Manufacturer`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
+  """
   The `Cursor` of this `Manufacturer`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Manufacturer`.
   """
@@ -4801,6 +4821,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type MechanicalPartEdge {
+  """
+  Search highlights for this `MechanicalPart`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `MechanicalPart`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `MechanicalPart`.
@@ -5430,6 +5455,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type NamedEntityEdge {
+  """
+  Search highlights for this `NamedEntity`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `NamedEntity`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `NamedEntity`.
@@ -6646,6 +6676,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type PartEdge {
+  """
+  Search highlights for this `Part`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `Part`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Part`.
@@ -8761,6 +8796,22 @@ type Query {
   ): WidgetOrAddressConnection
 }
 
+"""
+Provides information about why a document matched a search via highlighted snippets.
+"""
+type SearchHighlight {
+  """
+  Path to a leaf field containing one or more search highlight snippets. The returned list will contain a path segment for
+  each object layer of the schema, from the document root.
+  """
+  path: [String!]!
+
+  """
+  List of snippets containing search highlights from field values at this `path`.
+  """
+  snippets: [String!]!
+}
+
 enum Size {
   LARGE
   MEDIUM
@@ -9226,6 +9277,11 @@ Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for mor
 """
 type SponsorEdge {
   """
+  Search highlights for this `Sponsor`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
+  """
   The `Cursor` of this `Sponsor`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Sponsor`.
   """
@@ -9579,6 +9635,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type StringEdge {
+  """
+  Search highlights for this `String`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `String`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `String`.
@@ -10336,6 +10397,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type TeamEdge {
+  """
+  Search highlights for this `Team`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `Team`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Team`.
@@ -12582,6 +12648,11 @@ Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for mor
 """
 type WidgetCurrencyEdge {
   """
+  Search highlights for this `WidgetCurrency`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
+  """
   The `Cursor` of this `WidgetCurrency`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `WidgetCurrency`.
   """
@@ -12912,6 +12983,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type WidgetEdge {
+  """
+  Search highlights for this `Widget`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `Widget`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `Widget`.
@@ -13798,6 +13874,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type WidgetOrAddressEdge {
+  """
+  Search highlights for this `WidgetOrAddress`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `WidgetOrAddress`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `WidgetOrAddress`.
@@ -15068,6 +15149,11 @@ See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
 """
 type WidgetWorkspaceEdge {
+  """
+  Search highlights for this `WidgetWorkspace`, indicating where in the indexed document the query matched.
+  """
+  all_highlights: [SearchHighlight!]!
+
   """
   The `Cursor` of this `WidgetWorkspace`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `WidgetWorkspace`.

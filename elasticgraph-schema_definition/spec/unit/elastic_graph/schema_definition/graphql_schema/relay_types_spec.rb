@@ -35,12 +35,16 @@ module ElasticGraph
               """
               The `Widget` of this edge.
               """
-              node: Widget
+              #{schema_elements.node}: Widget
               """
               The `Cursor` of this `Widget`. This can be passed in the next query as
               a `before` or `after` argument to continue paginating from this `Widget`.
               """
-              cursor: Cursor
+              #{schema_elements.cursor}: Cursor
+              """
+              Search highlights for this `Widget`, indicating where in the indexed document the query matched.
+              """
+              #{schema_elements.all_highlights}: [SearchHighlight!]!
             }
           EOS
         end
@@ -70,8 +74,9 @@ module ElasticGraph
 
           expect(edge_type_from(result, "Inventor")).to eq(<<~EOS.strip)
             type InventorEdge {
-              node: Inventor
-              cursor: Cursor
+              #{schema_elements.node}: Inventor
+              #{schema_elements.cursor}: Cursor
+              #{schema_elements.all_highlights}: [SearchHighlight!]!
             }
           EOS
         end
