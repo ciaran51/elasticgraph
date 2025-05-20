@@ -252,6 +252,30 @@ module ElasticGraph
         expect(merged.request_all_fields).to be false
       end
 
+      it "sets `request_all_highlights` to `true` if it is set on either query", covers: :request_all_highlights do
+        merged = merge(
+          {request_all_highlights: true},
+          {request_all_highlights: false}
+        )
+        expect(merged.request_all_highlights).to be true
+      end
+
+      it "sets `request_all_highlights` to `true` if it is set on both queries", covers: :request_all_highlights do
+        merged = merge(
+          {request_all_highlights: true},
+          {request_all_highlights: true}
+        )
+        expect(merged.request_all_highlights).to be true
+      end
+
+      it "sets `request_all_highlights` to `false` if it is set to false on both queries", covers: :request_all_highlights do
+        merged = merge(
+          {request_all_highlights: false},
+          {request_all_highlights: false}
+        )
+        expect(merged.request_all_highlights).to be false
+      end
+
       it "sets `individual_docs_needed` to `true` if it is set on either query", covers: :individual_docs_needed do
         merged = merge(
           {individual_docs_needed: true},
@@ -280,6 +304,14 @@ module ElasticGraph
         merged = merge(
           {individual_docs_needed: false},
           {request_all_fields: true}
+        )
+        expect(merged.individual_docs_needed).to be true
+      end
+
+      it "sets `individual_docs_needed` to `true` if all highlights are requested", covers: :individual_docs_needed do
+        merged = merge(
+          {individual_docs_needed: false},
+          {request_all_highlights: true}
         )
         expect(merged.individual_docs_needed).to be true
       end

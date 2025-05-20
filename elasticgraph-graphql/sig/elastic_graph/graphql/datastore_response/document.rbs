@@ -34,6 +34,7 @@ module ElasticGraph
         def id: () -> ::String
         def sort: () -> ::Array[untyped]
         def version: () -> ::Integer
+        def highlights: () -> ::Hash[::String, ::Array[::String]]
 
         @cursor: DecodedCursor?
         def cursor: () -> DecodedCursor

@@ -58,6 +58,10 @@ module ElasticGraph
           payload["version"]
         end
 
+        def highlights
+          raw_data["highlight"] || {}
+        end
+
         def cursor
           @cursor ||= decoded_cursor_factory.build(raw_data.fetch("sort"))
         end
