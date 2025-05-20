@@ -32,7 +32,7 @@ module ElasticGraph
       #
       # This optimization, when we can apply it, results in much less load on the datastore. In addition, it also helps to reduce
       # the amount of overhead imposed by ElasticGraph. Profiling has shown that significant overhead is incurred when we repeatedly
-      # merge filters into a query (e.g. `query.merge_with(filters: [{id: {equal_to_any_of: [part.manufacturer_id]}}])` 10 times to
+      # merge filters into a query (e.g. `query.merge_with(internal_filters: [{id: {equal_to_any_of: [part.manufacturer_id]}}])` 10 times to
       # produce 10 different queries). This optimization also avoids that overhead.
       #
       # Note: while the comments discuss the examples in terms of _parent objects_, in the implementation, we deal with id sets.
@@ -172,7 +172,7 @@ module ElasticGraph
 
           # First, we build a combined query with filters that account for all ids we are filtering on from all `id_sets`.
           filtered_query = @query.merge_with(
-            filters: filters_for(id_sets.reduce(:union)),
+            internal_filters: filters_for(id_sets.reduce(:union)),
             requested_fields: [@join.filter_id_field_name],
             # We need to request a larger size than `@query` originally had. If the original size was `10` and we have
             # 5 sets of ids, then, at a minimum, we need to request 50 results (10 results for each id set).
@@ -216,7 +216,7 @@ module ElasticGraph
 
         def fetch_via_separate_queries(id_sets, requested_fields: [])
           queries = id_sets.map do |ids|
-            @query.merge_with(filters: filters_for(ids), requested_fields: requested_fields)
+            @query.merge_with(internal_filters: filters_for(ids), requested_fields: requested_fields)
           end
 
           results = QuerySource.execute_many(queries, for_context: @context)

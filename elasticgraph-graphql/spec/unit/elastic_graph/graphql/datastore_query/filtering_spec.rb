@@ -19,19 +19,19 @@ module ElasticGraph
       end
 
       it "builds a `nil` datastore body when given no filters (passed as `nil`)" do
-        query = new_query(filter: nil)
+        query = new_query(client_filter: nil)
 
         expect(datastore_body_of(query)).to not_filter_datastore_at_all
       end
 
       it "builds a `nil` datastore body when given no filters (passed as an empty hash)" do
-        query = new_query(filter: {})
+        query = new_query(client_filter: {})
 
         expect(datastore_body_of(query)).to not_filter_datastore_at_all
       end
 
       it "ignores unknown filtering operators and logs a warning" do
-        query = new_query(filter: {"name" => {"like" => "abc"}})
+        query = new_query(client_filter: {"name" => {"like" => "abc"}})
 
         expect {
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
@@ -39,7 +39,7 @@ module ElasticGraph
       end
 
       it "ignores malformed filters and logs a warning" do
-        query = new_query(filter: {"name" => [7]})
+        query = new_query(client_filter: {"name" => [7]})
 
         expect {
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
@@ -47,63 +47,63 @@ module ElasticGraph
       end
 
       it "takes advantage of ids query when filtering on id" do
-        query = new_query(filter: {"id" => {"equal_to_any_of" => ["testid"]}})
+        query = new_query(client_filter: {"id" => {"equal_to_any_of" => ["testid"]}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(ids: {values: ["testid"]})
       end
 
       it "deduplicates the `id` to a unique set of values when given duplicates in an `equal_to_any_of: [...]` filter" do
-        query = new_query(filter: {"id" => {"equal_to_any_of" => ["a", "b", "a"]}})
+        query = new_query(client_filter: {"id" => {"equal_to_any_of" => ["a", "b", "a"]}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(ids: {values: ["a", "b"]})
       end
 
       it "builds a `terms` condition when given an `equal_to_any_of: [...]` filter" do
-        query = new_query(filter: {"age" => {"equal_to_any_of" => [25, 30]}})
+        query = new_query(client_filter: {"age" => {"equal_to_any_of" => [25, 30]}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(terms: {"age" => [25, 30]})
       end
 
       it "deduplicates the `terms` to a unique set of values when given duplicates in an `equal_to_any_of: [...]` filter" do
-        query = new_query(filter: {"age" => {"equal_to_any_of" => [25, 30, 25]}})
+        query = new_query(client_filter: {"age" => {"equal_to_any_of" => [25, 30, 25]}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(terms: {"age" => [25, 30]})
       end
 
       it "builds a `range` condition when given an `gt: scalar` filter" do
-        query = new_query(filter: {"age" => {"gt" => 25}})
+        query = new_query(client_filter: {"age" => {"gt" => 25}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(range: {"age" => {gt: 25}})
       end
 
       it "builds a `range` condition when given an `gte: scalar` filter" do
-        query = new_query(filter: {"age" => {"gte" => 25}})
+        query = new_query(client_filter: {"age" => {"gte" => 25}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(range: {"age" => {gte: 25}})
       end
 
       it "builds a `range` condition when given an `lt: scalar` filter" do
-        query = new_query(filter: {"age" => {"lt" => 25}})
+        query = new_query(client_filter: {"age" => {"lt" => 25}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(range: {"age" => {lt: 25}})
       end
 
       it "builds a `range` condition when given an `lte: scalar` filter" do
-        query = new_query(filter: {"age" => {"lte" => 25}})
+        query = new_query(client_filter: {"age" => {"lte" => 25}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(range: {"age" => {lte: 25}})
       end
 
       it "merges multiple `range` clauses that are on the same field" do
-        query1 = new_query(filter: {"age" => {"gt" => 10, "lte" => 25}})
+        query1 = new_query(client_filter: {"age" => {"gt" => 10, "lte" => 25}})
         expect(datastore_body_of(query1)).to filter_datastore_with(range: {"age" => {gt: 10, lte: 25}})
 
-        query2 = new_query(filter: {"age" => {"gt" => 10, "lte" => 25, "gte" => 20, "lt" => 50}})
+        query2 = new_query(client_filter: {"age" => {"gt" => 10, "lte" => 25, "gte" => 20, "lt" => 50}})
         expect(datastore_body_of(query2)).to filter_datastore_with(range: {"age" => {gt: 10, gte: 20, lt: 50, lte: 25}})
       end
 
       it "leaves multiple `range` clauses that are on different fields unmerged" do
-        query = new_query(filter: {"age" => {"gt" => 10}, "height" => {"lte" => 120}})
+        query = new_query(client_filter: {"age" => {"gt" => 10}, "height" => {"lte" => 120}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(
           {range: {"age" => {gt: 10}}},
@@ -113,7 +113,7 @@ module ElasticGraph
 
       it "builds a `match` filter condition when given a `matches_query`: 'MatchesQueryFilterInput' filter" do
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -129,7 +129,7 @@ module ElasticGraph
 
       it "builds a `match` filter condition with specified fuzziness when given a `matches_query`: 'MatchesQueryFilterInput' filter" do
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -142,7 +142,7 @@ module ElasticGraph
         expect(datastore_body_of(query)).to query_datastore_with(bool: {filter: [{match: {"name_text" => {query: "foo", fuzziness: "0", operator: "OR"}}}]})
 
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -155,7 +155,7 @@ module ElasticGraph
         expect(datastore_body_of(query)).to query_datastore_with(bool: {filter: [{match: {"name_text" => {query: "foo", fuzziness: "1", operator: "OR"}}}]})
 
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -168,7 +168,7 @@ module ElasticGraph
         expect(datastore_body_of(query)).to query_datastore_with(bool: {filter: [{match: {"name_text" => {query: "foo", fuzziness: "2", operator: "OR"}}}]})
 
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -183,7 +183,7 @@ module ElasticGraph
 
       it "builds a `match` filter condition with specified operator when given a `matches_query`: 'MatchesQueryFilterInput' filter" do
         query = new_query(
-          filter: {
+          client_filter: {
             "name_text" => {
               "matches_query" => {
                 "query" => "foo",
@@ -198,25 +198,25 @@ module ElasticGraph
       end
 
       it "builds a `match_phrase_prefix` filter condition when given a `matches_phrase`: 'MatchesPhraseFilterInput' filter" do
-        query = new_query(filter: {"name_text" => {"matches_phrase" => {"phrase" => "foo"}}})
+        query = new_query(client_filter: {"name_text" => {"matches_phrase" => {"phrase" => "foo"}}})
 
         expect(datastore_body_of(query)).to query_datastore_with(bool: {filter: [{match_phrase_prefix: {"name_text" => {query: "foo"}}}]})
       end
 
       it "builds a `terms` condition on a nested path when given a deeply nested (3 levels) `equal_to_any_of: [...]` filter" do
-        query = new_query(filter: {"options" => {"color" => {"red" => {"equal_to_any_of" => [100, 200]}}}})
+        query = new_query(client_filter: {"options" => {"color" => {"red" => {"equal_to_any_of" => [100, 200]}}}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(terms: {"options.color.red" => [100, 200]})
       end
 
       it "builds a `terms` condition on a nested path when given a nested (2 levels) `equal_to_any_of: [...]` filter" do
-        query = new_query(filter: {"options" => {"size" => {"equal_to_any_of" => [10]}}})
+        query = new_query(client_filter: {"options" => {"size" => {"equal_to_any_of" => [10]}}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(terms: {"options.size" => [10]})
       end
 
       it "supports an `equal_to_any_of` operator on multiple fields, converting them to multiple `terms` conditions" do
-        query = new_query(filter: {"age" => {"equal_to_any_of" => [25, 30]}, "size" => {"equal_to_any_of" => [10]}})
+        query = new_query(client_filter: {"age" => {"equal_to_any_of" => [25, 30]}, "size" => {"equal_to_any_of" => [10]}})
 
         expect(datastore_body_of(query)).to filter_datastore_with(
           {terms: {"age" => [25, 30]}},
@@ -226,27 +226,27 @@ module ElasticGraph
 
       describe "`contains`" do
         it "is ignored if it is empty in any form" do
-          query = new_query(filter: {"name" => {"contains" => nil}})
+          query = new_query(client_filter: {"name" => {"contains" => nil}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {}}})
+          query = new_query(client_filter: {"name" => {"contains" => {}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {"ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"ignore_case" => true}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => nil}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => nil}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => nil}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"all_substrings_of" => nil}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => nil, "all_substrings_of" => nil, "ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => nil, "all_substrings_of" => nil, "ignore_case" => true}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
         end
 
         it "translates each `all_substrings_of` value to a wildcard query, which are all ANDed together" do
-          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", "bar", " "]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", "bar", " "]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
@@ -256,7 +256,7 @@ module ElasticGraph
         end
 
         it "translates each `any_substring_of` value to a wildcard query under a `should` clause to OR them together" do
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar", " "]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar", " "]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with({bool: {
             minimum_should_match: 1,
@@ -269,7 +269,7 @@ module ElasticGraph
         end
 
         it "supports `all_substrings_of` and `any_substring_of` on the same filter" do
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar"], "all_substrings_of" => ["bazz"]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo", "bar"], "all_substrings_of" => ["bazz"]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*bazz*", case_insensitive: false}}},
@@ -284,21 +284,21 @@ module ElasticGraph
         end
 
         it "returns a query that matches no documents when `any_substring_of` is empty" do
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => []}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => []}}})
 
           expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => [], "all_substrings_of" => ["foo"]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => [], "all_substrings_of" => ["foo"]}}})
 
           expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
         end
 
         it "ignores `all_substrings_of: []`" do
-          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => []}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"all_substrings_of" => []}}})
 
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => []}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => []}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
@@ -306,13 +306,13 @@ module ElasticGraph
         end
 
         it "avoids an unneeded `should` clause when `any_substring_of` has only one value, preserving the possibility of caching" do
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
           )
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar", "bazz"]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar", "bazz"]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
@@ -322,14 +322,14 @@ module ElasticGraph
         end
 
         it "uses a single wildcard of `*` when given an empty string" do
-          query = new_query(filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", ""]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"all_substrings_of" => ["foo", ""]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}},
             {wildcard: {"name" => {value: "*", case_insensitive: false}}}
           )
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => [""]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => [""]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*", case_insensitive: false}}}
@@ -337,19 +337,19 @@ module ElasticGraph
         end
 
         it "honors `ignore_case` and defaults it to false" do
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"]}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"]}}})
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
           )
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => true}}})
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*bar*", case_insensitive: true}}},
             {wildcard: {"name" => {value: "*foo*", case_insensitive: true}}}
           )
 
-          query = new_query(filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => false}}})
+          query = new_query(client_filter: {"name" => {"contains" => {"any_substring_of" => ["foo"], "all_substrings_of" => ["bar"], "ignore_case" => false}}})
           expect(datastore_body_of(query)).to filter_datastore_with(
             {wildcard: {"name" => {value: "*bar*", case_insensitive: false}}},
             {wildcard: {"name" => {value: "*foo*", case_insensitive: false}}}
@@ -359,24 +359,24 @@ module ElasticGraph
 
       describe "`starts_with`" do
         it "is ignored if it is empty in any form" do
-          query = new_query(filter: {"name" => {"starts_with" => nil}})
+          query = new_query(client_filter: {"name" => {"starts_with" => nil}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"starts_with" => {}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"starts_with" => {"ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"ignore_case" => true}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => nil}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => nil}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => nil, "ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => nil, "ignore_case" => true}}})
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
         end
 
         it "translates each `any_prefix_of` value to a prefix query under a `should` clause to OR them together" do
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar", " "]}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar", " "]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with({bool: {
             minimum_should_match: 1,
@@ -389,13 +389,13 @@ module ElasticGraph
         end
 
         it "returns a query that matches no documents when `any_prefix_of` is empty" do
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => []}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => []}}})
 
           expect(datastore_body_of(query)).to query_datastore_with(always_false_condition)
         end
 
         it "avoids an unneeded `should` clause when `any_prefix_of` has only one value, preserving the possibility of caching" do
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo"]}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo"]}}})
 
           expect(datastore_body_of(query)).to filter_datastore_with(
             {prefix: {"name" => {value: "foo", case_insensitive: false}}}
@@ -403,7 +403,7 @@ module ElasticGraph
         end
 
         it "honors `ignore_case` and defaults it to false" do
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"]}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"]}}})
           expect(datastore_body_of(query)).to filter_datastore_with({bool: {
             minimum_should_match: 1,
             should: [
@@ -412,7 +412,7 @@ module ElasticGraph
             ]
           }})
 
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => true}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => true}}})
           expect(datastore_body_of(query)).to filter_datastore_with({bool: {
             minimum_should_match: 1,
             should: [
@@ -421,7 +421,7 @@ module ElasticGraph
             ]
           }})
 
-          query = new_query(filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => false}}})
+          query = new_query(client_filter: {"name" => {"starts_with" => {"any_prefix_of" => ["foo", "bar"], "ignore_case" => false}}})
           expect(datastore_body_of(query)).to filter_datastore_with({bool: {
             minimum_should_match: 1,
             should: [
@@ -434,7 +434,7 @@ module ElasticGraph
 
       describe "`equal_to_any_of` with `[nil]`" do
         it "builds a `must_not` `exists` condition when given an `equal_to_any_of: [nil]` filter" do
-          query = new_query(filter: {"age" => {"equal_to_any_of" => [nil]}})
+          query = new_query(client_filter: {"age" => {"equal_to_any_of" => [nil]}})
 
           expect(datastore_body_of(query)).to query_datastore_with({
             bool: {must_not: [
@@ -444,7 +444,7 @@ module ElasticGraph
         end
 
         it "builds a `must_not` `exists` condition when given an `equal_to_any_of: [nil, nil]` filter" do
-          query = new_query(filter: {"age" => {"equal_to_any_of" => [nil, nil]}})
+          query = new_query(client_filter: {"age" => {"equal_to_any_of" => [nil, nil]}})
 
           expect(datastore_body_of(query)).to query_datastore_with({
             bool: {must_not: [
@@ -454,7 +454,7 @@ module ElasticGraph
         end
 
         it "handles `equal_to_any_of: [nil, non_nil_values, ...]` by ORing together multiple conditions (for a field that's not `id`)" do
-          query = new_query(filter: {"age" => {"equal_to_any_of" => [nil, 25, 40]}})
+          query = new_query(client_filter: {"age" => {"equal_to_any_of" => [nil, 25, 40]}})
 
           expect(datastore_body_of(query)).to filter_datastore_with({
             bool: {minimum_should_match: 1, should: [
@@ -465,7 +465,7 @@ module ElasticGraph
         end
 
         it "handles `equal_to_any_of: [nil, non_nil_values, ...]` by ORing together multiple conditions (for the `id` field)" do
-          query = new_query(filter: {"id" => {"equal_to_any_of" => [nil, 25, 40]}})
+          query = new_query(client_filter: {"id" => {"equal_to_any_of" => [nil, 25, 40]}})
 
           expect(datastore_body_of(query)).to filter_datastore_with({
             bool: {minimum_should_match: 1, should: [
@@ -476,7 +476,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` condition when given a `not` equal_to_any_of filter" do
-          query = new_query(filter: {"not" => {"age" => {"equal_to_any_of" => [nil]}}})
+          query = new_query(client_filter: {"not" => {"age" => {"equal_to_any_of" => [nil]}}})
 
           expect(datastore_body_of(query)).to query_datastore_with({
             bool: {filter: [{exists: {"field" => "age"}}]}
@@ -484,7 +484,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` condition when given `equal_to_any_of: [nil]` filter, and does not drop other boolean occurrences" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"equal_to_any_of" => [nil]},
             "color" => {"equal_to_any_of" => %w[blue green]}
           })
@@ -496,7 +496,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` condition when given `equal_to_any_of: [nil]` filter, and combines must_not occurrences" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"equal_to_any_of" => [nil]},
             "color" => {"not" => {"equal_to_any_of" => %w[blue green]}}
           })
@@ -510,7 +510,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` condition when given a `not` `equal_to_any_of` filter, and combines it with other boolean occurrences" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "not" => {"age" => {"equal_to_any_of" => [nil]}},
             "color" => {"equal_to_any_of" => %w[blue green]}
           })
@@ -524,7 +524,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` condition when given a `not` `equal_to_any_of` filter, and does not drop other negated boolean occurrences" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"not" => {"equal_to_any_of" => [nil]}},
             "color" => {"not" => {"equal_to_any_of" => %w[blue green]}}
           })
@@ -536,7 +536,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` when `equal_to_any_of: [nil]` is the only filter and nested in `any_of`" do
-          query = new_query(filter: {"any_of" => [
+          query = new_query(client_filter: {"any_of" => [
             {"age" => {"equal_to_any_of" => [nil]}}
           ]})
 
@@ -549,7 +549,7 @@ module ElasticGraph
         end
 
         it "builds an `exists` when the `equal_to_any_of: [nil]` part is among other filters" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "name" => {"equal_to_any_of" => ["foo"]},
             "age" => {"equal_to_any_of" => [nil]},
             "currency" => {"equal_to_any_of" => ["USD"]}
@@ -569,7 +569,7 @@ module ElasticGraph
 
       describe "`all_of` operator" do
         it "produces a separate bool subfilter for each clause" do
-          query = new_query(filter: {"all_of" => [
+          query = new_query(client_filter: {"all_of" => [
             {"color" => {"equal_to_any_of" => ["RED"]}},
             {"size" => {"gt" => 10}}
           ]})
@@ -595,7 +595,7 @@ module ElasticGraph
         end
 
         it "allows ANDing two subfilters on the same field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {"color" => {"equal_to_any_of" => ["RED"]}},
               {"color" => {"not" => {"equal_to_any_of" => ["GREEN"]}}}
@@ -631,7 +631,7 @@ module ElasticGraph
         end
 
         it "allows an AND of multiple OR subfilters (i.e. allOf of anyOfs)" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {
                 "any_of" => [
@@ -673,7 +673,7 @@ module ElasticGraph
         end
 
         it "can be used to wrap multiple `any_satisfy` expressions to require multiple sub-filters to be satisfied by a list element" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "tags" => {"all_of" => [
               {"any_satisfy" => {"equal_to_any_of" => ["a", "b"]}},
               {"any_satisfy" => {"equal_to_any_of" => ["c", "d"]}}
@@ -689,7 +689,7 @@ module ElasticGraph
         end
 
         it "handles `not` within `all_of` operator" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {"amount_cents" => {"gt" => 50}},
               {"not" => {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["foo"]}}}}
@@ -717,7 +717,7 @@ module ElasticGraph
         end
 
         it "handles empty predicates" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {},
               {"amount_cents" => {"gt" => 50}}
@@ -730,7 +730,7 @@ module ElasticGraph
             ]
           })
 
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {"amount_cents" => {}},
               {"amount_cents" => {"gt" => 50}}
@@ -745,7 +745,7 @@ module ElasticGraph
         end
 
         it "handles not with empty predicate" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "all_of" => [
               {"not" => {}},
               {"amount_cents" => {"gt" => 50}}
@@ -773,13 +773,13 @@ module ElasticGraph
         end
 
         it "is treated as `true` when `null` is passed" do
-          query = new_query(filter: {"tags" => {"all_of" => nil}})
+          query = new_query(client_filter: {"tags" => {"all_of" => nil}})
 
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
         end
 
         it "is treated as `true` when `[]` is passed" do
-          query = new_query(filter: {"tags" => {"all_of" => []}})
+          query = new_query(client_filter: {"tags" => {"all_of" => []}})
 
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
         end
@@ -788,12 +788,12 @@ module ElasticGraph
       describe "`any_satisfy` operator" do
         context "on a list-of-scalars field" do
           it "returns the body of the sub-filters because the semantics indicated by `any_satisfy` is what the datastore automatically provides on list fields" do
-            query1 = new_query(filter: {
+            query1 = new_query(client_filter: {
               "tags" => {"any_satisfy" => {"equal_to_any_of" => ["a", "b"]}},
               "ages" => {"any_satisfy" => {"gt" => 30}}
             })
 
-            query2 = new_query(filter: {
+            query2 = new_query(client_filter: {
               "tags" => {"equal_to_any_of" => ["a", "b"]},
               "ages" => {"gt" => 30}
             })
@@ -802,7 +802,7 @@ module ElasticGraph
           end
 
           it "merges multiple range operators into a single clause to force a single value to satisfy all (rather than separate values satisfying each)" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "ages" => {"any_satisfy" => {"gt" => 30, "lt" => 60}}
             })
 
@@ -816,7 +816,7 @@ module ElasticGraph
             let(:graphql) { build_graphql(schema_element_name_form: :snake_case) }
 
             it "rejects a query that produces multiple query clauses under `any_satisfy` because the datastore does not require a single value to match them all" do
-              query = new_query(filter: {
+              query = new_query(client_filter: {
                 # We don't expect users to send us a filter like this, but if they did, we can't support it.
                 "ages" => {"any_satisfy" => {"gt" => 30, "equal_to_any_of" => [50]}}
               })
@@ -833,7 +833,7 @@ module ElasticGraph
             let(:graphql) { build_graphql(schema_element_name_form: :camelCase) }
 
             it "rejects a query that produces multiple query clauses under `any_satisfy` because the datastore does not require a single value to match them all" do
-              query = new_query(filter: {
+              query = new_query(client_filter: {
                 # We don't expect users to send us a filter like this, but if they did, we can't support it.
                 "ages" => {"anySatisfy" => {"gt" => 30, "equalToAnyOf" => [50]}}
               })
@@ -847,7 +847,7 @@ module ElasticGraph
           end
 
           it "still allows multiple query clauses under `any_satisfy: {any_of: [...]}}` because that has OR semantics" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "ages" => {"any_satisfy" => {"any_of" => [{"gt" => 30}, {"equal_to_any_of" => [50]}]}}
             })
 
@@ -858,7 +858,7 @@ module ElasticGraph
           end
 
           it "does not allow `any_of` alongside another filter because that would also produce multiple query clauses that we can't support" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "ages" => {"any_satisfy" => {"any_of" => [{"gt" => 30}], "equal_to_any_of" => [50]}}
             })
 
@@ -870,7 +870,7 @@ module ElasticGraph
           end
 
           it "returns the standard always false filter for `any_satisfy: {any_of: []}`" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "ages" => {"any_satisfy" => {"any_of" => []}}
             })
 
@@ -878,7 +878,7 @@ module ElasticGraph
           end
 
           it "applies no filtering when given `any_satisfy: {}`" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "ages" => {"any_satisfy" => {}}
             })
 
@@ -888,7 +888,7 @@ module ElasticGraph
 
         context "on a list-of-nested-objects field" do
           it "builds a `nested` filter" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "people" => {"friends" => {"any_satisfy" => {"age" => {"gt" => 30}}}}
             })
 
@@ -901,7 +901,7 @@ module ElasticGraph
           end
 
           it "correctly builds a `nested` filter when `any_satisfy: {not: ...}` is used" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "people" => {"friends" => {"any_satisfy" => {"not" => {"age" => {"gt" => 30}}}}}
             })
 
@@ -914,7 +914,7 @@ module ElasticGraph
           end
 
           it "correctly builds a `nested` filter when `any_satisfy: {field: {any_satisfy: ...}}}` is used" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "line_items" => {"any_satisfy" => {"tags" => {"any_satisfy" => {"equal_to_any_of" => ["a"]}}}}
             })
 
@@ -927,7 +927,7 @@ module ElasticGraph
           end
 
           it "correctly builds a `nested` filter when `any_satisfy: {any_of: [{field: ...}]}` is used" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "line_items" => {"any_satisfy" => {"any_of" => [{"name" => {"equal_to_any_of" => ["a"]}}]}}
             })
 
@@ -943,7 +943,7 @@ module ElasticGraph
           end
 
           it "builds an empty filter when given `any_satisfy: {field: {}}`" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "line_items" => {"any_satisfy" => {"name" => {}}}
             })
 
@@ -951,7 +951,7 @@ module ElasticGraph
           end
 
           it "builds an empty filter when given `any_satisfy: {field: {predicate: nil}}`" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "line_items" => {"any_satisfy" => {"name" => {"equal_to_any_of" => nil}}}
             })
 
@@ -964,7 +964,7 @@ module ElasticGraph
       # and that translation happens as the query is being built, so we use `__counts` in our example filters here.
       describe "`count` operator on a list" do
         it "builds a query on the hidden `#{LIST_COUNTS_FIELD}` field where we have indexed list counts" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "past_names" => {LIST_COUNTS_FIELD => {"gt" => 10}}
           })
 
@@ -974,7 +974,7 @@ module ElasticGraph
         end
 
         it "correctly references a list field embedded on an object field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "details" => {"uniform_colors" => {LIST_COUNTS_FIELD => {"gt" => 10}}}
           })
 
@@ -984,7 +984,7 @@ module ElasticGraph
         end
 
         it "correctly references a list field under a list-of-nested-objects field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "seasons_nested" => {"any_satisfy" => {"notes" => {LIST_COUNTS_FIELD => {"gt" => 10}}}}
           })
 
@@ -997,7 +997,7 @@ module ElasticGraph
         end
 
         it "treats a filter on a `count` schema field like a filter on any other schema field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "past_names" => {"count" => {"gt" => 10}}
           })
 
@@ -1008,28 +1008,28 @@ module ElasticGraph
 
         describe "including an extra must_not exists filter for a predicate that matches zero in order to match documents indexed before the list field got defined" do
           it "correctly detects when an `lt` expression could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lt" => 10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lt: 10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lt" => 1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lt: 1}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lt" => 0}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lt: 0}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lt" => -1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
@@ -1038,28 +1038,28 @@ module ElasticGraph
           end
 
           it "correctly detects when an `lte` expression could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lte" => 10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lte: 10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lte" => 1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lte: 1}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lte" => 0}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lte: 0}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"lte" => -1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
@@ -1068,28 +1068,28 @@ module ElasticGraph
           end
 
           it "correctly detects when an `gt` expression could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gt" => -10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gt: -10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gt" => -1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gt: -1}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gt" => 0}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gt: 0}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gt" => 1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
@@ -1098,28 +1098,28 @@ module ElasticGraph
           end
 
           it "correctly detects when an `gte` expression could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => -10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gte: -10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => -1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gte: -1}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => 0}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gte: 0}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => 1}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
@@ -1128,14 +1128,14 @@ module ElasticGraph
           end
 
           it "correctly detects when an `equal_to_any_of` could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"equal_to_any_of" => [3, 0, 5]}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(terms: {
               "#{LIST_COUNTS_FIELD}.past_names" => [3, 0, 5]
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"equal_to_any_of" => [3, 5]}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(terms: {
@@ -1144,21 +1144,21 @@ module ElasticGraph
           end
 
           it "correct detects when an expression with multiple predicates could match zero" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => 0, "lt" => 10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gte: 0, lt: 10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => 1, "lt" => 10}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gte: 1, lt: 10}
             })
 
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "past_names" => {LIST_COUNTS_FIELD => {"gte" => 0, "lt" => 0}}
             })
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
@@ -1167,33 +1167,33 @@ module ElasticGraph
           end
 
           it "treats `count` filter predicates that have a `nil` or `{}` value as `true`" do
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => nil}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => nil}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => nil}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"gte" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"gte" => nil}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"lt" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"lt" => nil}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"lte" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"lte" => nil}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"equal_to_any_of" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"equal_to_any_of" => nil}}})
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => nil, "lt" => 10}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => nil, "lt" => 10}}})
             expect(datastore_body_of(query)).to filter_datastore_with_must_not_exists_or(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {lt: 10}
             })
 
-            query = new_query(filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => 10, "lt" => nil}}})
+            query = new_query(client_filter: {"past_names" => {LIST_COUNTS_FIELD => {"gt" => 10, "lt" => nil}}})
             expect(datastore_body_of(query)).to filter_datastore_with(range: {
               "#{LIST_COUNTS_FIELD}.past_names" => {gt: 10}
             })
@@ -1237,7 +1237,7 @@ module ElasticGraph
 
           datastore_abbreviations_by_distance_unit.each do |distance_unit, datastore_abbreviation|
             it "supports filtering using the `#{distance_unit}` distance unit" do
-              query = new_query(filter: {"address_location" => {"near" => {
+              query = new_query(client_filter: {"address_location" => {"near" => {
                 "latitude" => 37.5,
                 "longitude" => 67.5,
                 "max_distance" => 500,
@@ -1287,7 +1287,7 @@ module ElasticGraph
         specify "the `near` filter implementation doesn't fail due to a lack of a `DistanceUnit` type" do
           expect(graphql.runtime_metadata.enum_types_by_name.keys).to exclude("DistanceUnit")
 
-          query = new_query(filter: {"id" => {"equal_to_any_of" => ["a"]}})
+          query = new_query(client_filter: {"id" => {"equal_to_any_of" => ["a"]}})
 
           expect(datastore_body_of(query)).to filter_datastore_with({ids: {values: ["a"]}})
         end
@@ -1295,7 +1295,7 @@ module ElasticGraph
 
       describe "`time_of_day` operator" do
         it "uses a `script` query, passing along the `gte` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"gte" => "07:00:00"}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"gte" => "07:00:00"}}}})
 
           expect_script_query_with_params(query, {
             field: "timestamps.created_at",
@@ -1304,7 +1304,7 @@ module ElasticGraph
         end
 
         it "uses a `script` query, passing along the `gt` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"gt" => "07:00:00"}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"gt" => "07:00:00"}}}})
 
           expect_script_query_with_params(query, {
             field: "timestamps.created_at",
@@ -1313,7 +1313,7 @@ module ElasticGraph
         end
 
         it "uses a `script` query, passing along the `lte` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"lte" => "07:00:00"}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"lte" => "07:00:00"}}}})
 
           expect_script_query_with_params(query, {
             field: "timestamps.created_at",
@@ -1322,7 +1322,7 @@ module ElasticGraph
         end
 
         it "uses a `script` query, passing along the `lt` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"lt" => "07:00:00"}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"lt" => "07:00:00"}}}})
 
           expect_script_query_with_params(query, {
             field: "timestamps.created_at",
@@ -1331,7 +1331,7 @@ module ElasticGraph
         end
 
         it "uses a `script` query, passing along the `equal_to_any_of` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"equal_to_any_of" => ["07:00:00", "08:00:00"]}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"equal_to_any_of" => ["07:00:00", "08:00:00"]}}}})
 
           expect_script_query_with_params(query, {
             field: "timestamps.created_at",
@@ -1340,7 +1340,7 @@ module ElasticGraph
         end
 
         it "uses a `script` query, passing along the `time_zone` param" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {
             "time_zone" => "America/Los_Angeles",
             # We have to include at least one comparison operator so that the filter is included in the datastore body.
             "gt" => "08:00:00"
@@ -1354,7 +1354,7 @@ module ElasticGraph
         end
 
         it "omits the filter from the query payload when no operators are provided" do
-          query = new_query(filter: {"timestamps" => {"created_at" => {"time_of_day" => {"time_zone" => "America/Los_Angeles"}}}})
+          query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_of_day" => {"time_zone" => "America/Los_Angeles"}}}})
 
           expect(datastore_body_of(query)).to not_filter_datastore_at_all
         end
@@ -1373,7 +1373,7 @@ module ElasticGraph
           end
 
           it "recognizes the alternate schema element names but uses our standard names in the script params because the script expects that" do
-            query = new_query(filter: {"timestamps" => {"created_at" => {"time_part" => {
+            query = new_query(client_filter: {"timestamps" => {"created_at" => {"time_part" => {
               "tz" => "America/Los_Angeles",
               "greater" => "01:00:00",
               "lesser" => "02:00:00",
@@ -1417,7 +1417,7 @@ module ElasticGraph
       end
 
       it "supports an `any_of` operator" do
-        query = new_query(filter: {
+        query = new_query(client_filter: {
           "any_of" => [
             {
               "transaction_type" => {"equal_to_any_of" => ["CARD"]},
@@ -1465,7 +1465,7 @@ module ElasticGraph
       end
 
       it "handles `any_of` used at nested cousin nodes correctly" do
-        query = new_query(filter: {
+        query = new_query(client_filter: {
           "cost" => {
             "any_of" => [
               {"currency" => {"equal_to_any_of" => ["USD"]}},
@@ -1510,11 +1510,11 @@ module ElasticGraph
 
       describe "`not`" do
         it "negates the inner filter expression, regardless of where the `not` goes" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {"not" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {"not" => {
             "equal_to_any_of" => [25, 30]
           }}}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {"not" => {"age" => {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {"not" => {"age" => {
             "equal_to_any_of" => [25, 30]
           }}}))
 
@@ -1522,12 +1522,12 @@ module ElasticGraph
         end
 
         it "can negate multiple inner filter predicates" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {"not" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {"not" => {
             "gte" => 30,
             "lt" => 25
           }}}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {"not" => {"age" => {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {"not" => {"age" => {
             "gte" => 30,
             "lt" => 25
           }}}))
@@ -1538,7 +1538,7 @@ module ElasticGraph
         end
 
         it "negates a complex compound inner filter expression" do
-          query = new_query(filter: {"not" => {
+          query = new_query(client_filter: {"not" => {
             "any_of" => [
               {
                 "transaction_type" => {"equal_to_any_of" => ["CARD"]},
@@ -1586,12 +1586,12 @@ module ElasticGraph
         end
 
         it "works correctly when included alongside other filtering operators" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {
             "not" => {"equal_to_any_of" => [15, 30]},
             "gte" => 20
           }}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {
             "not" => {
               "age" => {"equal_to_any_of" => [15, 30]}
             },
@@ -1607,7 +1607,7 @@ module ElasticGraph
         end
 
         it "works correctly when included alongside an `any_of`" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {
             "not" => {"equal_to_any_of" => [15, 50]},
             "any_of" => [
               {"gt" => 35},
@@ -1615,7 +1615,7 @@ module ElasticGraph
             ]
           }}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {
             "not" => {
               "age" => {"equal_to_any_of" => [15, 50]}
             },
@@ -1627,7 +1627,7 @@ module ElasticGraph
             }
           }))
 
-          # The location of the `filter: [{bool: }]` wrapper differs between `body_for_inner_not` and `body_for_outer_not` but does not impact behavior.
+          # The location of the `client_filter: [{bool: }]` wrapper differs between `body_for_inner_not` and `body_for_outer_not` but does not impact behavior.
           # These two queries yield the same results - confirmed by the integration test "`not` works correctly when included alongside an `any_of`",
           # so even though the behavior is the same, we must assert on the two payloads separately.
           expect(body_for_inner_not).to query_datastore_with({bool: {filter: [{bool: {
@@ -1658,26 +1658,26 @@ module ElasticGraph
         end
 
         it "returns the standard always false filter when set to nil" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {"not" => nil}}))
-          body_for_outer_not = datastore_body_of(new_query(filter: {"not" => {"age" => nil}}))
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {"not" => nil}}))
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {"not" => {"age" => nil}}))
 
           expect(body_for_inner_not).to eq(body_for_outer_not).and query_datastore_with(always_false_condition)
         end
 
         it "returns the standard always false filter when set to an emptyPredicate" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {"not" => {}}}))
-          body_for_outer_not = datastore_body_of(new_query(filter: {"not" => {"age" => {}}}))
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {"not" => {}}}))
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {"not" => {"age" => {}}}))
 
           expect(body_for_inner_not).to eq(body_for_outer_not).and query_datastore_with(always_false_condition)
         end
 
         it "returns the standard always false filter when set to nil alongside other filters" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {
             "not" => nil,
             "gt" => 25
           }}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {
             "not" => nil,
             "age" => {
               "gt" => 25
@@ -1688,14 +1688,14 @@ module ElasticGraph
         end
 
         it "returns the standard always false filter when set to nil alongside other filters inside `any_of`" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {
             "any_of" => [
               {"not" => nil},
               {"gt" => 25}
             ]
           }}))
 
-          body_for_outer_not = datastore_body_of(new_query(filter: {
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {
             "any_of" => [
               {"not" => nil},
               {
@@ -1715,8 +1715,8 @@ module ElasticGraph
         end
 
         it "returns the standard always false filter when the inner filter evaluates to true" do
-          body_for_inner_not = datastore_body_of(new_query(filter: {"age" => {"not" => {"equal_to_any_of" => nil}}}))
-          body_for_outer_not = datastore_body_of(new_query(filter: {"not" => {"age" => {"equal_to_any_of" => nil}}}))
+          body_for_inner_not = datastore_body_of(new_query(client_filter: {"age" => {"not" => {"equal_to_any_of" => nil}}}))
+          body_for_outer_not = datastore_body_of(new_query(client_filter: {"not" => {"age" => {"equal_to_any_of" => nil}}}))
 
           expect(body_for_inner_not).to eq(body_for_outer_not).and query_datastore_with(always_false_condition)
         end
@@ -1729,14 +1729,14 @@ module ElasticGraph
             ]
           }
 
-          query1 = new_query(filter: {"not" => {"not" => inner_filter}})
-          query2 = new_query(filter: inner_filter)
+          query1 = new_query(client_filter: {"not" => {"not" => inner_filter}})
+          query2 = new_query(client_filter: inner_filter)
 
           expect(datastore_body_of(query1)).to eq(datastore_body_of(query2))
         end
 
         specify "`not: {all_of: [...]}` returns only the documents that are unmatched by `all_of: [...]`" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "not" => {
               "all_of" => [
                 {"age" => {"equal_to_any_of" => [25, 30]}},
@@ -1758,7 +1758,7 @@ module ElasticGraph
 
       describe "behavior of empty/null filter values" do
         it "treats filtering predicates that are empty no-ops on root fields as `true`" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"gt" => nil},
             "name" => {"equal_to_any_of" => ["Jane"]},
             "height" => {"gte" => nil, "lt" => nil},
@@ -1769,7 +1769,7 @@ module ElasticGraph
         end
 
         it "treats filtering predicates that are empty no-ops on subfields as `true`" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "bio" => {
               "age" => {"gt" => nil},
               "name" => {"equal_to_any_of" => ["Jane"]},
@@ -1782,7 +1782,7 @@ module ElasticGraph
         end
 
         it "does not filter at all when all predicate are empty/null on root fields" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"gt" => nil},
             "name" => {"equal_to_any_of" => nil},
             "height" => {"gte" => nil, "lt" => nil},
@@ -1793,7 +1793,7 @@ module ElasticGraph
         end
 
         it "does not filter at all when all predicate are empty/null on subfields" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "bio" => {
               "age" => {"gt" => nil},
               "name" => {"equal_to_any_of" => nil},
@@ -1806,7 +1806,7 @@ module ElasticGraph
         end
 
         it "does not prune out `equal_to_any_of: []` to be consistent with `equal_to_any_of` being like an `IN` in SQL and `where field IN ()` should match nothing" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "name" => {"equal_to_any_of" => []}
           })
 
@@ -1814,7 +1814,7 @@ module ElasticGraph
         end
 
         it "returns the standard always false filter for `any_of: []`" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "any_of" => []
           })
 
@@ -1822,7 +1822,7 @@ module ElasticGraph
         end
 
         it "returns an always false filter for `any_of: [{any_of: []}]`" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "any_of" => [{"any_of" => []}]
           })
 
@@ -1832,7 +1832,7 @@ module ElasticGraph
         end
 
         it "does not prune out `any_of: []` to be consistent with `equal_to_any_of: []`, instead providing an 'always false' condition to achieve the same behavior" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"gt" => 18},
             "name" => {"any_of" => []}
           })
@@ -1844,7 +1844,7 @@ module ElasticGraph
         end
 
         it "applies no filtering to an `any_of` composed entirely of empty predicates" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"any_of" => [{"gt" => nil}, {"lt" => nil}]}
           })
 
@@ -1852,7 +1852,7 @@ module ElasticGraph
         end
 
         it "applies no filtering for an `any_of` composed of an empty predicate and non empty predicate" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "any_of" => [{"age" => {}}, {"equal_to_any_of" => [36]}]
           })
 
@@ -1860,7 +1860,7 @@ module ElasticGraph
         end
 
         it "does not filter at all when given only `any_of: nil` on a root field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"any_of" => nil}
           })
 
@@ -1868,7 +1868,7 @@ module ElasticGraph
         end
 
         it "does not filter at all when given only `any_of: nil` on a subfield" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "bio" => {"age" => {"any_of" => nil}}
           })
 
@@ -1876,7 +1876,7 @@ module ElasticGraph
         end
 
         it "filters to a false condition when given `not: {any_of: {age: nil}}` on a root field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "not" => {"any_of" => [{"age" => nil}]}
           })
 
@@ -1884,7 +1884,7 @@ module ElasticGraph
         end
 
         it "filters to a false condition when given `not: {any_of: nil}` on a sub field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"not" => {"any_of" => nil}}
           })
 
@@ -1892,7 +1892,7 @@ module ElasticGraph
         end
 
         it "filters to a true condition when given `not: {any_of: []}` on a sub field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"not" => {"any_of" => []}}
           })
 
@@ -1900,7 +1900,7 @@ module ElasticGraph
         end
 
         it "filters to a false condition when given `not: {not: {any_of: []}}` on a sub field" do
-          query = new_query(filter: {
+          query = new_query(client_filter: {
             "age" => {"not" => {"not" => {"any_of" => []}}}
           })
 
@@ -1913,7 +1913,7 @@ module ElasticGraph
         # can't otherwise be exercised.
         describe "`any_of: {}` (which the GraphQL schema does not allow)" do
           it "does not filter at all when given on a root field" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "age" => {"any_of" => {}}
             })
 
@@ -1921,13 +1921,36 @@ module ElasticGraph
           end
 
           it "does not filter at all when given on a subfield" do
-            query = new_query(filter: {
+            query = new_query(client_filter: {
               "bio" => {"age" => {"any_of" => {}}}
             })
 
             expect(datastore_body_of(query)).to not_filter_datastore_at_all
           end
         end
+      end
+
+      it "uses both `client_filters` and `internal_filters` in the datastore body query when both are provided" do
+        query = new_query(
+          client_filter: {"age" => {"gt" => 10}},
+          internal_filters: [{"some_id" => {"equal_to_any_of" => ["testid"]}}]
+        )
+
+        expect(datastore_body_of(query)).to filter_datastore_with(
+          {range: {"age" => {gt: 10}}},
+          {terms: {"some_id" => ["testid"]}}
+        )
+      end
+
+      it "uses just `internal_filters` for filtering when no `client_filters` have been provided" do
+        query = new_query(
+          client_filter: nil,
+          internal_filters: [{"some_id" => {"equal_to_any_of" => ["testid"]}}]
+        )
+
+        expect(datastore_body_of(query)).to filter_datastore_with(
+          {terms: {"some_id" => ["testid"]}}
+        )
       end
 
       def not_filter_datastore_at_all
@@ -1950,6 +1973,12 @@ module ElasticGraph
       def color_of(value_name)
         enum_value("ColorInput", value_name)
       end
+
+      prepend Module.new {
+        def new_query(client_filter:, **options)
+          super(client_filters: [client_filter].compact, **options)
+        end
+      }
 
       # Custom matcher that provides nicer, more detailed failure output than what built-in RSpec matchers provide.
       matcher :query_datastore_with do |expected_query|

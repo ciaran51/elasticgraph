@@ -29,7 +29,7 @@ module ElasticGraph
     class DatastoreQuery < Support::MemoizableData.define(
       :total_document_count_needed, :aggregations, :logger, :filter_interpreter, :routing_picker,
       :index_expression_builder, :default_page_size, :search_index_definitions, :max_page_size,
-      :filters, :sort, :document_pagination, :requested_fields, :request_all_fields,
+      :client_filters, :internal_filters, :sort, :document_pagination, :requested_fields, :request_all_fields,
       :individual_docs_needed, :size_multiplier, :monotonic_clock_deadline, :schema_element_names
     )
       # Load these files after the `Query` class has been defined, to avoid
@@ -96,7 +96,8 @@ module ElasticGraph
       def merge_with(
         individual_docs_needed: false,
         total_document_count_needed: false,
-        filters: [],
+        client_filters: [],
+        internal_filters: [],
         sort: [],
         requested_fields: [],
         request_all_fields: false,
@@ -108,7 +109,8 @@ module ElasticGraph
         with(
           individual_docs_needed: self.individual_docs_needed || individual_docs_needed || !requested_fields.empty? || request_all_fields,
           total_document_count_needed: self.total_document_count_needed || total_document_count_needed || aggregations.values.any?(&:needs_total_doc_count?),
-          filters: self.filters + filters,
+          client_filters: self.client_filters + client_filters,
+          internal_filters: self.internal_filters + internal_filters,
           sort: merge_attribute(:sort, sort),
           requested_fields: self.requested_fields + requested_fields,
           request_all_fields: self.request_all_fields || request_all_fields,
@@ -130,7 +132,7 @@ module ElasticGraph
       # https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-index.html
       def search_index_expression
         @search_index_expression ||= index_expression_builder.determine_search_index_expression(
-          filters,
+          all_filters,
           search_index_definitions,
           # When we have aggregations, we must require indices to search. When we search no indices, the datastore does not return
           # the standard aggregations response structure, which causes problems.
@@ -167,7 +169,7 @@ module ElasticGraph
       # `[]` means that we are routing to no shards.
       def shard_routing_values
         return @shard_routing_values if defined?(@shard_routing_values)
-        routing_values = routing_picker.extract_eligible_routing_values(filters, route_with_field_paths)
+        routing_values = routing_picker.extract_eligible_routing_values(all_filters, route_with_field_paths)
 
         @shard_routing_values ||=
           if routing_values&.empty? && !aggregations_datastore_body.empty?
@@ -240,6 +242,10 @@ module ElasticGraph
         document_paginator.effective_size
       end
 
+      def all_filters
+        client_filters + internal_filters
+      end
+
       private
 
       def merge_attribute(attribute, other_value)
@@ -286,8 +292,7 @@ module ElasticGraph
       def to_datastore_body
         @to_datastore_body ||= aggregations_datastore_body
           .merge(document_paginator.to_datastore_body)
-          .merge({query: filter_interpreter.build_query(filters)}.compact)
-          .merge({_source: source})
+          .merge({query: filter_interpreter.build_query(all_filters), _source: source}.compact)
       end
 
       def aggregations_datastore_body
@@ -333,7 +338,8 @@ module ElasticGraph
 
         def new_query(
           search_index_definitions:,
-          filters: [],
+          client_filters: [],
+          internal_filters: [],
           sort: [],
           document_pagination: {},
           size_multiplier: 1,
@@ -354,7 +360,8 @@ module ElasticGraph
             logger: logger,
             schema_element_names: runtime_metadata.schema_element_names,
             search_index_definitions: search_index_definitions,
-            filters: filters.to_set,
+            client_filters: client_filters.to_set,
+            internal_filters: internal_filters.to_set,
             sort: sort,
             document_pagination: document_pagination,
             size_multiplier: size_multiplier,

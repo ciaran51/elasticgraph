@@ -39,7 +39,7 @@ module ElasticGraph
               end
 
               def intercept(query, field:, args:, http_request:, context:)
-                query.merge_with(filters: [{"public" => {"equal_to_any_of" => [false]}}])
+                query.merge_with(internal_filters: [{"public" => {"equal_to_any_of" => [false]}}])
               end
             end
           end
@@ -57,7 +57,7 @@ module ElasticGraph
 
               def intercept(query, field:, args:, http_request:, context:)
                 user_name = http_request.normalized_headers[@config.fetch("header")]
-                query.merge_with(filters: [{@config.fetch("key") => {"equal_to_any_of" => [user_name]}}])
+                query.merge_with(internal_filters: [{@config.fetch("key") => {"equal_to_any_of" => [user_name]}}])
               end
             end
           end
@@ -85,7 +85,7 @@ module ElasticGraph
         EOS
 
         expect(performed_datastore_queries.size).to eq(1)
-        expect(performed_datastore_queries.first.filters).to contain_exactly(
+        expect(performed_datastore_queries.first.internal_filters).to contain_exactly(
           {"public" => {"equal_to_any_of" => [false]}},
           {"user" => {"equal_to_any_of" => ["yoda"]}}
         )

@@ -18,7 +18,7 @@ module ElasticGraph
 
         private
 
-        def build_automatic_filter: (filter_from_args: ::Hash[::String, untyped]?, query: DatastoreQuery) -> ::Hash[::String, untyped]?
+        def build_automatic_filter: (client_filter: ::Hash[::String, untyped]?, query: DatastoreQuery) -> ::Hash[::String, untyped]?
         def exclude_incomplete_docs_filter: () -> ::Hash[::String, untyped]
         def search_could_hit_incomplete_docs?: (DatastoreCore::_IndexDefinition, ::Hash[::String, untyped]) -> bool
 

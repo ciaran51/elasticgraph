@@ -24,13 +24,12 @@ module ElasticGraph
         end
       end
 
-      def new_query(aggregations: {}, filter: nil, filters: [], types: ["Widget"], **options)
+      def new_query(aggregations: {}, types: ["Widget"], **options)
         aggregations = aggregations.to_h { |agg| [agg.name, agg] } if aggregations.is_a?(::Array)
 
         builder.new_query(
           aggregations: aggregations,
           search_index_definitions: types.flat_map { |t| graphql.datastore_core.index_definitions_by_graphql_type.fetch(t) },
-          filters: filters + [filter].compact,
           **options
         )
       end

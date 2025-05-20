@@ -1199,8 +1199,7 @@ module ElasticGraph
         )
 
         expect(
-          ids_of(search_datastore(filter:
-            {"any_of" => [{"amount_cents" => {"equal_to_any_of" => [nil]}}]}).to_a)
+          ids_of(search_datastore(client_filters: [{"any_of" => [{"amount_cents" => {"equal_to_any_of" => [nil]}}]}]).to_a)
         ).to eq ids_of(widget2)
       end
 
@@ -1526,11 +1525,11 @@ module ElasticGraph
       end
 
       def search_with_freeform_filter(filter, **options)
-        ids_of(search_datastore(filter: filter, sort: [], **options).to_a)
+        ids_of(search_datastore(client_filters: [filter], sort: [], **options).to_a)
       end
 
       def search_with_filter(field, operator, value)
-        ids_of(search_datastore(filter: {field => {operator => value}}, sort: []).to_a)
+        ids_of(search_datastore(client_filters: [{field => {operator => value}}], sort: []).to_a)
       end
 
       def enum_value(type_name, value_name)

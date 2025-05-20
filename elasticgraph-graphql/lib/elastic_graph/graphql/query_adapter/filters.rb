@@ -15,31 +15,30 @@ module ElasticGraph
     class QueryAdapter
       class Filters < Support::MemoizableData.define(:schema_element_names, :filter_args_translator, :filter_node_interpreter)
         def call(field:, query:, args:, lookahead:, context:)
-          filter_from_args = filter_args_translator.translate_filter_args(field: field, args: args)
-          automatic_filter = build_automatic_filter(filter_from_args: filter_from_args, query: query)
-          filters = [filter_from_args, automatic_filter].compact
-          return query if filters.empty?
+          client_filter = filter_args_translator.translate_filter_args(field: field, args: args)
+          internal_filter = build_automatic_filter(client_filter: client_filter, query: query)
+          return query if client_filter.nil? && internal_filter.nil?
 
-          query.merge_with(filters: filters)
+          query.merge_with(client_filters: [client_filter].compact, internal_filters: [internal_filter].compact)
         end
 
         private
 
-        def build_automatic_filter(filter_from_args:, query:)
+        def build_automatic_filter(client_filter:, query:)
           # If an incomplete document could be hit by a search with our filters against any of the
           # index definitions, we must add a filter that will exclude incomplete documents.
           exclude_incomplete_docs_filter if query
             .search_index_definitions
-            .any? { |index_def| search_could_hit_incomplete_docs?(index_def, filter_from_args || {}) }
+            .any? { |index_def| search_could_hit_incomplete_docs?(index_def, client_filter || {}) }
         end
 
         def exclude_incomplete_docs_filter
           {"__sources" => {schema_element_names.equal_to_any_of => [SELF_RELATIONSHIP_NAME]}}
         end
 
-        # Indicates if a search against the given `index_def` using the given `filter_from_args`
+        # Indicates if a search against the given `index_def` using the given `client_filter`
         # could hit an incomplete document.
-        def search_could_hit_incomplete_docs?(index_def, filter_from_args)
+        def search_could_hit_incomplete_docs?(index_def, client_filter)
           # If the index definition doesn't allow any searches to hit incomplete documents, we
           # can immediately return `false` without checking the filters.
           return false unless index_def.searches_could_hit_incomplete_docs?
@@ -53,7 +52,7 @@ module ElasticGraph
           #
           # Here we determine what field paths we need to check (e.g. only those field paths that are against
           # self-sourced fields).
-          paths_to_check = determine_paths_to_check(filter_from_args, index_def.fields_by_path)
+          paths_to_check = determine_paths_to_check(client_filter, index_def.fields_by_path)
 
           # If we have no paths to check, then our filters don't exclude incomplete documents and we must return `true`.
           return true if paths_to_check.empty?
@@ -61,7 +60,7 @@ module ElasticGraph
           # Finally, we look over each path. If all our filters allow the search to match documents that have `nil`
           # at that path, then the search can hit incomplete documents. But if even one path excludes documents
           # that have a `null` value for the field, we can safely return `false` for a more efficient query.
-          paths_to_check.all? { |path| can_match_nil_values_at?(path, filter_from_args) }
+          paths_to_check.all? { |path| can_match_nil_values_at?(path, client_filter) }
         end
 
         # Figures out which field paths we need to check to see if a filter on it could match an incomplete document.

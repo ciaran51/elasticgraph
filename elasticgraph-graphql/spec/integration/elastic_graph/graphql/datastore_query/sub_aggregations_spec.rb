@@ -77,7 +77,7 @@ module ElasticGraph
           nested_sub_aggregation_of(path_in_index: ["seasons_nested"], query: sub_aggregation_query_of(name: "seasons_nested", first: 5))
         ])
 
-        results = search_datastore_aggregations(query, index_def_name: "teams", filter: {"league" => {"equal_to_any_of" => []}})
+        results = search_datastore_aggregations(query, index_def_name: "teams", client_filters: [{"league" => {"equal_to_any_of" => []}}])
 
         expect(results).to eq [{
           "doc_count" => 0,
@@ -93,7 +93,7 @@ module ElasticGraph
           nested_sub_aggregation_of(path_in_index: ["seasons_nested"], query: sub_aggregation_query_of(name: "seasons_nested", first: 5))
         ])
 
-        results = search_datastore_aggregations(query, index_def_name: "teams", filter: {"formed_on" => {"equal_to_any_of" => []}})
+        results = search_datastore_aggregations(query, index_def_name: "teams", client_filters: [{"formed_on" => {"equal_to_any_of" => []}}])
 
         expect(results).to eq [{
           "doc_count" => 0,
@@ -109,7 +109,7 @@ module ElasticGraph
           nested_sub_aggregation_of(path_in_index: ["seasons_nested"], query: sub_aggregation_query_of(name: "seasons_nested", first: 5))
         ])
 
-        results = search_datastore_aggregations(query, index_def_name: "teams", filter: {"formed_on" => {"gt" => "7890-01-01"}})
+        results = search_datastore_aggregations(query, index_def_name: "teams", client_filters: [{"formed_on" => {"gt" => "7890-01-01"}}])
 
         expect(results).to eq [{
           "doc_count" => 0,
