@@ -178,7 +178,7 @@ module ElasticGraph
         response = search_datastore(
           sort: sort,
           document_pagination: document_pagination,
-          filter: ({"id" => {"equal_to_any_of" => ids_of(filter_to)}} if filter_to)
+          client_filters: [({"id" => {"equal_to_any_of" => ids_of(filter_to)}} if filter_to)].compact
         ) { |q| query = q }
 
         adapter = Resolvers::RelayConnection::SearchResponseAdapterBuilder.build_from(

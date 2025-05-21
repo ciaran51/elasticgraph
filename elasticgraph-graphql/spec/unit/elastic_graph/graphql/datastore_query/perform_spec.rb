@@ -43,9 +43,9 @@ module ElasticGraph
         expect(widgets_def.cluster_to_query).to eq "main"
         expect(components_def.cluster_to_query).to eq "other1"
 
-        query0 = new_query(search_index_definitions: [widgets_def], filter: {"age" => {"equal_to_any_of" => [0]}}, requested_fields: ["name"])
-        query1 = new_query(search_index_definitions: [widgets_def], filter: {"age" => {"equal_to_any_of" => [10]}}, requested_fields: ["name"])
-        query2 = new_query(search_index_definitions: [components_def], filter: {"age" => {"equal_to_any_of" => [20]}}, requested_fields: ["name"])
+        query0 = new_query(search_index_definitions: [widgets_def], client_filters: [{"age" => {"equal_to_any_of" => [0]}}], requested_fields: ["name"])
+        query1 = new_query(search_index_definitions: [widgets_def], client_filters: [{"age" => {"equal_to_any_of" => [10]}}], requested_fields: ["name"])
+        query2 = new_query(search_index_definitions: [components_def], client_filters: [{"age" => {"equal_to_any_of" => [20]}}], requested_fields: ["name"])
 
         yielded_header_body_tuples_by_query = nil
 
@@ -106,9 +106,9 @@ module ElasticGraph
         expect(widgets_def.cluster_to_query).to eq "main"
         expect(components_def.cluster_to_query).to eq "other1"
 
-        query0 = new_query(search_index_definitions: [widgets_def], filter: {"age" => {"equal_to_any_of" => [0]}}, requested_fields: ["name"])
-        query1 = new_query(search_index_definitions: [widgets_def], filter: {"age" => {"equal_to_any_of" => [10]}}, requested_fields: ["name"])
-        query2 = new_query(search_index_definitions: [components_def], filter: {"age" => {"equal_to_any_of" => [20]}}, requested_fields: ["name"])
+        query0 = new_query(search_index_definitions: [widgets_def], client_filters: [{"age" => {"equal_to_any_of" => [0]}}], requested_fields: ["name"])
+        query1 = new_query(search_index_definitions: [widgets_def], client_filters: [{"age" => {"equal_to_any_of" => [10]}}], requested_fields: ["name"])
+        query2 = new_query(search_index_definitions: [components_def], client_filters: [{"age" => {"equal_to_any_of" => [20]}}], requested_fields: ["name"])
 
         expect {
           DatastoreQuery.perform([query0, query1, query2]) do |header_body_tuples_by_query|

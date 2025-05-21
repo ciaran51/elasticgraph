@@ -614,19 +614,25 @@ module ElasticGraph
       end
 
       def shard_routing_for(route_with_field_paths, filter_or_filters, ignored_routing_values: [], aggregations: {})
-        options = if filter_or_filters.is_a?(Array)
-          {filters: filter_or_filters}
-        else
-          {filter: filter_or_filters}
+        client_filters_value, internal_filters_value = [:client_filters, :internal_filters].map do |filtering_attribute|
+          options = if filter_or_filters.is_a?(Array)
+            {filtering_attribute => filter_or_filters}
+          else
+            {filtering_attribute => [filter_or_filters]}
+          end
+
+          search_index_definitions = search_index_definitions_for(route_with_field_paths, ignored_routing_values)
+
+          query = new_query(search_index_definitions: search_index_definitions, aggregations: aggregations, **options)
+
+          datastore_msearch_header_of(query)[:routing]&.split(",").tap do |used_routing_values|
+            expect(used_routing_values).to eq(query.shard_routing_values)
+          end
         end
 
-        search_index_definitions = search_index_definitions_for(route_with_field_paths, ignored_routing_values)
-
-        query = new_query(search_index_definitions: search_index_definitions, aggregations: aggregations, **options)
-
-        datastore_msearch_header_of(query)[:routing]&.split(",").tap do |used_routing_values|
-          expect(used_routing_values).to eq(query.shard_routing_values)
-        end
+        # The shard routing value should be the same regardless of whether a client or internal filter is used.
+        expect(internal_filters_value).to eq(client_filters_value)
+        client_filters_value
       end
 
       def search_all_shards

@@ -102,7 +102,7 @@ module ElasticGraph
 
           it "supports `filter`" do
             datastore_query = build_query_from({filter: {name: {equal_to_any_of: ["ben"]}}})
-            expect(datastore_query.filters).to contain_exactly({"name" => {"equal_to_any_of" => ["ben"]}})
+            expect(datastore_query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => ["ben"]}})
           end
 
           describe "document_pagination" do

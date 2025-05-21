@@ -104,10 +104,11 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({
+          expect(query.client_filters.first).to eq({
             "name" => {"equal_to_any_of" => ["abc"]},
             "description_in_es" => {"equal_to_any_of" => ["def"]}
           })
+          expect(query.internal_filters).to be_empty
         end
 
         it "does field name translations at all levels of the filter" do
@@ -123,10 +124,11 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({"widget_opts" => {
+          expect(query.client_filters.first).to eq({"widget_opts" => {
             "rgb_color" => {"equal_to_any_of" => ["abc"]},
             "size" => {"equal_to_any_of" => ["def"]}
           }})
+          expect(query.internal_filters).to be_empty
         end
 
         it "translates enum value strings to enum value objects so that the `runtime_metadata` of the enum value is available to our `FilterInterpreter`" do
@@ -141,14 +143,16 @@ module ElasticGraph
           QUERY
 
           size_input_type = graphql.schema.type_named("SizeInput")
+          query = queries_by_field.fetch("Query.widgets").first
 
-          expect(queries_by_field.fetch("Query.widgets").first.filters.first).to eq({
+          expect(query.client_filters).to contain_exactly({
             "size" => {"equal_to_any_of" => [
               size_input_type.enum_value_named("LARGE"),
               size_input_type.enum_value_named("SMALL"),
               nil
             ]}
           })
+          expect(query.internal_filters).to be_empty
         end
 
         it "translates the sub-expressions of an `any_of`" do
@@ -170,7 +174,7 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({
+          expect(query.client_filters).to contain_exactly({
             "any_of" => [
               {
                 "name" => {"equal_to_any_of" => ["bob"]},
@@ -186,6 +190,7 @@ module ElasticGraph
               }
             ]
           })
+          expect(query.internal_filters).to be_empty
         end
 
         it "can translate filter fields that exist on multiple union subtypes on the indexed types" do
@@ -201,9 +206,10 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({
+          expect(query.client_filters).to contain_exactly({
             "inventor" => {"name_es" => {"equal_to_any_of" => ["abc"]}}
           })
+          expect(query.internal_filters).to be_empty
         end
 
         it "can translate filter fields that exist on only one of a type union's subtypes on the indexed types" do
@@ -219,10 +225,11 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({"inventor" => {
+          expect(query.client_filters).to contain_exactly({"inventor" => {
             "stock_ticker" => {"equal_to_any_of" => ["abc"]},
             "nationality_es" => {"equal_to_any_of" => ["def"]}
           }})
+          expect(query.internal_filters).to be_empty
         end
 
         it "translates `count` on a list field to `#{LIST_COUNTS_FIELD}` while leaving a `count` schema field unchanged" do
@@ -234,10 +241,11 @@ module ElasticGraph
             }
           QUERY
 
-          expect(query.filters.first).to eq({
+          expect(query.client_filters).to contain_exactly({
             "count" => {"gt" => 1},
             "tags" => {LIST_COUNTS_FIELD => {"gt" => 1}}
           })
+          expect(query.internal_filters).to be_empty
         end
 
         context "on a type that has never had any `sourced_from` fields" do
@@ -254,7 +262,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to be_empty
+            expect(query.client_filters).to be_empty
+            expect(query.internal_filters).to be_empty
           end
 
           it "sets no `filters` on the datastore query when the GraphQL query field does not have a `filter` argument" do
@@ -279,7 +288,8 @@ module ElasticGraph
 
             expect(queries_by_field.keys).to contain_exactly("Query.unfilterables")
             expect(queries_by_field.fetch("Query.unfilterables").size).to eq(1)
-            expect(queries_by_field.fetch("Query.unfilterables").first.filters).to be_empty
+            expect(queries_by_field.fetch("Query.unfilterables").first.client_filters).to be_empty
+            expect(queries_by_field.fetch("Query.unfilterables").first.internal_filters).to be_empty
           end
         end
 
@@ -299,7 +309,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(exclude_incomplete_docs_filter)
+            expect(query.client_filters).to be_empty
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "excludes incomplete documents as an additional automatic filter on top of any user-specified filters" do
@@ -313,10 +324,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              exclude_incomplete_docs_filter,
-              {"widget_name" => {"equal_to_any_of" => ["thingy"]}}
-            )
+            expect(query.client_filters).to contain_exactly({"widget_name" => {"equal_to_any_of" => ["thingy"]}})
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "omits the incomplete doc exclusion filter when the specified query filters cannot match an incomplete doc due to requiring a value coming from the `#{SELF_RELATIONSHIP_NAME}` source" do
@@ -330,7 +339,7 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
+            expect(query.client_filters).to contain_exactly(
               {"name" => {"equal_to_any_of" => ["thingy"]}}
             )
           end
@@ -346,10 +355,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              exclude_incomplete_docs_filter,
-              {"name" => {"equal_to_any_of" => [nil]}}
-            )
+            expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => [nil]}})
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "understands that a filter with `equal_to_any_of: [null, null]` may still match incomplete documents" do
@@ -363,10 +370,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              exclude_incomplete_docs_filter,
-              {"name" => {"equal_to_any_of" => [nil, nil]}}
-            )
+            expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => [nil, nil]}})
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "understands that a filter with `equal_to_any_of: [null, something_else]` may still match incomplete documents" do
@@ -380,10 +385,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              exclude_incomplete_docs_filter,
-              {"name" => {"equal_to_any_of" => [nil, "thingy"]}}
-            )
+            expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => [nil, "thingy"]}})
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "understands that a filter with `equal_to_any_of: []` cannot match incomplete documents" do
@@ -397,9 +400,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              {"name" => {"equal_to_any_of" => []}}
-            )
+            expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => []}})
+            expect(query.internal_filters).to be_empty
           end
 
           context "when multiple fields are filtered on" do
@@ -417,12 +419,13 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
+              expect(query.client_filters).to contain_exactly(
                 {
                   "name" => {"equal_to_any_of" => ["thingy"]},
                   "cost" => {"equal_to_any_of" => [7]}
                 }
               )
+              expect(query.internal_filters).to be_empty
             end
 
             it "omits the incomplete doc exclusion filter when some (but not all) of the field filters could match incomplete documents" do
@@ -439,12 +442,13 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
+              expect(query.client_filters).to contain_exactly(
                 {
                   "name" => {"equal_to_any_of" => [nil]},
                   "cost" => {"equal_to_any_of" => [7]}
                 }
               )
+              expect(query.internal_filters).to be_empty
             end
 
             it "includes the incomplete doc exclusion filter when all of the field filters could match incomplete documents" do
@@ -461,13 +465,13 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
+              expect(query.client_filters).to contain_exactly(
                 {
                   "name" => {"equal_to_any_of" => [nil]},
                   "cost" => {"equal_to_any_of" => [nil]}
                 }
               )
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
           end
 
@@ -482,9 +486,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              {"options" => {"size" => {"equal_to_any_of" => ["LARGE"]}}}
-            )
+            expect(query.client_filters).to contain_exactly({"options" => {"size" => {"equal_to_any_of" => ["LARGE"]}}})
+            expect(query.internal_filters).to be_empty
 
             query = datastore_query_for(:Query, :components, <<~QUERY)
               query {
@@ -496,10 +499,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              exclude_incomplete_docs_filter,
-              {"options" => {"size" => {"equal_to_any_of" => [nil]}}}
-            )
+            expect(query.client_filters).to contain_exactly({"options" => {"size" => {"equal_to_any_of" => [nil]}}})
+            expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
           end
 
           it "understands that a range filter on a self-sourced field cannot match incomplete docs, even if mixed with an operator that can match incomplete docs" do
@@ -513,9 +514,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              {"cost" => {"gt" => 7}}
-            )
+            expect(query.client_filters).to contain_exactly({"cost" => {"gt" => 7}})
+            expect(query.internal_filters).to be_empty
 
             query = datastore_query_for(:Query, :components, <<~QUERY)
               query {
@@ -527,9 +527,8 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters).to contain_exactly(
-              {"cost" => {"gt" => 7, "equal_to_any_of" => [nil]}}
-            )
+            expect(query.client_filters).to contain_exactly({"cost" => {"gt" => 7, "equal_to_any_of" => [nil]}})
+            expect(query.internal_filters).to be_empty
           end
 
           describe "`null` leaves" do
@@ -544,7 +543,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(exclude_incomplete_docs_filter)
+              expect(query.client_filters).to be_empty
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "treats `field: null` filter as `true`" do
@@ -558,10 +558,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"cost" => nil}
-              )
+              expect(query.client_filters).to contain_exactly({"cost" => nil})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               query = datastore_query_for(:Query, :components, <<~QUERY)
                 query {
@@ -576,7 +574,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly({"cost" => nil, "name" => {"equal_to_any_of" => ["thingy"]}})
+              expect(query.client_filters).to contain_exactly({"cost" => nil, "name" => {"equal_to_any_of" => ["thingy"]}})
+              expect(query.internal_filters).to be_empty
             end
 
             it "treats `field: {predicate: null}` filter as `true`" do
@@ -590,10 +589,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"cost" => {"equal_to_any_of" => nil}}
-              )
+              expect(query.client_filters).to contain_exactly({"cost" => {"equal_to_any_of" => nil}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               query = datastore_query_for(:Query, :components, <<~QUERY)
                 query {
@@ -608,10 +605,11 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly({
+              expect(query.client_filters).to contain_exactly({
                 "cost" => {"equal_to_any_of" => nil},
                 "name" => {"equal_to_any_of" => ["thingy"]}
               })
+              expect(query.internal_filters).to be_empty
             end
 
             it "treats `null` filter as `true`" do
@@ -625,10 +623,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"options" => nil}
-              )
+              expect(query.client_filters).to contain_exactly({"options" => nil})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               query = datastore_query_for(:Query, :components, <<~QUERY)
                 query {
@@ -643,10 +639,11 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly({
+              expect(query.client_filters).to contain_exactly({
                 "options" => nil,
                 "name" => {"equal_to_any_of" => ["thingy"]}
               })
+              expect(query.internal_filters).to be_empty
             end
 
             it "treats `parent_field: {child_field: null}` as true" do
@@ -660,10 +657,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"options" => {"size" => nil}},
-                exclude_incomplete_docs_filter
-              )
+              expect(query.client_filters).to contain_exactly({"options" => {"size" => nil}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               query = datastore_query_for(:Query, :components, <<~QUERY)
                 query {
@@ -678,10 +673,11 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly({
+              expect(query.client_filters).to contain_exactly({
                 "options" => {"size" => nil},
                 "name" => {"equal_to_any_of" => ["thingy"]}
               })
+              expect(query.internal_filters).to be_empty
             end
 
             it "treats `parent_field: {child_field: {predicate: null}}` as true" do
@@ -695,10 +691,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"options" => {"size" => {"equal_to_any_of" => nil}}},
-                exclude_incomplete_docs_filter
-              )
+              expect(query.client_filters).to contain_exactly({"options" => {"size" => {"equal_to_any_of" => nil}}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               query = datastore_query_for(:Query, :components, <<~QUERY)
                 query {
@@ -713,10 +707,11 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly({
+              expect(query.client_filters).to contain_exactly({
                 "options" => {"size" => {"equal_to_any_of" => nil}},
                 "name" => {"equal_to_any_of" => ["thingy"]}
               })
+              expect(query.internal_filters).to be_empty
             end
           end
 
@@ -733,10 +728,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"not" => {"widget_name" => {"equal_to_any_of" => ["thingy"]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"not" => {"widget_name" => {"equal_to_any_of" => ["thingy"]}}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               # not on the inside...
               query = datastore_query_for(:Query, :components, <<~QUERY)
@@ -749,10 +742,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"widget_name" => {"not" => {"equal_to_any_of" => ["thingy"]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"widget_name" => {"not" => {"equal_to_any_of" => ["thingy"]}}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "still includes the incomplete doc exclusion filter when `not` is applied to self-sourced field with a non-nil filter value" do
@@ -767,10 +758,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"not" => {"name" => {"equal_to_any_of" => ["thingy"]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"not" => {"name" => {"equal_to_any_of" => ["thingy"]}}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
 
               # not on the inside...
               query = datastore_query_for(:Query, :components, <<~QUERY)
@@ -783,10 +772,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"name" => {"not" => {"equal_to_any_of" => ["thingy"]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"name" => {"not" => {"equal_to_any_of" => ["thingy"]}}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "omits the incomplete doc exclusion filter when `not` is applied to self-sourced field with a nil and a non-nil filter value" do
@@ -801,9 +788,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"not" => {"name" => {"equal_to_any_of" => ["thingy", nil]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"not" => {"name" => {"equal_to_any_of" => ["thingy", nil]}}})
+              expect(query.internal_filters).to be_empty
 
               # not on the inside...
               query = datastore_query_for(:Query, :components, <<~QUERY)
@@ -816,9 +802,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"name" => {"not" => {"equal_to_any_of" => [nil, "thingy"]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"name" => {"not" => {"equal_to_any_of" => [nil, "thingy"]}}})
+              expect(query.internal_filters).to be_empty
             end
 
             it "omits the incomplete doc exclusion filter when `not` is applied to self-sourced field with a single nil filter value" do
@@ -833,9 +818,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"not" => {"name" => {"equal_to_any_of" => [nil]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"not" => {"name" => {"equal_to_any_of" => [nil]}}})
+              expect(query.internal_filters).to be_empty
 
               # not on the inside...
               query = datastore_query_for(:Query, :components, <<~QUERY)
@@ -848,9 +832,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"name" => {"not" => {"equal_to_any_of" => [nil]}}}
-              )
+              expect(query.client_filters).to contain_exactly({"name" => {"not" => {"equal_to_any_of" => [nil]}}})
+              expect(query.internal_filters).to be_empty
             end
           end
 
@@ -869,10 +852,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"any_of" => [{"name" => {"equal_to_any_of" => ["abc"]}}, {"cost" => {"equal_to_any_of" => [7]}}]}
-              )
+              expect(query.client_filters).to contain_exactly({"any_of" => [{"name" => {"equal_to_any_of" => ["abc"]}}, {"cost" => {"equal_to_any_of" => [7]}}]})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "omits the incomplete doc exclusion filter when there are multiple sub-clause on the same field, that both can't match incomplete docs" do
@@ -889,9 +870,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"any_of" => [{"cost" => {"lt" => 100}}, {"cost" => {"gt" => 200}}]}
-              )
+              expect(query.client_filters).to contain_exactly({"any_of" => [{"cost" => {"lt" => 100}}, {"cost" => {"gt" => 200}}]})
+              expect(query.internal_filters).to be_empty
             end
 
             it "includes the incomplete doc exclusion filter when there are multiple sub-clause on the same field, one of which can match incomplete docs" do
@@ -908,10 +888,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"any_of" => [{"cost" => {"lt" => 100}}, {"cost" => {"equal_to_any_of" => [nil]}}]}
-              )
+              expect(query.client_filters).to contain_exactly({"any_of" => [{"cost" => {"lt" => 100}}, {"cost" => {"equal_to_any_of" => [nil]}}]})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "omits the incomplete doc exclusion filter when there is one sub-clause, that can't match incomplete docs" do
@@ -927,9 +905,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"any_of" => [{"name" => {"equal_to_any_of" => ["abc"]}}]}
-              )
+              expect(query.client_filters).to contain_exactly({"any_of" => [{"name" => {"equal_to_any_of" => ["abc"]}}]})
+              expect(query.internal_filters).to be_empty
             end
 
             it "includes the incomplete doc exclusion filter when there are no sub-clauses, because the filter is treated as `false` for being empty" do
@@ -943,10 +920,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"any_of" => []}
-              )
+              expect(query.client_filters).to contain_exactly({"any_of" => []})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
           end
 
@@ -964,10 +939,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                exclude_incomplete_docs_filter,
-                {"name" => {"equal_to_any_of" => [nil]}}
-              )
+              expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => [nil]}})
+              expect(query.internal_filters).to contain_exactly(exclude_incomplete_docs_filter)
             end
 
             it "omits the incomplete doc exclusion filter if incomplete docs could not be hit by the search on either of the filters" do
@@ -983,9 +956,8 @@ module ElasticGraph
                 }
               QUERY
 
-              expect(query.filters).to contain_exactly(
-                {"name" => {"equal_to_any_of" => ["thingy"]}}
-              )
+              expect(query.client_filters).to contain_exactly({"name" => {"equal_to_any_of" => ["thingy"]}})
+              expect(query.internal_filters).to be_empty
             end
           end
         end
@@ -1003,7 +975,7 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters.first).to eq({"nested_options" => {"all_of" => [
+            expect(query.client_filters).to contain_exactly({"nested_options" => {"all_of" => [
               # the `name_in_index` of `color` is `rgb_color`.
               {"any_satisfy" => {"rgb_color" => {"equal_to_any_of" => ["red"]}}},
               {"any_satisfy" => {"rgb_color" => {"equal_to_any_of" => ["green"]}}}
@@ -1025,7 +997,7 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters.first).to eq({
+            expect(query.client_filters).to contain_exactly({
               "nested_options" => {"any_satisfy" => {"rgb_color" => {"equal_to_any_of" => ["red"]}}}
             })
           end
@@ -1041,9 +1013,7 @@ module ElasticGraph
               }
             QUERY
 
-            expect(query.filters.first).to eq({
-              "nested_options" => {"__counts" => {"equal_to_any_of" => [0]}}
-            })
+            expect(query.client_filters).to contain_exactly({"nested_options" => {"__counts" => {"equal_to_any_of" => [0]}}})
           end
         end
 

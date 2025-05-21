@@ -540,14 +540,20 @@ module ElasticGraph
             index_definitions: {"widgets" => config_index_def_of}
           )
 
-          options = if filter_or_filters.is_a?(Array)
-            {filters: filter_or_filters}
-          else
-            {filters: [filter_or_filters].compact}
+          client_filters_value, internal_filters_value = [:client_filters, :internal_filters].map do |filtering_attribute|
+            options = if filter_or_filters.is_a?(Array)
+              {filtering_attribute => filter_or_filters}
+            else
+              {filtering_attribute => [filter_or_filters].compact}
+            end
+
+            index_def = graphql.datastore_core.index_definitions_by_name.fetch("widgets")
+            builder.new_query(search_index_definitions: [index_def], aggregations: aggregations, **options).search_index_expression.split(",")
           end
 
-          index_def = graphql.datastore_core.index_definitions_by_name.fetch("widgets")
-          builder.new_query(search_index_definitions: [index_def], aggregations: aggregations, **options).search_index_expression.split(",")
+          # The search index expression parts should be the same regardless of whether a client or internal filter is used.
+          expect(internal_filters_value).to eq(client_filters_value)
+          client_filters_value
         end
 
         def target_all_widget_indices

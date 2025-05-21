@@ -24,7 +24,7 @@ class ProductResolver
     query = @datastore_query_builder.new_query(
       search_index_definitions: [@product_index_def],
       monotonic_clock_deadline: context[:monotonic_clock_deadline],
-      filters: [{"id" => {"equalToAnyOf" => [args.fetch("id")]}}],
+      client_filters: [{"id" => {"equalToAnyOf" => [args.fetch("id")]}}],
       individual_docs_needed: true,
       request_all_fields: true
     )

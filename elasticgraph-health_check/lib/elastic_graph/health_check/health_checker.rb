@@ -85,7 +85,7 @@ module ElasticGraph
 
         @datastore_query_builder.new_query(
           search_index_definitions: type.search_index_definitions,
-          filters: [build_index_optimization_filter_for(recency_config)],
+          internal_filters: [build_index_optimization_filter_for(recency_config)],
           requested_fields: ["id", recency_config.timestamp_field],
           document_pagination: {first: 1},
           sort: [{recency_config.timestamp_field => {"order" => "desc"}}]

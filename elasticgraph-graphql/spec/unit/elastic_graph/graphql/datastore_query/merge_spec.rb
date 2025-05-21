@@ -49,37 +49,47 @@ module ElasticGraph
         }.to raise_error ArgumentError, a_string_including("search_index_definitions")
       end
 
-      it "can merge `equal_to_any_of` conditions from two separate queries that are on separate fields", covers: :filters do
-        merged = merge(
-          {filters: [{"age" => {"equal_to_any_of" => [25, 30]}}]},
-          {filters: [{"size" => {"equal_to_any_of" => [10]}}]}
-        )
+      %i[client_filters internal_filters].each do |filter_attr|
+        describe ":#{filter_attr}", covers: filter_attr do
+          it "can merge `equal_to_any_of` conditions from two separate queries that are on separate fields" do
+            merged = merge(
+              {filter_attr => [{"age" => {"equal_to_any_of" => [25, 30]}}]},
+              {filter_attr => [{"size" => {"equal_to_any_of" => [10]}}]}
+            )
 
-        expect(datastore_body_of(merged)).to filter_datastore_with(
-          {terms: {"age" => [25, 30]}},
-          {terms: {"size" => [10]}}
-        )
-      end
+            expect(datastore_body_of(merged)).to filter_datastore_with(
+              {terms: {"age" => [25, 30]}},
+              {terms: {"size" => [10]}}
+            )
+          end
 
-      it "can merge `equal_to_any_of` conditions from two separate queries that are on the same field", covers: :filters do
-        merged = merge(
-          {filters: [{"age" => {"equal_to_any_of" => [25, 30]}}]},
-          {filters: [{"age" => {"equal_to_any_of" => [35, 30]}}]}
-        )
+          it "can merge `equal_to_any_of` conditions from two separate queries that are on the same field" do
+            merged = merge(
+              {filter_attr => [{"age" => {"equal_to_any_of" => [25, 30]}}]},
+              {filter_attr => [{"age" => {"equal_to_any_of" => [35, 30]}}]}
+            )
 
-        expect(datastore_body_of(merged)).to filter_datastore_with(
-          {terms: {"age" => [25, 30]}},
-          {terms: {"age" => [35, 30]}}
-        )
-      end
+            expect(datastore_body_of(merged)).to filter_datastore_with(
+              {terms: {"age" => [25, 30]}},
+              {terms: {"age" => [35, 30]}}
+            )
+          end
 
-      it "de-duplicates filters that are present in both queries", covers: :filters do
-        merged = merge(
-          {filters: [{"age" => {"equal_to_any_of" => [25, 30]}}]},
-          {filters: [{"age" => {"equal_to_any_of" => [25, 30]}}]}
-        )
+          it "de-duplicates filters that are present in both queries" do
+            merged = merge(
+              {filter_attr => [{"age" => {"equal_to_any_of" => [25, 30]}}]},
+              {filter_attr => [{"age" => {"equal_to_any_of" => [25, 30]}}]}
+            )
 
-        expect(merged.filters).to contain_exactly({"age" => {"equal_to_any_of" => [25, 30]}})
+            expect(merged.public_send(filter_attr)).to contain_exactly({"age" => {"equal_to_any_of" => [25, 30]}})
+          end
+
+          specify "#merge_with can merge in an empty filter" do
+            query = new_query(filter_attr => [{"age" => {"equal_to_any_of" => [25, 30]}}])
+            expect(query.merge_with).to eq query
+            expect(query.merge_with(filter_attr => [])).to eq query
+          end
+        end
       end
 
       it "uses only the tiebreaking sort clauses when merging two queries that have an empty sort", covers: :sort do
@@ -310,12 +320,6 @@ module ElasticGraph
           {total_document_count_needed: false}
         )
         expect(merged.total_document_count_needed).to be false
-      end
-
-      specify "#merge_with can merge in an empty filter", covers: :filters do
-        query = new_query(filters: [{"age" => {"equal_to_any_of" => [25, 30]}}])
-        expect(query.merge_with).to eq query
-        expect(query.merge_with(filters: [])).to eq query
       end
 
       it "prefers a set `monotonic_clock_deadline` value to an unset one", covers: :monotonic_clock_deadline do

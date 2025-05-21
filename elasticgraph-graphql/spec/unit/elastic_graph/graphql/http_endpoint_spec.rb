@@ -60,7 +60,7 @@ module ElasticGraph
             adapter = Class.new do
               def call(query:, context:, **)
                 user_name = context.fetch(:http_request).normalized_headers["USER-NAME"]
-                query.merge_with(filters: [{"user_name" => {"equal_to_any_of" => [user_name]}}])
+                query.merge_with(internal_filters: [{"user_name" => {"equal_to_any_of" => [user_name]}}])
               end
             end.new
 
@@ -98,7 +98,7 @@ module ElasticGraph
             process_graphql_expecting(200, extra_headers: {"USER-NAME" => "yoda"})
 
             expect(datastore_queries.size).to eq 1
-            expect(datastore_queries.first.filters).to contain_exactly(
+            expect(datastore_queries.first.internal_filters).to contain_exactly(
               {"user_name" => {"equal_to_any_of" => ["yoda"]}}
             )
           end
@@ -187,7 +187,7 @@ module ElasticGraph
             response_body = process_graphql_expecting(200, query: query, variables: {"filter" => filter})
             expect(response_body).to eq("data" => {"widgets" => {"total_edge_count" => 0}})
             expect(datastore_queries.size).to eq(1)
-            expect(datastore_queries.first.filters.to_a).to eq [filter]
+            expect(datastore_queries.first.client_filters.to_a).to eq [filter]
           end
 
           it "returns a 400 response when the variables are not a JSON object" do

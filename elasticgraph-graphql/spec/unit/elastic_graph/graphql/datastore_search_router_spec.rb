@@ -213,7 +213,7 @@ module ElasticGraph
             no_shards_searched_response
           ])
 
-          query_excluding_indices = query2.merge_with(filters: [{"created_at" => {"gte" => "2025-01-01T00:00:00Z"}}])
+          query_excluding_indices = query2.merge_with(client_filters: [{"created_at" => {"gte" => "2025-01-01T00:00:00Z"}}])
           expect(query_excluding_indices.search_index_expression).to eq("widgets_rollover__*,-widgets_rollover__2024")
 
           responses_by_query = router.msearch([query1, query_excluding_indices])
