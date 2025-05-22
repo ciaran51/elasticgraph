@@ -19,7 +19,7 @@ module ElasticGraph
   class GraphQL
     module Aggregation
       module Resolvers
-        class SubAggregations < ::Data.define(:schema_element_names, :sub_aggregations, :parent_queries, :sub_aggs_by_agg_key, :field_path)
+        class SubAggregations < ::Data.define(:schema, :sub_aggregations, :parent_queries, :sub_aggs_by_agg_key, :field_path)
           def resolve(field:, object:, args:, context:, lookahead:)
             path_segment = PathSegment.for(field: field, lookahead: lookahead)
             new_field_path = field_path + [path_segment]
@@ -31,7 +31,7 @@ module ElasticGraph
             RelayConnectionBuilder.build_from_buckets(
               query: sub_agg_query,
               parent_queries: parent_queries,
-              schema_element_names: schema_element_names,
+              schema: schema,
               field_path: new_field_path
             ) { extract_buckets(sub_agg_key, args) }
           end
@@ -41,7 +41,7 @@ module ElasticGraph
           def extract_buckets(aggregation_field_path, args)
             # When the client passes `first: 0`, we omit the sub-aggregation from the query body entirely,
             # and it wont' be in `sub_aggs_by_agg_key`. Instead, we can just return an empty list of buckets.
-            return [] if args[schema_element_names.first] == 0
+            return [] if args[schema.element_names.first] == 0
 
             sub_agg_key = Key.encode(parent_queries.map(&:name) + [aggregation_field_path])
             sub_agg = Support::HashUtil.verbose_fetch(sub_aggs_by_agg_key, sub_agg_key)

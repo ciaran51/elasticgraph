@@ -10,14 +10,14 @@ module ElasticGraph
           attr_reader paginator: DatastoreQuery::Paginator[N]
 
           def initialize: [N] (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             before_truncation_nodes: ::Array[N],
             edges: ::Array[_RelayEdge[N]],
             paginator: DatastoreQuery::Paginator[N]
           ) -> void
 
           def with: (
-            ?schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            ?schema: Schema,
             ?before_truncation_nodes: ::Array[N],
             ?edges: ::Array[_RelayEdge[N]],
             ?paginator: DatastoreQuery::Paginator[N]

@@ -124,7 +124,7 @@ module ElasticGraph
           connection = Aggregation::Resolvers::RelayConnectionBuilder.build_from_search_response(
             query: aggregation_query,
             search_response: response,
-            schema_element_names: graphql.runtime_metadata.schema_element_names
+            schema: graphql.schema
           )
 
           [connection.nodes, connection.page_info]

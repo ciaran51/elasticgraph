@@ -148,15 +148,17 @@ module ElasticGraph
             name: "John", birth_date: "2002-09-01", quote: "To be, or not to be, that is the question."
           |
             element_names = PersonFieldNames.new(form: name_form, overrides: overrides)
+            schema = build_graphql(element_names).schema
+            allow(schema).to receive(:element_names).and_return(element_names)
 
             person = person_class.new(
-              schema_element_names: element_names,
+              schema: schema,
               name: name,
               quote: quote,
               birth_date: birth_date
             )
 
-            [person, build_graphql(element_names).schema.field_named("Person", field)]
+            [person, schema.field_named("Person", field)]
           end
 
           def build_graphql(element_names)

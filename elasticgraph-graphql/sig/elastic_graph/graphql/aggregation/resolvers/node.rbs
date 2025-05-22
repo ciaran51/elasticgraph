@@ -9,13 +9,13 @@ module ElasticGraph
           attr_reader field_path: ::Array[PathSegment]
 
           def self.new: (
-            SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            Schema,
             Query,
             ::Array[Query],
             ::Hash[::String, untyped],
             ::Array[PathSegment]
           ) -> instance | (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             query: Query,
             parent_queries: ::Array[Query],
             bucket: ::Hash[::String, untyped],
@@ -23,7 +23,7 @@ module ElasticGraph
           ) -> instance
 
           def with: (
-            ?schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            ?schema: Schema,
             ?query: Query,
             ?parent_queries: ::Array[Query],
             ?bucket: ::Hash[::String, untyped],

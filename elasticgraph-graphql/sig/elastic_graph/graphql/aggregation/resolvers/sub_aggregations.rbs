@@ -3,20 +3,20 @@ module ElasticGraph
     module Aggregation
       module Resolvers
         class SubAggregationsSupertype
-          attr_reader schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+          attr_reader schema: Schema
           attr_reader sub_aggregations: ::Hash[::String, NestedSubAggregation]
           attr_reader parent_queries: ::Array[Query]
           attr_reader sub_aggs_by_agg_key: ::Hash[::String, ::Hash[::String, untyped]]
           attr_reader field_path: ::Array[PathSegment]
 
           def self.new: (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             sub_aggregations: ::Hash[::String, NestedSubAggregation],
             parent_queries: ::Array[Query],
             sub_aggs_by_agg_key: ::Hash[::String, ::Hash[::String, untyped]],
             field_path: ::Array[PathSegment]
           ) -> instance | (
-            SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            Schema,
             ::Hash[::String, NestedSubAggregation],
             ::Array[Query],
             ::Hash[::String, ::Hash[::String, untyped]],
@@ -24,7 +24,7 @@ module ElasticGraph
           ) -> instance
 
           def with: (
-            ?schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            ?schema: Schema,
             ?sub_aggregations: ::Hash[::String, NestedSubAggregation],
             ?parent_queries: ::Array[Query],
             ?sub_aggs_by_agg_key: ::Hash[::String, ::Hash[::String, untyped]],

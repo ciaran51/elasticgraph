@@ -6,20 +6,20 @@ module ElasticGraph
           attr_reader bucket: ::Hash[::String, untyped]
 
           def initialize: (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             bucket: ::Hash[::String, untyped]
           ) -> void
 
           def self.new: (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             bucket: ::Hash[::String, untyped]
           ) -> instance | (
-            SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            Schema,
             ::Hash[::String, untyped]
           ) -> instance
 
           def with: (
-            ?schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            ?schema: Schema,
             ?bucket: ::Hash[::String, untyped]
           ) -> instance
         end
