@@ -14,11 +14,11 @@ module ElasticGraph
       module RelayConnection
         # Adapts an `DatastoreResponse::SearchResponse` to what the graphql gem expects for a relay connection.
         class SearchResponseAdapterBuilder
-          def self.build_from(schema_element_names:, search_response:, query:)
+          def self.build_from(schema:, search_response:, query:)
             document_paginator = query.document_paginator
 
             GenericAdapter.new(
-              schema_element_names: schema_element_names,
+              schema: schema,
               raw_nodes: search_response.to_a,
               paginator: document_paginator.paginator,
               get_total_edge_count: -> { search_response.total_document_count },

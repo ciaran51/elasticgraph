@@ -182,7 +182,7 @@ module ElasticGraph
         ) { |q| query = q }
 
         adapter = Resolvers::RelayConnection::SearchResponseAdapterBuilder.build_from(
-          schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames.new(form: :snake_case, overrides: {}),
+          schema: graphql.schema,
           search_response: response,
           query: query
         )

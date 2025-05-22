@@ -37,7 +37,7 @@ module ElasticGraph
 
         agg_nodes_by_agg_name = all_aggs.to_h do |agg|
           connection = Aggregation::Resolvers::RelayConnectionBuilder.build_from_search_response(
-            schema_element_names: graphql.runtime_metadata.schema_element_names,
+            schema: graphql.schema,
             search_response: results,
             query: agg
           )

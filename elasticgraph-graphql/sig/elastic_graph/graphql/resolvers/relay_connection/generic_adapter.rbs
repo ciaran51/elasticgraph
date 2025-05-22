@@ -11,14 +11,14 @@ module ElasticGraph
         class GenericAdapter[N < _NodeWithCursor] < ResolvableValueClass
           include _RelayConnection[N]
 
-          attr_reader schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+          attr_reader schema: Schema
           attr_reader raw_nodes: ::Array[N]
           attr_reader paginator: DatastoreQuery::Paginator[N]
           attr_reader to_sort_value: ^(N, DecodedCursor) -> ::Array[DatastoreQuery::Paginator::SortValue]
           attr_reader get_total_edge_count: ^() -> ::Integer?
 
           def initialize: (
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             raw_nodes: ::Array[N],
             paginator: DatastoreQuery::Paginator[N],
             to_sort_value: ^(N, DecodedCursor) -> ::Array[DatastoreQuery::Paginator::SortValue],
@@ -26,7 +26,7 @@ module ElasticGraph
           ) -> void
 
           def with: (
-            ?schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            ?schema: Schema,
             ?raw_nodes: ::Array[N],
             ?paginator: DatastoreQuery::Paginator[N],
             ?to_sort_value: ^(N, DecodedCursor) -> ::Array[DatastoreQuery::Paginator::SortValue],
@@ -44,7 +44,7 @@ module ElasticGraph
 
           class Edge[N < _NodeWithCursor] < ResolvableValueClass
             include _RelayEdge[N]
-            def initialize: (SchemaArtifacts::RuntimeMetadata::SchemaElementNames, N) -> void
+            def initialize: (Schema, N) -> void
           end
         end
       end

@@ -17,10 +17,10 @@ module ElasticGraph
       # and also has a corresponding method definition.
       module ResolvableValue
         # `MemoizableData.define` provides the following methods:
-        # @dynamic schema_element_names
+        # @dynamic schema
 
         def self.new(*fields, &block)
-          Support::MemoizableData.define(:schema_element_names, *fields) do
+          Support::MemoizableData.define(:schema, *fields) do
             # @implements ResolvableValueClass
             include ResolvableValue
             class_exec(&block) if block
@@ -41,7 +41,7 @@ module ElasticGraph
         end
 
         def canonical_name_for(name, element_type)
-          schema_element_names.canonical_name_for(name) ||
+          schema.element_names.canonical_name_for(name) ||
             raise(Errors::SchemaError, "#{element_type} `#{name}` is not a defined schema element")
         end
       end

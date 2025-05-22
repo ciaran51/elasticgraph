@@ -19,7 +19,7 @@ module ElasticGraph
 
       def search_datastore_aggregations(aggregation_query, **options)
         connection = Aggregation::Resolvers::RelayConnectionBuilder.build_from_search_response(
-          schema_element_names: graphql.runtime_metadata.schema_element_names,
+          schema: graphql.schema,
           search_response: search_datastore(aggregations: [aggregation_query], **options),
           query: aggregation_query
         )

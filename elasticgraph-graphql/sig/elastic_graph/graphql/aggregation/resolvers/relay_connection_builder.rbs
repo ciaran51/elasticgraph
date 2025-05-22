@@ -6,13 +6,13 @@ module ElasticGraph
           def self.build_from_search_response: (
             query: Query,
             search_response: DatastoreResponse::SearchResponse,
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+            schema: Schema
           ) -> GraphQL::Resolvers::RelayConnection::GenericAdapter[Node]
 
           def self.build_from_buckets: (
             query: Query,
             parent_queries: ::Array[Query],
-            schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            schema: Schema,
             ?field_path: ::Array[PathSegment]
           ) { () -> ::Array[::Hash[::String, untyped]] } -> GraphQL::Resolvers::RelayConnection::GenericAdapter[Node]
 
@@ -21,7 +21,7 @@ module ElasticGraph
           def self.raw_nodes_for: (
             Query,
             ::Array[Query],
-            SchemaArtifacts::RuntimeMetadata::SchemaElementNames,
+            Schema,
             ::Array[PathSegment]
           ) { () -> ::Array[::Hash[::String, untyped]] } -> ::Array[Node]
 

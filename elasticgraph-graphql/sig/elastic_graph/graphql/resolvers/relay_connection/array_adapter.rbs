@@ -6,21 +6,21 @@ module ElasticGraph
           extend Forwardable
           include _RelayConnection[N]
           include _RelayPageInfo
-          attr_reader schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+          attr_reader schema: Schema
           attr_reader graphql_impl: ::GraphQL::Pagination::ArrayConnection[N]
 
-          def initialize: (SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Pagination::ArrayConnection[N]) -> void
+          def initialize: (Schema, ::GraphQL::Pagination::ArrayConnection[N]) -> void
 
-          def self.build: [N] (::Array[N], ::Hash[::String, untyped], SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Query::Context) -> ArrayAdapter[N]
+          def self.build: [N] (::Array[N], ::Hash[::String, untyped], ::GraphQL::Query::Context) -> ArrayAdapter[N]
 
           @edges: ::Array[_RelayEdge[N]]?
           @nodes: ::Array[N]?
 
           class Edge[N]
             include _RelayEdge[N]
-            attr_reader schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
+            attr_reader schema: Schema
             attr_reader graphql_impl: ::GraphQL::Pagination::ArrayConnection[N]
-            def initialize: (SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Pagination::ArrayConnection[N], N) -> void
+            def initialize: (Schema, ::GraphQL::Pagination::ArrayConnection[N], N) -> void
           end
         end
       end

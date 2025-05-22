@@ -16,7 +16,6 @@ module ElasticGraph
       # Responsible for fetching a single field value from a document.
       class GetRecordFieldValue
         def initialize(elasticgraph_graphql:, config:)
-          @schema_element_names = elasticgraph_graphql.runtime_metadata.schema_element_names
         end
 
         def resolve(field:, object:, args:, context:)
@@ -32,7 +31,7 @@ module ElasticGraph
           value = [] if value.nil? && field.type.list?
 
           if field.type.relay_connection?
-            RelayConnection::ArrayAdapter.build(value, args, @schema_element_names, context)
+            RelayConnection::ArrayAdapter.build(value, args, context)
           else
             value
           end

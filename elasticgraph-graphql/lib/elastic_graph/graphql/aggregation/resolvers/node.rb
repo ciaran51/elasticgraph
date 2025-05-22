@@ -29,7 +29,7 @@ module ElasticGraph
 
           def sub_aggregations
             @sub_aggregations ||= SubAggregations.new(
-              schema_element_names,
+              schema,
               query.sub_aggregations,
               parent_queries + [query],
               bucket,
@@ -42,7 +42,7 @@ module ElasticGraph
           end
 
           def count_detail
-            @count_detail ||= CountDetail.new(schema_element_names, bucket)
+            @count_detail ||= CountDetail.new(schema, bucket)
           end
 
           def cursor

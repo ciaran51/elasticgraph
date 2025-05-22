@@ -15,16 +15,16 @@ module ElasticGraph
     module Aggregation
       module Resolvers
         module RelayConnectionBuilder
-          def self.build_from_search_response(query:, search_response:, schema_element_names:)
-            build_from_buckets(query: query, parent_queries: [], schema_element_names: schema_element_names) do
+          def self.build_from_search_response(query:, search_response:, schema:)
+            build_from_buckets(query: query, parent_queries: [], schema: schema) do
               extract_buckets_from(search_response, for_query: query)
             end
           end
 
-          def self.build_from_buckets(query:, parent_queries:, schema_element_names:, field_path: [], &build_buckets)
+          def self.build_from_buckets(query:, parent_queries:, schema:, field_path: [], &build_buckets)
             GraphQL::Resolvers::RelayConnection::GenericAdapter.new(
-              schema_element_names: schema_element_names,
-              raw_nodes: raw_nodes_for(query, parent_queries, schema_element_names, field_path, &build_buckets),
+              schema: schema,
+              raw_nodes: raw_nodes_for(query, parent_queries, schema, field_path, &build_buckets),
               paginator: query.paginator,
               get_total_edge_count: -> {},
               to_sort_value: ->(node, decoded_cursor) do
@@ -39,13 +39,13 @@ module ElasticGraph
             )
           end
 
-          private_class_method def self.raw_nodes_for(query, parent_queries, schema_element_names, field_path)
+          private_class_method def self.raw_nodes_for(query, parent_queries, schema, field_path)
             # The `DecodedCursor::SINGLETON` is a special case, so handle it here.
             return [] if query.paginator.paginated_from_singleton_cursor?
 
             yield.map do |bucket|
               Node.new(
-                schema_element_names: schema_element_names,
+                schema: schema,
                 query: query,
                 parent_queries: parent_queries,
                 bucket: bucket,

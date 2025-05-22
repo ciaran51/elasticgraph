@@ -20,11 +20,11 @@ module ElasticGraph
         def self.maybe_wrap(search_response, field:, context:, lookahead:, query:)
           return search_response unless field.type.relay_connection?
 
-          schema_element_names = context.fetch(:elastic_graph_schema).element_names
+          schema = context.fetch(:elastic_graph_schema)
 
           unless field.type.unwrap_fully.indexed_aggregation?
             return SearchResponseAdapterBuilder.build_from(
-              schema_element_names: schema_element_names,
+              schema: schema,
               search_response: search_response,
               query: query
             )
@@ -32,7 +32,7 @@ module ElasticGraph
 
           agg_name = lookahead.ast_nodes.first&.alias || lookahead.name
           Aggregation::Resolvers::RelayConnectionBuilder.build_from_search_response(
-            schema_element_names: schema_element_names,
+            schema: schema,
             search_response: search_response,
             query: Support::HashUtil.verbose_fetch(query.aggregations, agg_name)
           )

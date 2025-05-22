@@ -17,14 +17,17 @@ module ElasticGraph
         # here we just adapt it to the ElasticGraph internal resolver interface.
         class ArrayAdapter < ResolvableValue.new(:graphql_impl)
           # `ResolvableValue.new` provides the following methods:
-          # @dynamic initialize, graphql_impl, schema_element_names
+          # @dynamic initialize, graphql_impl, schema
 
           # `def_delegators` provides the following methods:
           # @dynamic start_cursor, end_cursor, has_next_page, has_previous_page
           extend Forwardable
           def_delegators :graphql_impl, :start_cursor, :end_cursor, :has_next_page, :has_previous_page
 
-          def self.build(nodes, args, schema_element_names, context)
+          def self.build(nodes, args, context)
+            schema = context.fetch(:elastic_graph_schema)
+            schema_element_names = schema.element_names
+
             # ElasticGraph supports any schema elements (like a `first` argument) being renamed,
             # but `GraphQL::Relay::ArrayConnection` would not understand a renamed argument.
             # Here we map the args back to the canonical relay args so `ArrayConnection` can
@@ -34,7 +37,7 @@ module ElasticGraph
             end.compact
 
             graphql_impl = ::GraphQL::Pagination::ArrayConnection.new(nodes || [], context: context, **relay_args)
-            new(schema_element_names, graphql_impl)
+            new(schema, graphql_impl)
           end
 
           def total_edge_count
@@ -47,7 +50,7 @@ module ElasticGraph
 
           def edges
             @edges ||= graphql_impl.nodes.map do |node|
-              Edge.new(schema_element_names, graphql_impl, node)
+              Edge.new(schema, graphql_impl, node)
             end
           end
 
@@ -58,7 +61,7 @@ module ElasticGraph
           # Simple edge implementation for a node object.
           class Edge < ResolvableValue.new(:graphql_impl, :node)
             # `ResolvableValue.new` provides the following methods:
-            # @dynamic initialize, graphql_impl, schema_element_names, node
+            # @dynamic initialize, graphql_impl, schema, node
 
             def cursor
               graphql_impl.cursor_for(node)

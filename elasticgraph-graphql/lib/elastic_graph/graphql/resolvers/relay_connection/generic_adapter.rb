@@ -23,11 +23,11 @@ module ElasticGraph
           # Gets an optional count of total edges.
           :get_total_edge_count
         )
-          # @dynamic initialize, with, schema_element_names, raw_nodes, paginator, to_sort_value, get_total_edge_count
+          # @dynamic initialize, with, schema, raw_nodes, paginator, to_sort_value, get_total_edge_count
 
           def page_info
             @page_info ||= PageInfo.new(
-              schema_element_names: schema_element_names,
+              schema: schema,
               before_truncation_nodes: before_truncation_nodes,
               edges: edges,
               paginator: paginator
@@ -39,7 +39,7 @@ module ElasticGraph
           end
 
           def edges
-            @edges ||= nodes.map { |node| Edge.new(schema_element_names, node) }
+            @edges ||= nodes.map { |node| Edge.new(schema, node) }
           end
 
           def nodes
