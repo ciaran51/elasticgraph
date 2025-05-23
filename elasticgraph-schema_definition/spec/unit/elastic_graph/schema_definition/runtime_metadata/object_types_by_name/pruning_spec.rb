@@ -76,6 +76,7 @@ module ElasticGraph
           NonNumericAggregatedValues
           PageInfo
           Query
+          SearchHighlight
           StringListFilterInput
           TextListFilterInput
           TimeZoneListFilterInput

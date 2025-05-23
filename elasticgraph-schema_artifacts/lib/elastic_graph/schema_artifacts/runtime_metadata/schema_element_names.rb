@@ -143,6 +143,8 @@ module ElasticGraph
         :eg_latency_slo, :ms,
         # For sorting.
         :order_by,
+        # For search highlighting,
+        :all_highlights, :path, :snippets,
         # For aggregation
         :grouped_by, :count, :count_detail, :aggregated_values, :sub_aggregations,
         # Date/time grouping aggregation fields

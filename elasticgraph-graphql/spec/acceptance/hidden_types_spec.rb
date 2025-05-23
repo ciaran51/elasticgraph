@@ -121,6 +121,7 @@ module ElasticGraph
               IntListFilterInput IntListElementFilterInput AggregationCountDetail
               LocalTimeGroupingOffsetInput LocalTimeGroupingTruncationUnitInput LocalTimeUnitInput MatchesQueryFilterInput
               MatchesPhraseFilterInput MatchesQueryAllowedEditsPerTermInput StringContainsFilterInput StringStartsWithFilterInput
+              SearchHighlight
             ]
 
           # The sub-aggregation types are quite complicated and we just add them all here.

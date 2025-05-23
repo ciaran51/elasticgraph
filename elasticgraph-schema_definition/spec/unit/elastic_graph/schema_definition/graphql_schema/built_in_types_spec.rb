@@ -921,6 +921,25 @@ module ElasticGraph
           EOS
         end
 
+        it "defines a `SearchHighlight` type" do
+          expect(type_named("SearchHighlight", include_docs: true)).to eq(<<~EOS.strip)
+            """
+            Provides information about why a document matched a search via highlighted snippets.
+            """
+            type SearchHighlight {
+              """
+              Path to a leaf field containing one or more search highlight snippets. The returned list will contain a path segment for
+              each object layer of the schema, from the document root.
+              """
+              #{schema_elements.path}: [String!]!
+              """
+              List of snippets containing search highlights from field values at this `path`.
+              """
+              #{schema_elements.snippets}: [String!]!
+            }
+          EOS
+        end
+
         it "defines a `PageInfo` type" do
           expect(type_named("PageInfo", include_docs: true)).to eq(<<~EOS.strip)
             """

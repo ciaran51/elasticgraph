@@ -2696,6 +2696,8 @@ object_types_by_name:
   AddressEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -2910,6 +2912,8 @@ object_types_by_name:
   ComponentEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -3126,6 +3130,8 @@ object_types_by_name:
   ElectricalPartEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -3431,6 +3437,8 @@ object_types_by_name:
   ManufacturerEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -3544,6 +3552,8 @@ object_types_by_name:
   MechanicalPartEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -3858,6 +3868,8 @@ object_types_by_name:
   NamedEntityEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -4078,6 +4090,8 @@ object_types_by_name:
   PartEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -4238,6 +4252,13 @@ object_types_by_name:
         resolver: list_records
       widgets_or_addresses:
         resolver: list_records
+  SearchHighlight:
+    graphql_fields_by_name:
+      path:
+        resolver: object_without_lookahead
+      snippets:
+        resolver: object_without_lookahead
+    graphql_only_return_type: true
   SizeListFilterInput:
     graphql_fields_by_name:
       count:
@@ -4342,6 +4363,8 @@ object_types_by_name:
   SponsorEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -4390,6 +4413,8 @@ object_types_by_name:
   StringEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -4639,6 +4664,8 @@ object_types_by_name:
   TeamEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -5479,6 +5506,8 @@ object_types_by_name:
   WidgetCurrencyEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -5519,6 +5548,8 @@ object_types_by_name:
   WidgetEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -5856,6 +5887,8 @@ object_types_by_name:
   WidgetOrAddressEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
@@ -6041,6 +6074,8 @@ object_types_by_name:
   WidgetWorkspaceEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
+      all_highlights:
+        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:
