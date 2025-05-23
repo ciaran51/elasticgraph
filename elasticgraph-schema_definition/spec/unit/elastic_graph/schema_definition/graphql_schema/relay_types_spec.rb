@@ -26,7 +26,7 @@ module ElasticGraph
           expect(edge_type_from(result, "Widget", include_docs: true)).to eq(<<~EOS.strip)
             """
             Represents a specific `Widget` in the context of a `WidgetConnection`,
-            providing access to both the `Widget` and a pagination `Cursor`.
+            providing access to both the `Widget` and query-specific information such as the pagination `Cursor`.
 
             See the [Relay GraphQL Cursor Connections
             Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -88,7 +88,7 @@ module ElasticGraph
           expect(aggregation_edge_type_from(result, "Widget", include_docs: true)).to eq(<<~EOS.strip)
             """
             Represents a specific `WidgetAggregation` in the context of a `WidgetAggregationConnection`,
-            providing access to both the `WidgetAggregation` and a pagination `Cursor`.
+            providing access to both the `WidgetAggregation` and query-specific information such as the pagination `Cursor`.
 
             See the [Relay GraphQL Cursor Connections
             Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.

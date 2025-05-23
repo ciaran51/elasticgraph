@@ -90,7 +90,7 @@ type AddressAggregationConnection {
 
 """
 Represents a specific `AddressAggregation` in the context of a `AddressAggregationConnection`,
-providing access to both the `AddressAggregation` and a pagination `Cursor`.
+providing access to both the `AddressAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -138,7 +138,7 @@ type AddressConnection {
 
 """
 Represents a specific `Address` in the context of a `AddressConnection`,
-providing access to both the `Address` and a pagination `Cursor`.
+providing access to both the `Address` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -1093,7 +1093,7 @@ type ComponentAggregationConnection {
 
 """
 Represents a specific `ComponentAggregation` in the context of a `ComponentAggregationConnection`,
-providing access to both the `ComponentAggregation` and a pagination `Cursor`.
+providing access to both the `ComponentAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -1141,7 +1141,7 @@ type ComponentConnection {
 
 """
 Represents a specific `Component` in the context of a `ComponentConnection`,
-providing access to both the `Component` and a pagination `Cursor`.
+providing access to both the `Component` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -2594,7 +2594,7 @@ type ElectricalPartAggregationConnection {
 
 """
 Represents a specific `ElectricalPartAggregation` in the context of a `ElectricalPartAggregationConnection`,
-providing access to both the `ElectricalPartAggregation` and a pagination `Cursor`.
+providing access to both the `ElectricalPartAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -2642,7 +2642,7 @@ type ElectricalPartConnection {
 
 """
 Represents a specific `ElectricalPart` in the context of a `ElectricalPartConnection`,
-providing access to both the `ElectricalPart` and a pagination `Cursor`.
+providing access to both the `ElectricalPart` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -4283,7 +4283,7 @@ type ManufacturerAggregationConnection {
 
 """
 Represents a specific `ManufacturerAggregation` in the context of a `ManufacturerAggregationConnection`,
-providing access to both the `ManufacturerAggregation` and a pagination `Cursor`.
+providing access to both the `ManufacturerAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -4331,7 +4331,7 @@ type ManufacturerConnection {
 
 """
 Represents a specific `Manufacturer` in the context of a `ManufacturerConnection`,
-providing access to both the `Manufacturer` and a pagination `Cursor`.
+providing access to both the `Manufacturer` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -4747,7 +4747,7 @@ type MechanicalPartAggregationConnection {
 
 """
 Represents a specific `MechanicalPartAggregation` in the context of a `MechanicalPartAggregationConnection`,
-providing access to both the `MechanicalPartAggregation` and a pagination `Cursor`.
+providing access to both the `MechanicalPartAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -4795,7 +4795,7 @@ type MechanicalPartConnection {
 
 """
 Represents a specific `MechanicalPart` in the context of a `MechanicalPartConnection`,
-providing access to both the `MechanicalPart` and a pagination `Cursor`.
+providing access to both the `MechanicalPart` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -5376,7 +5376,7 @@ type NamedEntityAggregationConnection {
 
 """
 Represents a specific `NamedEntityAggregation` in the context of a `NamedEntityAggregationConnection`,
-providing access to both the `NamedEntityAggregation` and a pagination `Cursor`.
+providing access to both the `NamedEntityAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -5424,7 +5424,7 @@ type NamedEntityConnection {
 
 """
 Represents a specific `NamedEntity` in the context of a `NamedEntityConnection`,
-providing access to both the `NamedEntity` and a pagination `Cursor`.
+providing access to both the `NamedEntity` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -6592,7 +6592,7 @@ type PartAggregationConnection {
 
 """
 Represents a specific `PartAggregation` in the context of a `PartAggregationConnection`,
-providing access to both the `PartAggregation` and a pagination `Cursor`.
+providing access to both the `PartAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -6640,7 +6640,7 @@ type PartConnection {
 
 """
 Represents a specific `Part` in the context of a `PartConnection`,
-providing access to both the `Part` and a pagination `Cursor`.
+providing access to both the `Part` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -9171,7 +9171,7 @@ type SponsorAggregationConnection {
 
 """
 Represents a specific `SponsorAggregation` in the context of a `SponsorAggregationConnection`,
-providing access to both the `SponsorAggregation` and a pagination `Cursor`.
+providing access to both the `SponsorAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -9219,7 +9219,7 @@ type SponsorConnection {
 
 """
 Represents a specific `Sponsor` in the context of a `SponsorConnection`,
-providing access to both the `Sponsor` and a pagination `Cursor`.
+providing access to both the `Sponsor` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -9573,7 +9573,7 @@ input StringContainsFilterInput {
 
 """
 Represents a specific `String` in the context of a `StringConnection`,
-providing access to both the `String` and a pagination `Cursor`.
+providing access to both the `String` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -9962,7 +9962,7 @@ type TeamAggregationCurrentPlayersObjectSubAggregations {
 
 """
 Represents a specific `TeamAggregation` in the context of a `TeamAggregationConnection`,
-providing access to both the `TeamAggregation` and a pagination `Cursor`.
+providing access to both the `TeamAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -10330,7 +10330,7 @@ type TeamDetailsGroupedBy {
 
 """
 Represents a specific `Team` in the context of a `TeamConnection`,
-providing access to both the `Team` and a pagination `Cursor`.
+providing access to both the `Team` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -12321,7 +12321,7 @@ type WidgetAggregationConnection {
 
 """
 Represents a specific `WidgetAggregation` in the context of a `WidgetAggregationConnection`,
-providing access to both the `WidgetAggregation` and a pagination `Cursor`.
+providing access to both the `WidgetAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -12527,7 +12527,7 @@ type WidgetCurrencyAggregationConnection {
 
 """
 Represents a specific `WidgetCurrencyAggregation` in the context of a `WidgetCurrencyAggregationConnection`,
-providing access to both the `WidgetCurrencyAggregation` and a pagination `Cursor`.
+providing access to both the `WidgetCurrencyAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -12575,7 +12575,7 @@ type WidgetCurrencyConnection {
 
 """
 Represents a specific `WidgetCurrency` in the context of a `WidgetCurrencyConnection`,
-providing access to both the `WidgetCurrency` and a pagination `Cursor`.
+providing access to both the `WidgetCurrency` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -12906,7 +12906,7 @@ enum WidgetCurrencySortOrderInput {
 
 """
 Represents a specific `Widget` in the context of a `WidgetConnection`,
-providing access to both the `Widget` and a pagination `Cursor`.
+providing access to both the `Widget` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -13744,7 +13744,7 @@ type WidgetOrAddressAggregationConnection {
 
 """
 Represents a specific `WidgetOrAddressAggregation` in the context of a `WidgetOrAddressAggregationConnection`,
-providing access to both the `WidgetOrAddressAggregation` and a pagination `Cursor`.
+providing access to both the `WidgetOrAddressAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -13792,7 +13792,7 @@ type WidgetOrAddressConnection {
 
 """
 Represents a specific `WidgetOrAddress` in the context of a `WidgetOrAddressConnection`,
-providing access to both the `WidgetOrAddress` and a pagination `Cursor`.
+providing access to both the `WidgetOrAddress` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -15014,7 +15014,7 @@ type WidgetWorkspaceAggregationConnection {
 
 """
 Represents a specific `WidgetWorkspaceAggregation` in the context of a `WidgetWorkspaceAggregationConnection`,
-providing access to both the `WidgetWorkspaceAggregation` and a pagination `Cursor`.
+providing access to both the `WidgetWorkspaceAggregation` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
@@ -15062,7 +15062,7 @@ type WidgetWorkspaceConnection {
 
 """
 Represents a specific `WidgetWorkspace` in the context of a `WidgetWorkspaceConnection`,
-providing access to both the `WidgetWorkspace` and a pagination `Cursor`.
+providing access to both the `WidgetWorkspace` and query-specific information such as the pagination `Cursor`.
 
 See the [Relay GraphQL Cursor Connections
 Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
