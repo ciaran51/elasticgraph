@@ -71,15 +71,17 @@ module ElasticGraph
       end
 
       it "avoids yielding empty queries, providing a default empty search response to the caller" do
-        empty_query = new_minimal_query
-        with_fields = new_minimal_query(requested_fields: ["name"])
-        with_total_hits = new_minimal_query(total_document_count_needed: true)
-        with_aggs = new_minimal_query(aggregations: [agg = aggregation_query_of(computations: [computation_of("amountMoney", "amount", :sum)])])
+        filters = [{"name" => {"equal_to_any_of" => ["foo"]}}]
+        empty_query = new_minimal_query(client_filters: filters)
+        with_fields = new_minimal_query(client_filters: filters, requested_fields: ["name"])
+        with_total_hits = new_minimal_query(client_filters: filters, total_document_count_needed: true)
+        with_aggs = new_minimal_query(client_filters: filters, aggregations: [agg = aggregation_query_of(computations: [computation_of("amountMoney", "amount", :sum)])])
+        with_highlights = new_minimal_query(client_filters: filters, request_all_highlights: true)
 
         yielded_header_body_tuples_by_query = nil
         query_response = raw_response_with_docs(raw_doc)
 
-        responses = DatastoreQuery.perform([empty_query, with_fields, with_total_hits, with_aggs]) do |header_body_tuples_by_query|
+        responses = DatastoreQuery.perform([empty_query, with_fields, with_total_hits, with_aggs, with_highlights]) do |header_body_tuples_by_query|
           yielded_header_body_tuples_by_query = header_body_tuples_by_query
           header_body_tuples_by_query.transform_values { query_response }
         end
@@ -87,7 +89,8 @@ module ElasticGraph
         # Notably, `empty_query` shouldn't be yielded to the block...
         expect(yielded_header_body_tuples_by_query.keys).to contain_exactly(
           with_fields, with_total_hits,
-          with_aggs.with(aggregations: {agg.name => agg})
+          with_aggs.with(aggregations: {agg.name => agg}),
+          with_highlights
         )
 
         # ...but we should still get a response for it.
@@ -95,7 +98,8 @@ module ElasticGraph
           empty_query => 0,
           with_fields => 1,
           with_total_hits => 1,
-          with_aggs => 1
+          with_aggs => 1,
+          with_highlights => 1
         )
       end
 

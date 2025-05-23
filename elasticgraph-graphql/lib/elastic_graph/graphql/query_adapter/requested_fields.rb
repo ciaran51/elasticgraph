@@ -45,7 +45,8 @@ module ElasticGraph
             if field.type.relay_connection?
               {
                 individual_docs_needed: pagination_fields_need_individual_docs?(lookahead),
-                requested_fields: requested_fields_under(relay_connection_node_from(lookahead))
+                requested_fields: requested_fields_under(relay_connection_node_from(lookahead)),
+                request_all_highlights: requesting_all_highlights?(lookahead)
               }
             else
               {
@@ -125,6 +126,15 @@ module ElasticGraph
         def query_needs_total_document_count?(lookahead)
           # If total edge count is explicitly specified in page_info, we have to return the total count
           lookahead.selects?(@schema.element_names.total_edge_count)
+        end
+
+        def requesting_all_highlights?(lookahead)
+          all_highlights =
+            lookahead
+              .selection(@schema.element_names.edges)
+              .selection(@schema.element_names.all_highlights)
+
+          all_highlights.selects?(@schema.element_names.path) || all_highlights.selects?(@schema.element_names.snippets)
         end
 
         def graphql_dynamic_field?(node)

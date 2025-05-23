@@ -41,6 +41,10 @@ module ElasticGraph
           ::GraphQL::Execution::Lookahead
         ) -> bool
 
+        def requesting_all_highlights?: (
+          ::GraphQL::Execution::Lookahead
+        ) -> bool
+
         def graphql_dynamic_field?: (
           ::GraphQL::Execution::Lookahead
         ) -> bool

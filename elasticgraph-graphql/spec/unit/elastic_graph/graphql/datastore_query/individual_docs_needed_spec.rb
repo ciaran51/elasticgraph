@@ -31,6 +31,14 @@ module ElasticGraph
         query = new_query(requested_fields: ["id"], individual_docs_needed: false)
         expect(query.individual_docs_needed).to be true
       end
+
+      it "forces `individual_docs_needed` to `true` if all highlights are requested, because we will not get back the highlights if we do not fetch documents" do
+        query = new_query(request_all_highlights: true)
+        expect(query.individual_docs_needed).to be true
+
+        query = new_query(request_all_highlights: true, individual_docs_needed: false)
+        expect(query.individual_docs_needed).to be true
+      end
     end
   end
 end

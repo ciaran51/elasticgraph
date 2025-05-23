@@ -115,6 +115,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "name")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "can request the fields under `nodes` for a relay connection" do
@@ -132,6 +133,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "name")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "does not request the fields under `edges.node` for an aggregations query" do
@@ -158,6 +160,7 @@ module ElasticGraph
           expect(query.requested_fields).to be_empty
           expect(query.individual_docs_needed).to be false
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "includes a path prefix when requesting a field under an embedded object" do
@@ -180,6 +183,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "name", "options.size")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "requests __typename when the client asks for __typename on a union or interface (but not when they ask for __typename on an object)" do
@@ -210,6 +214,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "inventor.__typename", "named_inventor.__typename")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "requests the set union of fields from union subtypes" do
@@ -240,6 +245,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("inventor.__typename", "inventor.name", "inventor.nationality", "inventor.stock_ticker")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "requests the set union of fields from interface subtypes" do
@@ -269,6 +275,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("named_inventor.__typename", "named_inventor.name", "named_inventor.nationality", "named_inventor.stock_ticker")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "always requests __typename for union fields even if the GraphQL query is not asking for it so that the ElasticGraph framework can determine the subtype" do
@@ -295,6 +302,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("inventor.__typename", "inventor.nationality", "inventor.stock_ticker")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "always requests __typename for interface fields even if the GraphQL query is not asking for it so that the ElasticGraph framework can determine the subtype" do
@@ -321,6 +329,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("named_inventor.__typename", "named_inventor.nationality", "named_inventor.stock_ticker")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "ignores relay connection sub-fields that are not directly under `edges.node` (e.g. `page_info`)" do
@@ -344,6 +353,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "name")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "requests no fields when only fetching page_info on a relay connection" do
@@ -362,6 +372,92 @@ module ElasticGraph
 
           expect(query.requested_fields).to be_empty
           expect(query.total_document_count_needed).to be false
+        end
+
+        describe "request_all_highlights" do
+          it "sets `request_all_highlights = true` when `all_highlights.path` is requested" do
+            query = datastore_query_for(:Query, :widgets, <<~QUERY)
+              query {
+                widgets {
+                  edges {
+                    all_highlights {
+                      path
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            expect(query.request_all_highlights).to be true
+            expect(query.individual_docs_needed).to be true
+          end
+
+          it "sets `request_all_highlights = true` when `all_highlights.snippets` is requested" do
+            query = datastore_query_for(:Query, :widgets, <<~QUERY)
+              query {
+                widgets {
+                  edges {
+                    all_highlights {
+                      snippets
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            expect(query.request_all_highlights).to be true
+            expect(query.individual_docs_needed).to be true
+          end
+
+          it "sets `request_all_highlights = true` when `all_highlights.snippets` and `all_highlights.path` are requested" do
+            query = datastore_query_for(:Query, :widgets, <<~QUERY)
+              query {
+                widgets {
+                  edges {
+                    all_highlights {
+                      path
+                      snippets
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            expect(query.request_all_highlights).to be true
+            expect(query.individual_docs_needed).to be true
+          end
+
+          it "sets `request_all_highlights = false` when the only requested `all_highlights` field is `__typename`" do
+            query = datastore_query_for(:Query, :widgets, <<~QUERY)
+              query {
+                widgets {
+                  edges {
+                    all_highlights {
+                      __typename
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            expect(query.request_all_highlights).to be false
+            expect(query.individual_docs_needed).to be false
+          end
+
+          it "sets `request_all_highlights = false` when `all_highlights` is not requested" do
+            query = datastore_query_for(:Query, :widgets, <<~QUERY)
+              query {
+                widgets {
+                  edges {
+                    cursor
+                  }
+                }
+              }
+            QUERY
+
+            expect(query.request_all_highlights).to be false
+            expect(query.individual_docs_needed).to be true # needed because of the cursor
+          end
         end
 
         describe "individual_docs_needed" do
@@ -504,6 +600,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("name", "component_ids")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
 
           it "also includes `id` if it is a self-referential relation" do
@@ -526,6 +623,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("name", "id", "parent_id")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
         end
 
@@ -550,6 +648,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("last_name", "id")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
 
           it "also includes foreign key field if it is a self-referential relation" do
@@ -576,6 +675,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("name", "id", "parent_id")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
         end
 
@@ -608,6 +708,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("last_name", "id")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
         end
 
@@ -649,6 +750,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("last_name", "part_ids")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
         end
 
@@ -690,6 +792,7 @@ module ElasticGraph
             expect(query.requested_fields).to contain_exactly("name", "voltage", "__typename")
             expect(query.individual_docs_needed).to be true
             expect(query.total_document_count_needed).to be false
+            expect(query.request_all_highlights).to be false
           end
         end
 
@@ -711,6 +814,7 @@ module ElasticGraph
           expect(query.requested_fields).to contain_exactly("id", "name")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
+          expect(query.request_all_highlights).to be false
         end
 
         it "only identifies requested fields for query nodes of indexed types" do
