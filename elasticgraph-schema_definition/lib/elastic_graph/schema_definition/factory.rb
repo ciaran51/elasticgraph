@@ -207,9 +207,9 @@ module ElasticGraph
         [single_value_filter, list_filter, fields_list_filter]
       end
 
-      def build_relay_pagination_types(type_name, include_total_edge_count: false, derived_indexed_types: [], support_pagination: true, support_highlights: true, &customize_connection)
+      def build_relay_pagination_types(type_name, include_total_edge_count: false, derived_indexed_types: [], support_pagination: true, &customize_connection)
         [
-          (edge_type_for(type_name, support_highlights) if support_pagination),
+          (edge_type_for(type_name) if support_pagination),
           connection_type_for(type_name, include_total_edge_count, derived_indexed_types, support_pagination, &customize_connection)
         ].compact
       end
@@ -431,7 +431,7 @@ module ElasticGraph
         end
       end
 
-      def edge_type_for(type_name, support_highlights)
+      def edge_type_for(type_name)
         type_ref = @state.type_ref(type_name)
         new_object_type type_ref.as_edge.name do |t|
           t.relay_pagination_type = true
@@ -457,7 +457,7 @@ module ElasticGraph
             EOS
           end
 
-          if support_highlights
+          if type_ref.as_object_type&.indexed?
             t.field @state.schema_elements.all_highlights, "[SearchHighlight!]!" do |f|
               f.documentation "Search highlights for this `#{type_name}`, indicating where in the indexed document the query matched."
             end

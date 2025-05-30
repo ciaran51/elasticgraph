@@ -73,7 +73,6 @@ module ElasticGraph
         ?include_total_edge_count: bool,
         ?derived_indexed_types: ::Array[Indexing::DerivedIndexedType],
         ?support_pagination: bool,
-        ?support_highlights: bool
       ) ?{ (SchemaElements::ObjectType) -> void } -> ::Array[SchemaElements::ObjectType]
 
       def new_interface_type: (::String) { (SchemaElements::InterfaceType) -> void } -> SchemaElements::InterfaceType
@@ -138,7 +137,7 @@ module ElasticGraph
 
       def define_list_counts_filter_field_on: (SchemaElements::InputType) -> void
 
-      def edge_type_for: (::String, bool) -> SchemaElements::ObjectType
+      def edge_type_for: (::String) -> SchemaElements::ObjectType
       def connection_type_for: (
         ::String,
         bool,

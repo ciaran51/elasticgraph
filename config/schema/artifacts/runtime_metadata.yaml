@@ -4413,8 +4413,6 @@ object_types_by_name:
   StringEdge:
     elasticgraph_category: relay_edge
     graphql_fields_by_name:
-      all_highlights:
-        resolver: object_without_lookahead
       cursor:
         resolver: object_without_lookahead
       node:

@@ -62,7 +62,6 @@ module ElasticGraph
             type StringEdge {
               #{schema_elements.node}: String
               #{schema_elements.cursor}: Cursor
-              #{schema_elements.all_highlights}: [SearchHighlight!]!
             }
           EOS
         end
@@ -106,7 +105,6 @@ module ElasticGraph
             type WidgetOptionsEdge {
               #{schema_elements.node}: WidgetOptions
               #{schema_elements.cursor}: Cursor
-              #{schema_elements.all_highlights}: [SearchHighlight!]!
             }
           EOS
         end
@@ -158,7 +156,6 @@ module ElasticGraph
             type TimeOfDayEdge {
               #{schema_elements.node}: TimeOfDay
               #{schema_elements.cursor}: Cursor
-              #{schema_elements.all_highlights}: [SearchHighlight!]!
             }
           EOS
 

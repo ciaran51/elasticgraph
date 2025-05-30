@@ -36,7 +36,7 @@ module ElasticGraph
           indexed_agg_type = to_indexed_aggregation_type
           indexed_aggregation_pagination_types =
             if indexed_agg_type
-              schema_def_state.factory.build_relay_pagination_types(indexed_agg_type.name, support_highlights: false)
+              schema_def_state.factory.build_relay_pagination_types(indexed_agg_type.name)
             else
               [] # : ::Array[SchemaElements::ObjectType]
             end

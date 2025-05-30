@@ -9636,11 +9636,6 @@ Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for mor
 """
 type StringEdge {
   """
-  Search highlights for this `String`, indicating where in the indexed document the query matched.
-  """
-  all_highlights: [SearchHighlight!]!
-
-  """
   The `Cursor` of this `String`. This can be passed in the next query as
   a `before` or `after` argument to continue paginating from this `String`.
   """
