@@ -80,8 +80,6 @@ module ElasticGraph
       #   @private
       # @!attribute [rw] non_nullable_in_json_schema
       #   @private
-      # @!attribute [rw] backing_indexing_field
-      #   @private
       # @!attribute [rw] as_input
       #   @private
       # @!attribute [rw] legacy_grouping_schema
@@ -91,7 +89,7 @@ module ElasticGraph
         :filter_customizations, :grouped_by_customizations, :sub_aggregations_customizations,
         :aggregated_values_customizations, :sort_order_enum_value_customizations,
         :args, :sortable, :filterable, :aggregatable, :groupable, :graphql_only, :source, :runtime_field_script, :relationship, :singular_name,
-        :computation_detail, :non_nullable_in_json_schema, :backing_indexing_field, :as_input,
+        :computation_detail, :non_nullable_in_json_schema, :as_input,
         :legacy_grouping_schema, :name_in_index, :resolver
       )
         include Mixins::HasDocumentation
@@ -105,7 +103,7 @@ module ElasticGraph
           accuracy_confidence: :high, name_in_index: name,
           type_for_derived_types: nil, graphql_only: nil, singular: nil,
           sortable: nil, filterable: nil, aggregatable: nil, groupable: nil,
-          backing_indexing_field: nil, as_input: false, legacy_grouping_schema: false, resolver: nil
+          as_input: false, legacy_grouping_schema: false, resolver: nil
         )
           type_ref = schema_def_state.type_ref(type)
           super(
@@ -134,7 +132,6 @@ module ElasticGraph
             singular_name: singular,
             name_in_index: name_in_index,
             non_nullable_in_json_schema: false,
-            backing_indexing_field: backing_indexing_field,
             as_input: as_input,
             legacy_grouping_schema: legacy_grouping_schema,
             resolver: resolver
@@ -935,6 +932,11 @@ module ElasticGraph
         end
 
         private
+
+        def backing_indexing_field
+          return nil unless graphql_only
+          parent_type.indexing_fields_by_name_in_index[name_in_index]
+        end
 
         def args_sdl(joiner:, after_opening_paren: "", &arg_selector)
           selected_args = args.values.select(&arg_selector)
