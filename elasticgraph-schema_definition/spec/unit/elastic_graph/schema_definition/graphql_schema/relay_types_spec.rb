@@ -376,6 +376,39 @@ module ElasticGraph
           EOS
         end
 
+        it "only defines `all_highlights` on `*Edge` types derived from indexed object types" do
+          result = define_schema do |api|
+            api.object_type "WidgetIndexed" do |t|
+              t.field "id", "ID!"
+              t.field "name", "String"
+              t.paginated_collection_field "widgets_unindexed", "WidgetUnIndexed" do |f|
+                f.mapping type: "object"
+              end
+              t.index "widgets"
+            end
+
+            api.object_type "WidgetUnIndexed" do |t|
+              t.field "id", "ID!"
+              t.field "name", "String"
+            end
+          end
+
+          expect(edge_type_from(result, "WidgetIndexed")).to eq(<<~EOS.strip)
+            type WidgetIndexedEdge {
+              #{schema_elements.node}: WidgetIndexed
+              #{schema_elements.cursor}: Cursor
+              #{schema_elements.all_highlights}: [SearchHighlight!]!
+            }
+          EOS
+
+          expect(edge_type_from(result, "WidgetUnIndexed")).to eq(<<~EOS.strip)
+            type WidgetUnIndexedEdge {
+              #{schema_elements.node}: WidgetUnIndexed
+              #{schema_elements.cursor}: Cursor
+            }
+          EOS
+        end
+
         def aggregation_efficency_hint_for(result, query_field)
           query_def = type_def_from(result, "Query", include_docs: true)
           aggregations_comments = query_def[/(#{TestSupport::DOC_COMMENTS})\s*#{correctly_cased(query_field)}\(/, 1]
