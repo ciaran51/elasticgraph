@@ -62,7 +62,7 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Setup Docker Compose
-        uses: KengoTODA/actions-setup-docker-compose@059437ac4daa2ca1c52f19e3c311aaf52cb4ccef # main
+        uses: KengoTODA/actions-setup-docker-compose@aa468051c6851848da9bfe114e7eac913c0bf59c # v1.2.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,9 +73,9 @@ jobs:
           git config --global init.defaultBranch main
 
       - name: Run Build Part
-      # Note: the `10` argument on the end is a number of seconds to sleep after booting the datastore.
-      # We've found that there is a minor race condition where the shards aren't fully ready for the tests
-      # to hit them if we don't wait a bit after booting.
+        # Note: the `10` argument on the end is a number of seconds to sleep after booting the datastore.
+        # We've found that there is a minor race condition where the shards aren't fully ready for the tests
+        # to hit them if we don't wait a bit after booting.
         run: script/ci_parts/${{ matrix.build_part }} ${{ matrix.datastore }} 10
 
   docker-demo:
