@@ -822,6 +822,47 @@ type Component implements NamedEntity @key(fields: "id") {
   dollar_widget: Widget
   id: ID!
   name: String
+  owner: ComponentOwner
+  owners: [ComponentOwner!]!
+  owners_paginated(
+    """
+    Used to forward-paginate through the `owners_paginated`. When provided, the next page after the
+    provided cursor will be returned.
+
+    See the [Relay GraphQL Cursor Connections
+    Specification](https://relay.dev/graphql/connections.htm#sec-Arguments) for more info.
+    """
+    after: Cursor
+
+    """
+    Used to backward-paginate through the `owners_paginated`. When provided, the previous page before the
+    provided cursor will be returned.
+
+    See the [Relay GraphQL Cursor Connections
+    Specification](https://relay.dev/graphql/connections.htm#sec-Arguments) for more info.
+    """
+    before: Cursor
+
+    """
+    Used in conjunction with the `after` argument to forward-paginate through the `owners_paginated`.
+    When provided, limits the number of returned results to the first `n` after the provided
+    `after` cursor (or from the start of the `owners_paginated`, if no `after` cursor is provided).
+
+    See the [Relay GraphQL Cursor Connections
+    Specification](https://relay.dev/graphql/connections.htm#sec-Arguments) for more info.
+    """
+    first: Int
+
+    """
+    Used in conjunction with the `before` argument to backward-paginate through the `owners_paginated`.
+    When provided, limits the number of returned results to the last `n` before the provided
+    `before` cursor (or from the end of the `owners_paginated`, if no `before` cursor is provided).
+
+    See the [Relay GraphQL Cursor Connections
+    Specification](https://relay.dev/graphql/connections.htm#sec-Arguments) for more info.
+    """
+    last: Int
+  ): ComponentOwnerConnection
 
   """
   Aggregations over the `parts` data.
@@ -1336,6 +1377,58 @@ type ComponentGroupedBy {
   The `widget_workspace_id` field value for this group.
   """
   widget_workspace_id: ID
+}
+
+type ComponentOwner @key(fields: "token", resolvable: false) {
+  token: ID
+}
+
+"""
+Represents a paginated collection of `ComponentOwner` results.
+
+See the [Relay GraphQL Cursor Connections
+Specification](https://relay.dev/graphql/connections.htm#sec-Connection-Types) for more info.
+"""
+type ComponentOwnerConnection {
+  """
+  Wraps a specific `ComponentOwner` to pair it with its pagination cursor.
+  """
+  edges: [ComponentOwnerEdge!]!
+
+  """
+  The list of `ComponentOwner` results.
+  """
+  nodes: [ComponentOwner!]!
+
+  """
+  Provides pagination-related information.
+  """
+  page_info: PageInfo!
+
+  """
+  The total number of edges available in this connection to paginate over.
+  """
+  total_edge_count: JsonSafeLong!
+}
+
+"""
+Represents a specific `ComponentOwner` in the context of a `ComponentOwnerConnection`,
+providing access to both the `ComponentOwner` and a pagination `Cursor`.
+
+See the [Relay GraphQL Cursor Connections
+Specification](https://relay.dev/graphql/connections.htm#sec-Edge-Types) for more info.
+"""
+type ComponentOwnerEdge {
+  """
+  The `Cursor` of this `ComponentOwner`. This can be passed in the next query as
+  a `before` or `after` argument to continue paginating from this `ComponentOwner`.
+  """
+  cursor: Cursor
+
+  """
+  The `ComponentOwner` of this edge.
+  """
+  node: ComponentOwner
 }
 
 """

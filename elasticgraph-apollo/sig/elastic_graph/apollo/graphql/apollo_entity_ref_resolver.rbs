@@ -1,0 +1,24 @@
+module ElasticGraph
+  module Apollo
+    module GraphQL
+      module ApolloEntityRefResolver
+        class ForSingleId
+          include ::ElasticGraph::_GraphQLResolverWithoutLookahead
+          @source_id_field: ::String
+          @exposed_id_field: ::String
+        end
+
+        class ForIdList
+          include ::ElasticGraph::_GraphQLResolverWithoutLookahead
+          @source_ids_field: ::String
+          @exposed_id_field: ::String
+        end
+
+        class ForPaginatedList
+          include ::ElasticGraph::_GraphQLResolverWithoutLookahead
+          @for_id_list: ForIdList
+        end
+      end
+    end
+  end
+end

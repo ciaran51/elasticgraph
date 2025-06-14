@@ -91,6 +91,8 @@ module ElasticGraph
         def runtime_metadata_computation_detail: (empty_bucket_value: ::Numeric?, function: ::Symbol) -> void
         def runtime_metadata_graphql_field: () -> SchemaArtifacts::RuntimeMetadata::GraphQLField
 
+        def backing_indexing_field: () -> Field?
+
         private
 
         def text?: () -> bool
