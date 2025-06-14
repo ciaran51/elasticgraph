@@ -604,6 +604,514 @@ module ElasticGraph
           end
         end
 
+        describe "apollo entity reference support" do
+          it "supports an entity reference field for a single id" do
+            results = define_schema do |schema|
+              schema.object_type "Component" do |t|
+                t.field "the_id_field", "ID"
+              end
+
+              schema.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.field "component_id", "ID!"
+                # Demnonstrate that it works with and without a block, supporting both nullable and non-null fields.
+                t.apollo_entity_ref_field "component1", "Component", id_field_name_in_index: "component_id"
+                t.apollo_entity_ref_field "component2", "Component!", id_field_name_in_index: "component_id" do |f|
+                  f.documentation "A component entity reference."
+                end
+
+                t.index "widgets"
+              end
+            end
+
+            schema_string = results.graphql_schema_string
+            expect(type_def_from(schema_string, "Widget", include_docs: true)).to eq(<<~EOS.strip)
+              type Widget @key(fields: "id", resolvable: true) {
+                id: ID
+                component_id: ID!
+                component1: Component
+                """
+                A component entity reference.
+                """
+                component2: Component!
+              }
+            EOS
+
+            # The entity ref field should be available as a return field but not available for
+            # filtering, grouping, aggregating, sorting, or highlighting.
+            expect(type_def_from(schema_string, "WidgetFilterInput")).to eq(<<~EOS.strip)
+              input WidgetFilterInput {
+                #{schema_elements.any_of}: [WidgetFilterInput!]
+                #{schema_elements.all_of}: [WidgetFilterInput!]
+                #{schema_elements.not}: WidgetFilterInput
+                id: IDFilterInput
+                component_id: IDFilterInput
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetGroupedBy")).to eq(<<~EOS.strip)
+              type WidgetGroupedBy {
+                component_id: ID
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetAggregatedValues")).to eq(<<~EOS.strip)
+              type WidgetAggregatedValues {
+                id: NonNumericAggregatedValues
+                component_id: NonNumericAggregatedValues
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetHighlights")).to eq(<<~EOS.strip)
+              type WidgetHighlights {
+                id: [String!]!
+                component_id: [String!]!
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetSortOrderInput")).to eq(<<~EOS.strip)
+              enum WidgetSortOrderInput {
+                id_ASC
+                id_DESC
+                component_id_ASC
+                component_id_DESC
+              }
+            EOS
+
+            # The entity ref field should not be in the datastore index mapping.
+            expect(
+              results.datastore_config.dig("indices", "widgets", "mappings", "properties").keys.grep_v(/^__/)
+            ).to contain_exactly("component_id", "id")
+
+            runtime_graphql_fields_by_name = results
+              .runtime_metadata
+              .object_types_by_name
+              .fetch("Widget")
+              .graphql_fields_by_name
+
+            # Verify the runtime metadata of the entity ref fields are correct.
+            expect(runtime_graphql_fields_by_name.fetch("component1")).to eq(graphql_field_with(
+              name_in_index: "component_id",
+              resolver: configured_graphql_resolver(:apollo_entity_ref, source_id_field: "component_id", exposed_id_field: "the_id_field")
+            ))
+            expect(runtime_graphql_fields_by_name.fetch("component2")).to eq(graphql_field_with(
+              name_in_index: "component_id",
+              resolver: configured_graphql_resolver(:apollo_entity_ref, source_id_field: "component_id", exposed_id_field: "the_id_field")
+            ))
+          end
+
+          it "supports an entity reference field for a list of ids" do
+            results = define_schema do |schema|
+              schema.object_type "Component" do |t|
+                t.field "the_id_field", "ID"
+              end
+
+              schema.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.field "component_ids", "[ID!]!", singular: "component_id"
+                # Demnonstrate that it works with and without a block, supporting both nullable and non-null fields.
+                t.apollo_entity_ref_field "components1", "[Component!]!", id_field_name_in_index: "component_ids"
+                t.apollo_entity_ref_field "components2", "[Component]", id_field_name_in_index: "component_ids" do |f|
+                  f.documentation "Component entity references."
+                end
+
+                t.index "widgets"
+              end
+            end
+
+            schema_string = results.graphql_schema_string
+            expect(type_def_from(schema_string, "Widget", include_docs: true)).to eq(<<~EOS.strip)
+              type Widget @key(fields: "id", resolvable: true) {
+                id: ID
+                component_ids: [ID!]!
+                components1: [Component!]!
+                """
+                Component entity references.
+                """
+                components2: [Component]
+              }
+            EOS
+
+            # The entity ref field should be available as a return field but not available for
+            # filtering, grouping, aggregating, sorting, or highlighting.
+            expect(type_def_from(schema_string, "WidgetFilterInput")).to eq(<<~EOS.strip)
+              input WidgetFilterInput {
+                #{schema_elements.any_of}: [WidgetFilterInput!]
+                #{schema_elements.all_of}: [WidgetFilterInput!]
+                #{schema_elements.not}: WidgetFilterInput
+                id: IDFilterInput
+                component_ids: IDListFilterInput
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetGroupedBy")).to eq(<<~EOS.strip)
+              type WidgetGroupedBy {
+                component_id: ID
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetAggregatedValues")).to eq(<<~EOS.strip)
+              type WidgetAggregatedValues {
+                id: NonNumericAggregatedValues
+                component_ids: NonNumericAggregatedValues
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetHighlights")).to eq(<<~EOS.strip)
+              type WidgetHighlights {
+                id: [String!]!
+                component_ids: [String!]!
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetSortOrderInput")).to eq(<<~EOS.strip)
+              enum WidgetSortOrderInput {
+                id_ASC
+                id_DESC
+              }
+            EOS
+
+            # The entity ref field should not be in the datastore index mapping.
+            expect(
+              results.datastore_config.dig("indices", "widgets", "mappings", "properties").keys.grep_v(/^__/)
+            ).to contain_exactly("component_ids", "id")
+
+            runtime_graphql_fields_by_name = results
+              .runtime_metadata
+              .object_types_by_name
+              .fetch("Widget")
+              .graphql_fields_by_name
+
+            # Verify the runtime metadata of the entity ref fields are correct.
+            expect(runtime_graphql_fields_by_name.fetch("components1")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_list, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+            expect(runtime_graphql_fields_by_name.fetch("components2")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_list, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+          end
+
+          it "supports a paginated entity reference collection field backed by a non-paginated list field" do
+            results = define_schema do |schema|
+              schema.object_type "Component" do |t|
+                t.field "the_id_field", "ID"
+              end
+
+              schema.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.field "component_ids", "[ID!]!", singular: "component_id"
+                # Demnonstrate that it works with and without a block
+                t.apollo_entity_ref_paginated_collection_field "components1", "Component", id_field_name_in_index: "component_ids"
+                t.apollo_entity_ref_paginated_collection_field "components2", "Component", id_field_name_in_index: "component_ids" do |f|
+                  f.directive "deprecated"
+                end
+
+                t.index "widgets"
+              end
+            end
+
+            schema_string = results.graphql_schema_string
+            expect(type_def_from(schema_string, "Widget")).to eq(<<~EOS.strip)
+              type Widget @key(fields: "id", resolvable: true) {
+                id: ID
+                component_ids: [ID!]!
+                components1(
+                  first: Int
+                  after: Cursor
+                  last: Int
+                  before: Cursor): ComponentConnection
+                components2(
+                  first: Int
+                  after: Cursor
+                  last: Int
+                  before: Cursor): ComponentConnection @deprecated
+              }
+            EOS
+
+            # The entity ref field should be available as a return field but not available for
+            # filtering, grouping, aggregating, sorting, or highlighting.
+            expect(type_def_from(schema_string, "WidgetFilterInput")).to eq(<<~EOS.strip)
+              input WidgetFilterInput {
+                #{schema_elements.any_of}: [WidgetFilterInput!]
+                #{schema_elements.all_of}: [WidgetFilterInput!]
+                #{schema_elements.not}: WidgetFilterInput
+                id: IDFilterInput
+                component_ids: IDListFilterInput
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetGroupedBy")).to eq(<<~EOS.strip)
+              type WidgetGroupedBy {
+                component_id: ID
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetAggregatedValues")).to eq(<<~EOS.strip)
+              type WidgetAggregatedValues {
+                id: NonNumericAggregatedValues
+                component_ids: NonNumericAggregatedValues
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetHighlights")).to eq(<<~EOS.strip)
+              type WidgetHighlights {
+                id: [String!]!
+                component_ids: [String!]!
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetSortOrderInput")).to eq(<<~EOS.strip)
+              enum WidgetSortOrderInput {
+                id_ASC
+                id_DESC
+              }
+            EOS
+
+            # The entity ref field should not be in the datastore index mapping.
+            expect(
+              results.datastore_config.dig("indices", "widgets", "mappings", "properties").keys.grep_v(/^__/)
+            ).to contain_exactly("component_ids", "id")
+
+            runtime_graphql_fields_by_name = results
+              .runtime_metadata
+              .object_types_by_name
+              .fetch("Widget")
+              .graphql_fields_by_name
+
+            # Verify the runtime metadata of the entity ref fields are correct.
+            expect(runtime_graphql_fields_by_name.fetch("components1")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_paginated, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+            expect(runtime_graphql_fields_by_name.fetch("components2")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_paginated, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+          end
+
+          it "supports a paginated entity reference collection field backed by a paginated list field" do
+            results = define_schema do |schema|
+              schema.object_type "Component" do |t|
+                t.field "the_id_field", "ID"
+              end
+
+              schema.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.paginated_collection_field "component_ids", "ID", singular: "component_id"
+                # Demnonstrate that it works with and without a block
+                t.apollo_entity_ref_paginated_collection_field "components1", "Component", id_field_name_in_index: "component_ids"
+                t.apollo_entity_ref_paginated_collection_field "components2", "Component", id_field_name_in_index: "component_ids" do |f|
+                  f.directive "deprecated"
+                end
+
+                t.index "widgets"
+              end
+            end
+
+            schema_string = results.graphql_schema_string
+            expect(type_def_from(schema_string, "Widget")).to eq(<<~EOS.strip)
+              type Widget @key(fields: "id", resolvable: true) {
+                id: ID
+                component_ids(
+                  first: Int
+                  after: Cursor
+                  last: Int
+                  before: Cursor): IDConnection
+                components1(
+                  first: Int
+                  after: Cursor
+                  last: Int
+                  before: Cursor): ComponentConnection
+                components2(
+                  first: Int
+                  after: Cursor
+                  last: Int
+                  before: Cursor): ComponentConnection @deprecated
+              }
+            EOS
+
+            # The entity ref field should be available as a return field but not available for
+            # filtering, grouping, aggregating, sorting, or highlighting.
+            expect(type_def_from(schema_string, "WidgetFilterInput")).to eq(<<~EOS.strip)
+              input WidgetFilterInput {
+                #{schema_elements.any_of}: [WidgetFilterInput!]
+                #{schema_elements.all_of}: [WidgetFilterInput!]
+                #{schema_elements.not}: WidgetFilterInput
+                id: IDFilterInput
+                component_ids: IDListFilterInput
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetGroupedBy")).to eq(<<~EOS.strip)
+              type WidgetGroupedBy {
+                component_id: ID
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetAggregatedValues")).to eq(<<~EOS.strip)
+              type WidgetAggregatedValues {
+                id: NonNumericAggregatedValues
+                component_ids: NonNumericAggregatedValues
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetHighlights")).to eq(<<~EOS.strip)
+              type WidgetHighlights {
+                id: [String!]!
+                component_ids: [String!]!
+              }
+            EOS
+            expect(type_def_from(schema_string, "WidgetSortOrderInput")).to eq(<<~EOS.strip)
+              enum WidgetSortOrderInput {
+                id_ASC
+                id_DESC
+              }
+            EOS
+
+            # The entity ref field should not be in the datastore index mapping.
+            expect(
+              results.datastore_config.dig("indices", "widgets", "mappings", "properties").keys.grep_v(/^__/)
+            ).to contain_exactly("component_ids", "id")
+
+            runtime_graphql_fields_by_name = results
+              .runtime_metadata
+              .object_types_by_name
+              .fetch("Widget")
+              .graphql_fields_by_name
+
+            # Verify the runtime metadata of the entity ref fields are correct.
+            expect(runtime_graphql_fields_by_name.fetch("components1")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_paginated, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+            expect(runtime_graphql_fields_by_name.fetch("components2")).to eq(graphql_field_with(
+              name_in_index: "component_ids",
+              resolver: configured_graphql_resolver(:apollo_entity_ref_paginated, source_ids_field: "component_ids", exposed_id_field: "the_id_field")
+            ))
+          end
+
+          it "validates that the entity ref type is an object type" do
+            expect {
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "ID"
+                  t.apollo_entity_ref_field "component", "String", id_field_name_in_index: "component_id"
+                  t.index "widgets"
+                end
+              end
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`Widget.component` is invalid: the referenced type (`String`) " \
+              "is not an object type as required by `apollo_entity_ref_field`."
+            )
+          end
+
+          it "validates that the entity ref type has only one field as the custom resolver is not capable of returning any other fields" do
+            expect {
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "ID"
+                  t.apollo_entity_ref_field "component", "Component", id_field_name_in_index: "component_id"
+                  t.index "widgets"
+                end
+
+                schema.object_type "Component" do |t|
+                  t.field "id", "ID"
+                  t.field "name", "String"
+                end
+              end
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`Widget.component` is invalid: `apollo_entity_ref_field` can only be used for " \
+              "types with a single field, but `Component` has 2 fields."
+            )
+          end
+
+          it "validates that the entity ref type's single field is an `ID` field" do
+            define_schema_with_entity_ref_field_of_type = lambda do |entity_ref_field_type|
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "ID"
+                  t.apollo_entity_ref_field "component", "Component", id_field_name_in_index: "component_id"
+                  t.index "widgets"
+                end
+
+                schema.object_type "Component" do |t|
+                  t.field "id", entity_ref_field_type
+                end
+              end
+            end
+
+            expect {
+              define_schema_with_entity_ref_field_of_type.call("String")
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`Widget.component` is invalid: `apollo_entity_ref_field` can only be used for " \
+              "types with a single `ID` field, but the type of `Component.id` is `String`."
+            )
+
+            expect {
+              define_schema_with_entity_ref_field_of_type.call("[ID!]!")
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`Widget.component` is invalid: `apollo_entity_ref_field` can only be used for " \
+              "types with a single `ID` field, but the type of `Component.id` is `[ID!]!`."
+            )
+
+            expect {
+              define_schema_with_entity_ref_field_of_type.call("ID")
+            }.not_to raise_error
+
+            expect {
+              define_schema_with_entity_ref_field_of_type.call("ID!")
+            }.not_to raise_error
+          end
+
+          it "validates that the field referenced from `id_field_name_in_index` exists" do
+            expect {
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "ID"
+                  t.apollo_entity_ref_field "component", "Component", id_field_name_in_index: "component_id2"
+                  t.index "widgets"
+                end
+
+                schema.object_type "Component" do |t|
+                  t.field "id", "ID"
+                end
+              end
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "GraphQL-only field `Widget.component` has a `name_in_index` (component_id2) which does not reference an existing indexing field."
+            )
+          end
+
+          it "validates that the field referenced from `id_field_name_in_index` is an `ID` field" do
+            expect {
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "String"
+                  t.apollo_entity_ref_field "component", "Component", id_field_name_in_index: "component_id"
+                  t.index "widgets"
+                end
+
+                schema.object_type "Component" do |t|
+                  t.field "id", "ID"
+                end
+              end
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`id_field_name_in_index` must reference an `ID` field, but the type of `component_id` is `String`."
+            )
+          end
+
+          it "validates that the field referenced from `id_field_name_in_index` for a paginated field is an `ID` collection field" do
+            expect {
+              define_schema do |schema|
+                schema.object_type "Widget" do |t|
+                  t.field "id", "ID"
+                  t.field "component_id", "ID"
+                  t.apollo_entity_ref_paginated_collection_field "component", "Component", id_field_name_in_index: "component_id"
+                  t.index "widgets"
+                end
+
+                schema.object_type "Component" do |t|
+                  t.field "id", "ID"
+                end
+              end
+            }.to raise_error Errors::SchemaError, a_string_including(
+              "`Widget.component` is invalid: `id_field_name_in_index` must reference an id collection field, " \
+              "but the type of `component_id` is `ID`."
+            )
+          end
+        end
+
         it "provides an API on `object_type` and `interface_type` to make it easy to tag a field and all derived schema elements for inclusion in an apollo contract variant" do
           schema_string = graphql_schema_string do |schema|
             # For full branch test coverage, verify that these overridden methods still work when no block is given.

@@ -256,6 +256,23 @@ ElasticGraph.define_schema do |schema|
     t.relates_to_many "widgets", "Widget", via: "component_ids", dir: :in, singular: "widget"
     t.relates_to_many "parts", "Part", via: "part_ids", dir: :out, singular: "part"
 
+    t.field "owner_ids", "[ID!]!", indexing_only: true
+    t.field "owner_id", "ID", indexing_only: true
+
+    # Define some Apollo-specific schema elements when we are defining the schema for Apollo.
+    if schema.respond_to?(:target_apollo_federation_version)
+      # :nocov: -- this file is only exercised in a test running without `elasticgraph-apollo`.
+      t.apollo_entity_ref_field "owner", "ComponentOwner", id_field_name_in_index: "owner_id"
+      t.apollo_entity_ref_field "owners", "[ComponentOwner!]!", id_field_name_in_index: "owner_ids"
+      t.apollo_entity_ref_paginated_collection_field "owners_paginated", "ComponentOwner", id_field_name_in_index: "owner_ids"
+
+      schema.object_type "ComponentOwner" do |t|
+        t.field "token", "ID"
+        t.apollo_key fields: "token", resolvable: false
+      end
+      # :nocov:
+    end
+
     t.index "components" do |i|
       i.default_sort "created_at", :desc
     end

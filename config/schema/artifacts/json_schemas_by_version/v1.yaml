@@ -263,6 +263,24 @@ json_schema_version: 1
         ElasticGraph:
           type: "[ID!]!"
           nameInIndex: part_ids
+      owner_ids:
+        type: array
+        items:
+          allOf:
+          - "$ref": "#/$defs/ID"
+          - maxLength: 8191
+        ElasticGraph:
+          type: "[ID!]!"
+          nameInIndex: owner_ids
+      owner_id:
+        anyOf:
+        - allOf:
+          - "$ref": "#/$defs/ID"
+          - maxLength: 8191
+        - type: 'null'
+        ElasticGraph:
+          type: ID
+          nameInIndex: owner_id
       __typename:
         type: string
         const: Component
@@ -274,6 +292,8 @@ json_schema_version: 1
     - position
     - tags
     - part_ids
+    - owner_ids
+    - owner_id
   Date:
     type: string
     format: date

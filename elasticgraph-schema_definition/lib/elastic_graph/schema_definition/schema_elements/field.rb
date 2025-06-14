@@ -1060,8 +1060,10 @@ module ElasticGraph
           )
         end
 
-        private
-
+        # The alternate field that is backing this field in the datastore index. Will only be non-`nil` for `graphql_only` fields.
+        # @return [Field, nil] the field backing this field in the index
+        #
+        # @private
         def backing_indexing_field
           return nil unless graphql_only
 
@@ -1078,6 +1080,8 @@ module ElasticGraph
 
           field
         end
+
+        private
 
         def args_sdl(joiner:, after_opening_paren: "", &arg_selector)
           selected_args = args.values.select(&arg_selector)

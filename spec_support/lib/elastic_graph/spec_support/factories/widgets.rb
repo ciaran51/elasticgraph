@@ -184,6 +184,8 @@ FactoryBot.define do
     name { Faker::ElectricalComponents.active }
     created_at { Faker::Time.between(from: recent_date - 30, to: recent_date).utc.iso8601 }
     position { build :position }
+    owner_ids { [] }
+    owner_id { owner_ids.first }
 
     part_ids do
       parts.map { |part| part.fetch(:id) }

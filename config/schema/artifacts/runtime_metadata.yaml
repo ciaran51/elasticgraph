@@ -1461,6 +1461,8 @@ index_definitions_by_name:
     - direction: desc
       field_path: created_at
     fields_by_path:
+      __counts.owner_ids:
+        source: __self
       __counts.part_ids:
         source: __self
       __counts.tags:
@@ -1472,6 +1474,10 @@ index_definitions_by_name:
       id:
         source: __self
       name:
+        source: __self
+      owner_id:
+        source: __self
+      owner_ids:
         source: __self
       part_ids:
         source: __self
@@ -2896,6 +2902,10 @@ object_types_by_name:
         created_at:
           cardinality: one
         name:
+          cardinality: one
+        owner_id:
+          cardinality: one
+        owner_ids:
           cardinality: one
         part_ids:
           cardinality: one

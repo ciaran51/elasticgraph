@@ -1406,6 +1406,21 @@ graphql_resolvers_by_name:
     resolver_ref:
       name: ElasticGraph::Apollo::GraphQL::EntitiesFieldResolver
       require_path: elastic_graph/apollo/graphql/entities_field_resolver
+  apollo_entity_ref:
+    needs_lookahead: false
+    resolver_ref:
+      name: ElasticGraph::Apollo::GraphQL::ApolloEntityRefResolver::ForSingleId
+      require_path: elastic_graph/apollo/graphql/apollo_entity_ref_resolver
+  apollo_entity_ref_list:
+    needs_lookahead: false
+    resolver_ref:
+      name: ElasticGraph::Apollo::GraphQL::ApolloEntityRefResolver::ForIdList
+      require_path: elastic_graph/apollo/graphql/apollo_entity_ref_resolver
+  apollo_entity_ref_paginated:
+    needs_lookahead: false
+    resolver_ref:
+      name: ElasticGraph::Apollo::GraphQL::ApolloEntityRefResolver::ForPaginatedList
+      require_path: elastic_graph/apollo/graphql/apollo_entity_ref_resolver
   apollo_service:
     needs_lookahead: false
     resolver_ref:
@@ -1475,6 +1490,8 @@ index_definitions_by_name:
     - direction: desc
       field_path: created_at
     fields_by_path:
+      __counts.owner_ids:
+        source: __self
       __counts.part_ids:
         source: __self
       __counts.tags:
@@ -1486,6 +1503,10 @@ index_definitions_by_name:
       id:
         source: __self
       name:
+        source: __self
+      owner_id:
+        source: __self
+      owner_ids:
         source: __self
       part_ids:
         source: __self
@@ -2851,6 +2872,27 @@ object_types_by_name:
       name:
         resolver:
           name: get_record_field_value
+      owner:
+        name_in_index: owner_id
+        resolver:
+          config:
+            source_id_field: owner_id
+            exposed_id_field: token
+          name: apollo_entity_ref
+      owners:
+        name_in_index: owner_ids
+        resolver:
+          config:
+            source_ids_field: owner_ids
+            exposed_id_field: token
+          name: apollo_entity_ref_list
+      owners_paginated:
+        name_in_index: owner_ids
+        resolver:
+          config:
+            source_ids_field: owner_ids
+            exposed_id_field: token
+          name: apollo_entity_ref_paginated
       part_aggregations:
         relation:
           direction: out
@@ -2910,6 +2952,10 @@ object_types_by_name:
         created_at:
           cardinality: one
         name:
+          cardinality: one
+        owner_id:
+          cardinality: one
+        owner_ids:
           cardinality: one
         part_ids:
           cardinality: one
@@ -3085,6 +3131,35 @@ object_types_by_name:
         name_in_index: widget_workspace_id3
         resolver:
           name: get_record_field_value
+  ComponentOwner:
+    graphql_fields_by_name:
+      token:
+        resolver:
+          name: get_record_field_value
+  ComponentOwnerConnection:
+    elasticgraph_category: relay_connection
+    graphql_fields_by_name:
+      edges:
+        resolver:
+          name: object_without_lookahead
+      nodes:
+        resolver:
+          name: object_without_lookahead
+      page_info:
+        resolver:
+          name: object_without_lookahead
+      total_edge_count:
+        resolver:
+          name: object_without_lookahead
+  ComponentOwnerEdge:
+    elasticgraph_category: relay_edge
+    graphql_fields_by_name:
+      cursor:
+        resolver:
+          name: object_without_lookahead
+      node:
+        resolver:
+          name: object_without_lookahead
   Country:
     graphql_fields_by_name:
       currency:
@@ -4090,6 +4165,27 @@ object_types_by_name:
       options:
         resolver:
           name: get_record_field_value
+      owner:
+        name_in_index: owner_id
+        resolver:
+          config:
+            source_id_field: owner_id
+            exposed_id_field: token
+          name: apollo_entity_ref
+      owners:
+        name_in_index: owner_ids
+        resolver:
+          config:
+            source_ids_field: owner_ids
+            exposed_id_field: token
+          name: apollo_entity_ref_list
+      owners_paginated:
+        name_in_index: owner_ids
+        resolver:
+          config:
+            source_ids_field: owner_ids
+            exposed_id_field: token
+          name: apollo_entity_ref_paginated
       part_aggregations:
         relation:
           direction: out
