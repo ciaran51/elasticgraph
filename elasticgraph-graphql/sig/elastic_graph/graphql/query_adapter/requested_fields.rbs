@@ -19,11 +19,13 @@ module ElasticGraph
 
         def requested_fields_under: (
           ::GraphQL::Execution::Lookahead,
+          ::Set[::String],
           ?path_prefix: ::String
         ) -> ::Array[::String]
 
         def requested_fields_for: (
           ::GraphQL::Execution::Lookahead,
+          ::Set[::String],
           path_prefix: ::String
         ) -> ::Array[::String]
 

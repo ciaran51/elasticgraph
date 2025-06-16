@@ -93,7 +93,13 @@ module ElasticGraph
               t.field "last_name", "String"
               t.relates_to_one "widget", "Widget", via: "component_ids", dir: :in
               t.relates_to_many "parts", "Part", via: "part_ids", dir: :out, singular: "part"
+              t.field "owner_id", "ID", indexing_only: true
+              t.field "owner", "ComponentOwner", name_in_index: "owner_id", graphql_only: true
               t.index "components"
+            end
+
+            schema.object_type "ComponentOwner" do |t|
+              t.field "id", "ID"
             end
           end
         end
@@ -178,6 +184,23 @@ module ElasticGraph
           QUERY
 
           expect(query.requested_fields).to contain_exactly("id", "name", "options.size")
+          expect(query.individual_docs_needed).to be true
+          expect(query.total_document_count_needed).to be false
+        end
+
+        it "aligns the requested fields with the index structure even when it differs from the GraphQL structure" do
+          query = datastore_query_for(:Query, :components, <<~QUERY)
+            query {
+              components {
+                nodes {
+                  id
+                  owner { id }
+                }
+              }
+            }
+          QUERY
+
+          expect(query.requested_fields).to contain_exactly("id", "owner_id")
           expect(query.individual_docs_needed).to be true
           expect(query.total_document_count_needed).to be false
         end
