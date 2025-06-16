@@ -6434,6 +6434,11 @@ type NamedEntityHighlights {
   options: WidgetOptionsHighlights
 
   """
+  Search highlights for the `size`, providing snippets of the matching text.
+  """
+  size: [String!]!
+
+  """
   Search highlights for the `tags`, providing snippets of the matching text.
   """
   tags: [String!]!
@@ -14327,6 +14332,11 @@ type WidgetHighlights {
   options: WidgetOptionsHighlights
 
   """
+  Search highlights for the `size`, providing snippets of the matching text.
+  """
+  size: [String!]!
+
+  """
   Search highlights for the `tags`, providing snippets of the matching text.
   """
   tags: [String!]!
@@ -15382,6 +15392,11 @@ type WidgetOrAddressHighlights {
   Search highlights for the `options`, providing snippets of the matching text.
   """
   options: WidgetOptionsHighlights
+
+  """
+  Search highlights for the `size`, providing snippets of the matching text.
+  """
+  size: [String!]!
 
   """
   Search highlights for the `tags`, providing snippets of the matching text.

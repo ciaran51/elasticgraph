@@ -4108,6 +4108,9 @@ object_types_by_name:
         resolver: get_record_field_value
       options:
         resolver: get_record_field_value
+      size:
+        name_in_index: options.size
+        resolver: get_record_field_value
       tags:
         resolver: get_record_field_value
       the_options:
@@ -5947,6 +5950,9 @@ object_types_by_name:
         resolver: get_record_field_value
       options:
         resolver: get_record_field_value
+      size:
+        name_in_index: options.size
+        resolver: get_record_field_value
       tags:
         resolver: get_record_field_value
       the_options:
@@ -6346,6 +6352,9 @@ object_types_by_name:
       named_inventor:
         resolver: get_record_field_value
       options:
+        resolver: get_record_field_value
+      size:
+        name_in_index: options.size
         resolver: get_record_field_value
       tags:
         resolver: get_record_field_value

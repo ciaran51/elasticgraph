@@ -191,6 +191,30 @@ module ElasticGraph
           EOS
         end
 
+        it "is able to define a highlights field for a `graphql_only` field which references a child subfield in `name_in_index`" do
+          result = define_schema do |api|
+            api.object_type "WidgetOptions" do |t|
+              t.field "size", "Int"
+              t.field "color", "String", indexing_only: true
+            end
+
+            api.object_type "Widget" do |t|
+              t.field "id", "ID"
+              t.field "options", "WidgetOptions"
+              t.field "color", "String", graphql_only: true, name_in_index: "options.color"
+
+              t.index "widgets"
+            end
+          end
+
+          expect(highlights_type_from(result, "Widget")).to eq(<<~EOS.strip)
+            type WidgetHighlights {
+              id: [String!]!
+              color: [String!]!
+            }
+          EOS
+        end
+
         it "does not define highlights for an indexing only field" do
           result = define_schema do |api|
             api.object_type "Widget" do |t|
