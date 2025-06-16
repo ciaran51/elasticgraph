@@ -137,8 +137,20 @@ module ElasticGraph
             resolver: resolver
           )
 
-          if name != name_in_index && name_in_index.include?(".") && !graphql_only
-            raise Errors::SchemaError, "#{self} has an invalid `name_in_index`: #{name_in_index.inspect}. Only `graphql_only: true` fields can have a `name_in_index` that references a child field."
+          if name != name_in_index
+            if graphql_only
+              schema_def_state.after_user_definition_complete do
+                unless backing_indexing_field
+                  raise Errors::SchemaError,
+                    "GraphQL-only field `#{parent_type.name}.#{name}` has a `name_in_index` (#{name_in_index}) which does not reference an " \
+                    "existing indexing field. To proceed, remove `graphql_only: true` or update `name_in_index` to match an existing indexing field."
+                end
+              end
+            elsif name_in_index.include?(".")
+              raise Errors::SchemaError,
+                "#{self} has an invalid `name_in_index`: #{name_in_index.inspect}. " \
+                "Only `graphql_only: true` fields can have a `name_in_index` that references a child field."
+            end
           end
 
           schema_def_state.register_user_defined_field(self)
@@ -935,7 +947,19 @@ module ElasticGraph
 
         def backing_indexing_field
           return nil unless graphql_only
-          parent_type.indexing_fields_by_name_in_index[name_in_index]
+
+          type = parent_type
+          field = nil
+
+          name_in_index.split(".").each do |path_part|
+            if (field = type&.indexing_fields_by_name_in_index&.fetch(path_part, nil))
+              type = field.type.fully_unwrapped.as_object_type
+            else
+              return nil
+            end
+          end
+
+          field
         end
 
         def args_sdl(joiner:, after_opening_paren: "", &arg_selector)
