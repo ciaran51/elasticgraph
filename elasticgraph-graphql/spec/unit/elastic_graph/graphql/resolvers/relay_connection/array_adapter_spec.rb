@@ -77,9 +77,14 @@ module ElasticGraph
             expect(response.end_cursor).to eq(cursors.last)
           end
 
-          it "exposes a `total_edge_count`" do
+          it "exposes the total count of edges/nodes from `total_edge_count`, regardless of applied truncation" do
             response = resolve_nums(11)
+            expect(response.total_edge_count).to eq(11)
 
+            response = resolve_nums(11, first: 3)
+            expect(response.total_edge_count).to eq(11)
+
+            response = resolve_nums(11, last: 0)
             expect(response.total_edge_count).to eq(11)
           end
 
@@ -146,6 +151,16 @@ module ElasticGraph
           end
 
           def resolve_nums(count, **args)
+            # Parse cursors in the same way the GraphQL runtime does.
+            args = args.to_h do |name, value|
+              case name
+              when :after, :aftr, :before, :bfr
+                [name, DecodedCursor.try_decode(value)]
+              else
+                [name, value]
+              end
+            end
+
             natural_numbers = count.is_a?(::Integer) ? 1.upto(count).to_a : count
             resolve("Widget", "natural_numbers", {"natural_numbers" => natural_numbers}, **args)
           end

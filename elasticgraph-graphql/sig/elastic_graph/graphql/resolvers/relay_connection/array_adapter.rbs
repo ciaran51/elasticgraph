@@ -9,7 +9,7 @@ module ElasticGraph
           attr_reader schema_element_names: SchemaArtifacts::RuntimeMetadata::SchemaElementNames
           attr_reader graphql_impl: ::GraphQL::Pagination::ArrayConnection[N]
 
-          def initialize: (SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Pagination::ArrayConnection[N]) -> void
+          def initialize: (SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Pagination::ArrayConnection[N], ::Integer) -> void
 
           def self.build: [N] (::Array[N], ::Hash[::String, untyped], SchemaArtifacts::RuntimeMetadata::SchemaElementNames, ::GraphQL::Query::Context) -> ArrayAdapter[N]
 
