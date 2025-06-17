@@ -9,7 +9,7 @@ module ElasticGraph
           attr_reader schema: Schema
           attr_reader graphql_impl: ::GraphQL::Pagination::ArrayConnection[N]
 
-          def initialize: (Schema, ::GraphQL::Pagination::ArrayConnection[N]) -> void
+          def initialize: (Schema, ::GraphQL::Pagination::ArrayConnection[N], ::Integer) -> void
 
           def self.build: [N] (::Array[N], ::Hash[::String, untyped], ::GraphQL::Query::Context) -> ArrayAdapter[N]
 
