@@ -1543,6 +1543,10 @@ indices:
               type: integer
         part_ids:
           type: keyword
+        owner_ids:
+          type: keyword
+        owner_id:
+          type: keyword
         __counts:
           properties:
             tags:
@@ -1550,6 +1554,8 @@ indices:
             widget_tags:
               type: integer
             part_ids:
+              type: integer
+            owner_ids:
               type: integer
         __sources:
           type: keyword

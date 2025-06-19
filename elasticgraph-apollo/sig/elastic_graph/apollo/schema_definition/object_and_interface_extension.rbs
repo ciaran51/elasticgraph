@@ -1,0 +1,31 @@
+module ElasticGraph
+  module Apollo
+    module SchemaDefinition
+      module ObjectAndInterfaceExtension: ElasticGraph::SchemaDefinition::SchemaElements::TypeWithSubfields
+        def apollo_entity_ref_field: (
+          ::String,
+          ::String,
+          id_field_name_in_index: ::String
+        ) ?{ (::ElasticGraph::SchemaDefinition::SchemaElements::Field) -> void } -> void
+
+        def apollo_entity_ref_paginated_collection_field: (
+          ::String,
+          ::String,
+          id_field_name_in_index: ::String
+        ) ?{ (::ElasticGraph::SchemaDefinition::SchemaElements::Field) -> void } -> void
+
+        private
+
+        LIMITED_GRAPHQL_ONLY_FIELD_OPTIONS: ::Hash[::Symbol, untyped]
+        LIMITED_GRAPHQL_ONLY_PAGINATED_FIELD_OPTIONS: ::Hash[::Symbol, untyped]
+
+        def validate_entity_ref_options: (
+          ::String,
+          ::ElasticGraph::SchemaDefinition::SchemaElements::Field,
+          ::String,
+          ::String
+        ) { (::String) -> void } -> void
+      end
+    end
+  end
+end

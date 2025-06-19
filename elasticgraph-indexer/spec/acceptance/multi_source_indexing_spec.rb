@@ -52,7 +52,8 @@ module ElasticGraph
         LIST_COUNTS_FIELD => {
           "tags" => 2,
           "part_ids" => 1,
-          "widget_tags" => 3
+          "widget_tags" => 3,
+          "owner_ids" => 0
         },
         "id" => "c23",
         "name" => "C",
@@ -95,7 +96,8 @@ module ElasticGraph
         LIST_COUNTS_FIELD => {
           "part_ids" => 1,
           "tags" => 2,
-          "widget_tags" => 3
+          "widget_tags" => 3,
+          "owner_ids" => 0
         },
         "id" => "c56",
         "name" => "D",
@@ -116,7 +118,8 @@ module ElasticGraph
         },
         LIST_COUNTS_FIELD => {
           "part_ids" => 1,
-          "tags" => 2
+          "tags" => 2,
+          "owner_ids" => 0
         },
         "id" => "c78",
         "name" => "E",
