@@ -54,6 +54,55 @@ module ElasticGraph
           )
         )
 
+        unfiltered_widget_currencies = list_widget_currencies(widget_names_args: {first: 1})
+        expect(unfiltered_widget_currencies).to match([{
+          "id" => "USD",
+          case_correctly("widget_names") => {
+            case_correctly("page_info") => {
+              case_correctly("end_cursor") => /\w+/,
+              case_correctly("start_cursor") => /\w+/,
+              case_correctly("has_next_page") => true,
+              case_correctly("has_previous_page") => false
+            },
+            case_correctly("total_edge_count") => 2,
+            "edges" => [
+              {"node" => "thing123", "cursor" => /\w+/}
+            ]
+          },
+          case_correctly("widget_options") => {
+            "colors" => [enum_value("BLUE"), enum_value("RED")],
+            "sizes" => [enum_value("MEDIUM"), enum_value("SMALL")]
+          },
+          case_correctly("widget_tags") => ["abc", "def", "ghi", "jkl", "mno", "pqr"],
+          case_correctly("widget_fee_currencies") => ["CAD", "USD"]
+        }])
+
+        unfiltered_widget_currencies = list_widget_currencies(widget_names_args: {
+          first: 1,
+          after: unfiltered_widget_currencies.dig(0, case_correctly("widget_names"), case_correctly("page_info"), case_correctly("end_cursor"))
+        })
+        expect(unfiltered_widget_currencies).to match([{
+          "id" => "USD",
+          case_correctly("widget_names") => {
+            case_correctly("page_info") => {
+              case_correctly("end_cursor") => /\w+/,
+              case_correctly("start_cursor") => /\w+/,
+              case_correctly("has_next_page") => false,
+              case_correctly("has_previous_page") => true
+            },
+            case_correctly("total_edge_count") => 2,
+            "edges" => [
+              {"node" => "thing234", "cursor" => /\w+/}
+            ]
+          },
+          case_correctly("widget_options") => {
+            "colors" => [enum_value("BLUE"), enum_value("RED")],
+            "sizes" => [enum_value("MEDIUM"), enum_value("SMALL")]
+          },
+          case_correctly("widget_tags") => ["abc", "def", "ghi", "jkl", "mno", "pqr"],
+          case_correctly("widget_fee_currencies") => ["CAD", "USD"]
+        }])
+
         unfiltered_widget_currencies = list_widget_currencies
         expect(unfiltered_widget_currencies).to match([{
           "id" => "USD",
@@ -1535,14 +1584,14 @@ module ElasticGraph
         QUERY
       end
 
-      def list_widget_currencies(**query_args)
+      def list_widget_currencies(widget_names_args: {}, **query_args)
         call_graphql_query(<<~QUERY).dig("data", case_correctly("widget_currencies"), "edges").map { |we| we.fetch("node") }
           query {
             widget_currencies#{graphql_args(query_args)} {
               edges {
                 node {
                   id
-                  widget_names {
+                  widget_names#{graphql_args(widget_names_args)} {
                     page_info {
                       start_cursor
                       end_cursor
