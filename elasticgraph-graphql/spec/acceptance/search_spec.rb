@@ -1270,6 +1270,22 @@ module ElasticGraph
           }
         })
 
+        # Demonstrate highlighting on a `graphql_only` field with a `name_in_index` of a child field
+        highlights_by_id = query_highlights("widgets", "size", filter: {
+          "size" => {"equal_to_any_of" => [enum_value(:SMALL), enum_value(:MEDIUM)]}
+        })
+        expect(highlights_by_id).to eq({
+          widget1.fetch(:id) => {
+            case_correctly("size") => ["<em>#{enum_value(:SMALL)}</em>"]
+          },
+          widget2.fetch(:id) => {
+            case_correctly("size") => ["<em>#{enum_value(:SMALL)}</em>"]
+          },
+          widget3.fetch(:id) => {
+            case_correctly("size") => ["<em>#{enum_value(:MEDIUM)}</em>"]
+          }
+        })
+
         # Demonstrate we can get *just* the highlights and no other fields off of the `edges`.
         # (Initially this did not work.)
         highlights = query_just_all_highlights("widgets", filter: {
