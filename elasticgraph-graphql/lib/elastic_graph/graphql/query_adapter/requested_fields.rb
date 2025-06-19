@@ -41,6 +41,13 @@ module ElasticGraph
         end
 
         def query_attributes_for(field:, lookahead:)
+          index_field_paths =
+            field.type
+              .unwrap_fully
+              .search_index_definitions
+              .flat_map { |index_def| index_def.fields_by_path.keys }
+              .to_set
+
           attributes =
             if field.type.relay_connection?
               highlights = lookahead
@@ -49,13 +56,13 @@ module ElasticGraph
 
               {
                 individual_docs_needed: pagination_fields_need_individual_docs?(lookahead),
-                requested_fields: requested_fields_under(relay_connection_node_from(lookahead)),
+                requested_fields: requested_fields_under(relay_connection_node_from(lookahead), index_field_paths),
                 request_all_highlights: requesting_all_highlights?(lookahead),
-                requested_highlights: requested_fields_under(highlights)
+                requested_highlights: requested_fields_under(highlights, index_field_paths)
               }
             else
               {
-                requested_fields: requested_fields_under(lookahead)
+                requested_fields: requested_fields_under(lookahead, index_field_paths)
               }
             end
 
@@ -74,9 +81,9 @@ module ElasticGraph
         # can ignore its foreign key; but when we are determining requested fields for a parent type,
         # we need to identify the foreign key to request from the datastore, without recursing into
         # its children.
-        def requested_fields_under(node, path_prefix: "")
+        def requested_fields_under(node, index_field_paths, path_prefix: "")
           fields = node.selections.flat_map do |child|
-            requested_fields_for(child, path_prefix: path_prefix)
+            requested_fields_for(child, index_field_paths, path_prefix: path_prefix)
           end
 
           fields << "#{path_prefix}__typename" if field_for(node.field)&.type&.abstract?
@@ -85,14 +92,22 @@ module ElasticGraph
 
         # Identifies the fields we need to fetch from the datastore for the given node,
         # and recursing into the fields under it as needed.
-        def requested_fields_for(node, path_prefix:)
+        def requested_fields_for(node, index_field_paths, path_prefix:)
           return [] if graphql_dynamic_field?(node)
 
           # @type var field: Schema::Field
           field = _ = field_for(node.field)
 
           if field.type.embedded_object?
-            requested_fields_under(node, path_prefix: "#{path_prefix}#{field.name_in_index}.")
+            field_path = "#{path_prefix}#{field.name_in_index}"
+            if index_field_paths.include?(field_path)
+              # If we've reached a path to a scalar field, we should just return it instead of recursing.
+              # This allows an object field to use a `name_in_index` of a scalar field which can be
+              # necessary for some custom resolvers.
+              [field_path]
+            else
+              requested_fields_under(node, index_field_paths, path_prefix: "#{field_path}.")
+            end
           else
             field.index_field_names_for_resolution.map do |name|
               "#{path_prefix}#{name}"
