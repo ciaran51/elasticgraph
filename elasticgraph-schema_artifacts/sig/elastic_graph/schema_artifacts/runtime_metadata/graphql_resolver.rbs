@@ -67,7 +67,7 @@ module ElasticGraph
   interface _GraphQLResolverWithLookahead
     def initialize: (
       elasticgraph_graphql: GraphQL,
-      config: ::Hash[::String, untyped]
+      config: ::Hash[::Symbol, untyped]
     ) -> void
 
     include _GraphQLResolvableWithLookahead
@@ -76,7 +76,7 @@ module ElasticGraph
   interface _GraphQLResolverWithoutLookahead
     def initialize: (
       elasticgraph_graphql: GraphQL,
-      config: ::Hash[::String, untyped]
+      config: ::Hash[::Symbol, untyped]
     ) -> void
 
     include _GraphQLResolvableWithoutLookahead

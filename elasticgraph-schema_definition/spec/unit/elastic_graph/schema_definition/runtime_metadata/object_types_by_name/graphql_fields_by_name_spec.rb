@@ -16,26 +16,55 @@ module ElasticGraph
       it "defaults the `resolver` of each individual field to the parent type's `default_graphql_resolver`" do
         metadata = object_type_metadata_for "Widget" do |s|
           s.object_type "Widget" do |t|
-            t.default_graphql_resolver = :list_records
+            t.resolve_fields_with :list_records
 
             t.field "id", "ID"
             t.field "description", "String"
 
             t.field "name", "String" do |f|
-              f.resolver = :get_record_field_value
+              f.resolve_with :get_record_field_value
             end
 
             t.field "title", "String" do |f|
-              f.resolver = :object_without_lookahead
+              f.resolve_with :object_without_lookahead
             end
           end
         end
 
         expect(metadata.graphql_fields_by_name).to eq({
-          "id" => graphql_field_with(name_in_index: "id", resolver: :list_records),
-          "description" => graphql_field_with(name_in_index: "description", resolver: :list_records),
-          "name" => graphql_field_with(name_in_index: "name", resolver: :get_record_field_value),
-          "title" => graphql_field_with(name_in_index: "title", resolver: :object_without_lookahead)
+          "id" => graphql_field_with(name_in_index: "id", resolver: configured_graphql_resolver(:list_records)),
+          "description" => graphql_field_with(name_in_index: "description", resolver: configured_graphql_resolver(:list_records)),
+          "name" => graphql_field_with(name_in_index: "name", resolver: configured_graphql_resolver(:get_record_field_value)),
+          "title" => graphql_field_with(name_in_index: "title", resolver: configured_graphql_resolver(:object_without_lookahead))
+        })
+      end
+
+      it "records resolver arguments as `config`" do
+        metadata = object_type_metadata_for "Widget" do |s|
+          s.object_type "Widget" do |t|
+            t.resolve_fields_with :list_records, limit: 17
+
+            t.field "id", "ID"
+
+            t.field "description", "String" do |f|
+              f.resolve_with :list_records, limit: 4
+            end
+
+            t.field "name", "String" do |f|
+              f.resolve_with :get_record_field_value, max: 12
+            end
+
+            t.field "title", "String" do |f|
+              f.resolve_with :object_without_lookahead, size: 3
+            end
+          end
+        end
+
+        expect(metadata.graphql_fields_by_name).to eq({
+          "id" => graphql_field_with(name_in_index: "id", resolver: configured_graphql_resolver(:list_records, limit: 17)),
+          "description" => graphql_field_with(name_in_index: "description", resolver: configured_graphql_resolver(:list_records, limit: 4)),
+          "name" => graphql_field_with(name_in_index: "name", resolver: configured_graphql_resolver(:get_record_field_value, max: 12)),
+          "title" => graphql_field_with(name_in_index: "title", resolver: configured_graphql_resolver(:object_without_lookahead, size: 3))
         })
       end
 
@@ -46,7 +75,7 @@ module ElasticGraph
 
             t.field "title", "String", name_in_index: "title2" do |f|
               f.customize_filter_field do |ff|
-                ff.resolver = :other2
+                ff.resolve_with :other2
               end
             end
           end
@@ -74,9 +103,9 @@ module ElasticGraph
         expect {
           object_type_metadata_for "Widget" do |s|
             s.object_type "Widget" do |t|
-              t.default_graphql_resolver = nil
+              t.resolve_fields_with nil
               t.field "id", "ID" do |f|
-                f.resolver = nil
+                f.resolve_with nil
               end
             end
           end
@@ -127,6 +156,64 @@ module ElasticGraph
           expect(metadata.fetch("Widget").graphql_fields_by_name.fetch("names").name_in_index).to eq("names2")
           expect(metadata.fetch("WidgetFilterInput").graphql_fields_by_name.fetch("names").name_in_index).to eq("names2")
         end
+
+        it "allows a `graphql_only` field to reference a child field" do
+          metadata = object_type_metadata_for "Widget" do |s|
+            s.object_type "Options" do |t|
+              t.field "size", "String!"
+            end
+
+            s.object_type "Widget" do |t|
+              t.field "id", "ID!"
+              t.field "size", "String!", name_in_index: "options.size", graphql_only: true
+              t.field "options", "Options!"
+              t.index "widgets"
+            end
+          end
+
+          expect(metadata.graphql_fields_by_name.fetch("size").name_in_index).to eq("options.size")
+        end
+
+        it "raises an error when given a `name_in_index` on a `graphql_only` field which does not match an existing sibling indexing field" do
+          define_widget = lambda do |schema, &block|
+            schema.object_type "Widget" do |t|
+              t.field "id", "ID"
+              t.field "description", "String", name_in_index: "description_index", graphql_only: true
+              block&.call(t)
+              t.index "widgets"
+            end
+          end
+
+          expect {
+            object_type_metadata_for("Widget", &define_widget)
+          }.to raise_error Errors::SchemaError, a_string_including(
+            "GraphQL-only field `Widget.description` has a `name_in_index` (description_index) " \
+            "which does not reference an existing indexing field."
+          )
+
+          metadata = object_type_metadata_for("Widget") do |schema|
+            define_widget.call(schema) do |t|
+              t.field "description_index", "String", indexing_only: true
+            end
+          end
+
+          expect(metadata.graphql_fields_by_name.fetch("description").name_in_index).to eq("description_index")
+        end
+
+        it "raises an error when given a nested `name_in_index` on a `graphql_only` field when a parent part does not reference an object field" do
+          expect {
+            object_type_metadata_for "Widget" do |schema|
+              schema.object_type "Widget" do |t|
+                t.field "id", "ID"
+                t.field "color", "String", name_in_index: "id.color", graphql_only: true
+                t.index "widgets"
+              end
+            end
+          }.to raise_error Errors::SchemaError, a_string_including(
+            "GraphQL-only field `Widget.color` has a `name_in_index` (id.color) " \
+            "which does not reference an existing indexing field."
+          )
+        end
       end
 
       context "on an embedded object type" do
@@ -140,7 +227,7 @@ module ElasticGraph
           expect(metadata.graphql_fields_by_name).to eq({
             "description" => graphql_field_with(
               name_in_index: "description_index",
-              resolver: :get_record_field_value,
+              resolver: configured_graphql_resolver(:get_record_field_value),
               relation: nil
             )
           })

@@ -8,7 +8,6 @@
 
 require "elastic_graph/errors"
 require "elastic_graph/version"
-require "elastic_graph/apollo/graphql/engine_extension"
 require "elastic_graph/apollo/schema_definition/entity_type_extension"
 require "elastic_graph/apollo/schema_definition/factory_extension"
 require "elastic_graph/apollo/schema_definition/state_extension"
@@ -125,7 +124,6 @@ module ElasticGraph
             end
           end
 
-          api.register_graphql_extension GraphQL::EngineExtension, defined_at: "elastic_graph/apollo/graphql/engine_extension"
           api.state.after_user_definition_complete do
             api.send(:define_apollo_schema_elements)
           end
@@ -380,11 +378,19 @@ module ElasticGraph
             end
           end
 
+          require(require_path = "elastic_graph/apollo/graphql/engine_extension")
+          register_graphql_extension GraphQL::EngineExtension, defined_at: require_path
+
           require(require_path = "elastic_graph/apollo/graphql/entities_field_resolver")
           register_graphql_resolver :apollo_entities, GraphQL::EntitiesFieldResolver, defined_at: require_path
 
           require(require_path = "elastic_graph/apollo/graphql/service_field_resolver")
           register_graphql_resolver :apollo_service, GraphQL::ServiceFieldResolver, defined_at: require_path
+
+          require(require_path = "elastic_graph/apollo/graphql/apollo_entity_ref_resolver")
+          register_graphql_resolver :apollo_entity_ref, GraphQL::ApolloEntityRefResolver::ForSingleId, defined_at: require_path
+          register_graphql_resolver :apollo_entity_ref_list, GraphQL::ApolloEntityRefResolver::ForIdList, defined_at: require_path
+          register_graphql_resolver :apollo_entity_ref_paginated, GraphQL::ApolloEntityRefResolver::ForPaginatedList, defined_at: require_path
         end
 
         def apollo_object_type(name, &block)
@@ -487,7 +493,7 @@ module ElasticGraph
                 EOS
               end
 
-              f.resolver = :apollo_entities
+              f.resolve_with :apollo_entities
             end
           end
 
@@ -503,7 +509,7 @@ module ElasticGraph
               Not intended for use by clients other than Apollo.
             EOS
 
-            f.resolver = :apollo_service
+            f.resolve_with :apollo_service
           end
         end
       end

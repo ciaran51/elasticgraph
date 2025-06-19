@@ -8,6 +8,7 @@
 
 require "delegate"
 require "elastic_graph/constants"
+require "elastic_graph/schema_artifacts/runtime_metadata/configured_graphql_resolver"
 require "elastic_graph/schema_definition/indexing/field"
 require "elastic_graph/schema_definition/indexing/field_reference"
 require "elastic_graph/schema_definition/mixins/has_directives"
@@ -80,8 +81,6 @@ module ElasticGraph
       #   @private
       # @!attribute [rw] non_nullable_in_json_schema
       #   @private
-      # @!attribute [rw] backing_indexing_field
-      #   @private
       # @!attribute [rw] as_input
       #   @private
       # @!attribute [rw] legacy_grouping_schema
@@ -91,7 +90,7 @@ module ElasticGraph
         :filter_customizations, :grouped_by_customizations, :sub_aggregations_customizations,
         :aggregated_values_customizations, :sort_order_enum_value_customizations,
         :args, :sortable, :filterable, :aggregatable, :groupable, :graphql_only, :source, :runtime_field_script, :relationship, :singular_name,
-        :computation_detail, :non_nullable_in_json_schema, :backing_indexing_field, :as_input,
+        :computation_detail, :non_nullable_in_json_schema, :as_input,
         :legacy_grouping_schema, :name_in_index, :resolver
       )
         include Mixins::HasDocumentation
@@ -105,7 +104,7 @@ module ElasticGraph
           accuracy_confidence: :high, name_in_index: name,
           type_for_derived_types: nil, graphql_only: nil, singular: nil,
           sortable: nil, filterable: nil, aggregatable: nil, groupable: nil,
-          backing_indexing_field: nil, as_input: false, legacy_grouping_schema: false, resolver: nil
+          as_input: false, legacy_grouping_schema: false, resolver: nil
         )
           type_ref = schema_def_state.type_ref(type)
           super(
@@ -134,19 +133,32 @@ module ElasticGraph
             singular_name: singular,
             name_in_index: name_in_index,
             non_nullable_in_json_schema: false,
-            backing_indexing_field: backing_indexing_field,
             as_input: as_input,
             legacy_grouping_schema: legacy_grouping_schema,
             resolver: resolver
           )
 
-          if name != name_in_index && name_in_index.include?(".") && !graphql_only
-            raise Errors::SchemaError, "#{self} has an invalid `name_in_index`: #{name_in_index.inspect}. Only `graphql_only: true` fields can have a `name_in_index` that references a child field."
+          if name != name_in_index
+            if graphql_only
+              schema_def_state.after_user_definition_complete do
+                unless backing_indexing_field
+                  raise Errors::SchemaError,
+                    "GraphQL-only field `#{parent_type.name}.#{name}` has a `name_in_index` (#{name_in_index}) which does not reference an " \
+                    "existing indexing field. To proceed, remove `graphql_only: true` or update `name_in_index` to match an existing indexing field."
+                end
+              end
+            elsif name_in_index.include?(".")
+              raise Errors::SchemaError,
+                "#{self} has an invalid `name_in_index`: #{name_in_index.inspect}. " \
+                "Only `graphql_only: true` fields can have a `name_in_index` that references a child field."
+            end
           end
 
           schema_def_state.register_user_defined_field(self)
           yield self if block_given?
         end
+
+        private :resolver=
 
         # @private
         @@initialize_param_names = instance_method(:initialize).parameters.map(&:last).to_set
@@ -446,6 +458,46 @@ module ElasticGraph
             relationship_name: relationship,
             field_path: field_path
           )
+        end
+
+        # Configures the GraphQL resolver used to resolve this field. If not set, the resolver configured on the parent type
+        # via {Mixins::HasIndices#resolve_fields_with} will be used.
+        #
+        # @param resolver_name [Symbol] name of the GraphQL resolver
+        # @param config [Hash<Symbol, Object>] configuration parameters for the resolver
+        # @return [void]
+        # @see API#register_graphql_resolver
+        #
+        # @example Use a custom resolver for a custom `Query` field
+        #   # In `add_resolver.rb`:
+        #   class AddResolver
+        #     def initialize(elasticgraph_graphql:, config:)
+        #       @multiplier = config.fetch(:multiplier, 1)
+        #     end
+        #
+        #     def resolve(field:, object:, args:, context:)
+        #       sum = args.fetch("x") + args.fetch("y")
+        #       sum * @multiplier
+        #     end
+        #   end
+        #
+        #   # In `config/schema.rb`:
+        #   ElasticGraph.define_schema do |schema|
+        #     require(resolver_path = "add_resolver")
+        #     schema.register_graphql_resolver :add, AddResolver, defined_at: resolver_path
+        #
+        #     schema.on_root_query_type do |t|
+        #       t.field "add", "Int" do |f|
+        #         f.argument "x", "Int!"
+        #         f.argument "y", "Int!"
+        #
+        #         # Extra args (`multiplier: 2`, in this example) are passed to the resolver within `config`.
+        #         f.resolve_with :add, multiplier: 2
+        #       end
+        #     end
+        #   end
+        def resolve_with(resolver_name, **config)
+          self.resolver = resolver_name&.then { |name| SchemaArtifacts::RuntimeMetadata::ConfiguredGraphQLResolver.new(name, config) }
         end
 
         # @private
@@ -932,6 +984,27 @@ module ElasticGraph
             relation: relationship&.runtime_metadata,
             resolver: resolver
           )
+        end
+
+        # The alternate field that is backing this field in the datastore index. Will only be non-`nil` for `graphql_only` fields.
+        # @return [Field, nil] the field backing this field in the index
+        #
+        # @private
+        def backing_indexing_field
+          return nil unless graphql_only
+
+          type = parent_type
+          field = nil
+
+          name_in_index.split(".").each do |path_part|
+            if (field = type&.indexing_fields_by_name_in_index&.fetch(path_part, nil))
+              type = field.type.fully_unwrapped.as_object_type
+            else
+              return nil
+            end
+          end
+
+          field
         end
 
         private

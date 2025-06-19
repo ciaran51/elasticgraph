@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/apollo/schema_definition/apollo_directives"
+require "elastic_graph/apollo/schema_definition/object_and_interface_extension"
 
 module ElasticGraph
   module Apollo
@@ -20,6 +21,7 @@ module ElasticGraph
         include ApolloDirectives::Policy
         include ApolloDirectives::RequiresScopes
         include ApolloDirectives::Tag
+        include ObjectAndInterfaceExtension
       end
     end
   end

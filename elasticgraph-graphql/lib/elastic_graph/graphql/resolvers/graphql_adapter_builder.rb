@@ -17,7 +17,11 @@ module ElasticGraph
       class GraphQLAdapterBuilder
         def initialize(runtime_metadata:, named_resolvers:, query_adapter:)
           @runtime_metadata = runtime_metadata
-          @named_resolvers = named_resolvers
+          @resolvers_by_name_and_field_config = named_resolvers.transform_values do |resolver_constructor|
+            ::Hash.new do |hash, field_config|
+              hash[field_config] = resolver_constructor.call(field_config)
+            end
+          end
           @query_adapter = query_adapter
         end
 
@@ -42,10 +46,10 @@ module ElasticGraph
         def object_type_hash
           @runtime_metadata.object_types_by_name.filter_map do |type_name, type|
             fields_hash = type.graphql_fields_by_name.filter_map do |field_name, field|
-              if (resolver_name = field.resolver)
-                resolver = @named_resolvers.fetch(resolver_name) do
-                  raise Errors::SchemaError, "Resolver `#{resolver_name}` (for `#{type_name}.#{field_name}`) cannot be found."
-                end
+              if (configured_resolver = field.resolver)
+                resolver = @resolvers_by_name_and_field_config.fetch(configured_resolver.name) do
+                  raise Errors::SchemaError, "Resolver `#{configured_resolver.name}` (for `#{type_name}.#{field_name}`) cannot be found."
+                end[configured_resolver.config]
 
                 resolver_lambda =
                   if resolver.method(:resolve).parameters.include?([:keyreq, :lookahead])
