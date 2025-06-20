@@ -8,7 +8,7 @@
 
 module ElasticGraph
   # The version of all ElasticGraph gems.
-  VERSION = "0.19.2.3.pre"
+  VERSION = "0.19.3.0"
 
   # Steep weirdly expects this here...
   # @dynamic self.define_schema
