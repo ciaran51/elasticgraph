@@ -51,7 +51,7 @@ module ElasticGraph
               # It's useful for the caller to be define `initialize` in order to provide field defaults, as
               # shown in the `Data` docs:
               #
-              # https://rubyapi.org/3.4/o/data
+              # https://rubyapi.org/3.2/o/data
               #
               # However, to make that work, we need the `initialize` definition to be included in the data class,
               # rather than in our `DelegateClass` wrapper.
@@ -100,15 +100,15 @@ module ElasticGraph
           # Since `DelegateClass` delegates all methods to the wrapped object, `with` will return an instance of the
           # data class and not our wrapper. To overcome that, we redefine it here so that the new instance is re-wrapped.
           def with(**updates)
-            data_instance = super(**updates)
-
-            # Here we re-implement `new` because (1) we override `new` and (2) `initialize` may be overridden.
-            self.class.allocate.instance_eval do
-              # Match `__setobj__` behavior: https://github.com/ruby/ruby/blob/v3_4_2/lib/delegate.rb#L411
-              @delegate_dc_obj = data_instance
-              after_initialize
-              self
-            end
+            # Note: we intentionally do _not_ `super` to the `Date#with` method here, because in Ruby 3.2 it has a bug that
+            # impacts us: `with` does not call `initialize` as it should. Some of our value classes (based on the old `values` gem)
+            # depend on this behavior, so here we work around it by delegating to `new` after merging the attributes.
+            #
+            # This bug is fixed in Ruby 3.3 so we should be able to revert back to an implementation that delegates with `super`
+            # after we are on Ruby 3.3. For more info, see:
+            # - https://bugs.ruby-lang.org/issues/19259
+            # - https://github.com/ruby/ruby/pull/7031
+            self.class.new(**to_h.merge(updates))
           end
         end
 
