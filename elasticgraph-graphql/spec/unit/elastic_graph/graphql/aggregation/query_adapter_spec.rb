@@ -467,10 +467,6 @@ module ElasticGraph
             it "builds a `count` filter on a nested sub-aggregation correctly for deeply nested fields" do
               # This test verifies the fix for nested count filters in aggregations by checking
               # that the field path gets the proper nested transformation when processing filters.
-              #
-              # To verify this test fails without the fix, comment out the nested context logic in
-              # Query#filter_detail (lines with `if nested_context && field_path.any?`) and change
-              # the expectation below to `expect(field_path.from_parent).to eq(["current_players_nested"])`
               
               # Create a mock filter interpreter that captures the field path used
               captured_field_paths = []
