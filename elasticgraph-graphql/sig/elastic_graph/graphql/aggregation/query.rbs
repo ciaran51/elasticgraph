@@ -47,7 +47,7 @@ module ElasticGraph
           Filtering::FilterInterpreter,
           field_path: ::Array[PathSegment],
           parent_queries: ::Array[Query],
-          nested_context: bool
+          ?nested_context: bool
         ) -> AggregationDetail?
 
         private
@@ -55,7 +55,7 @@ module ElasticGraph
         def filter_detail: (
           Filtering::FilterInterpreter,
           ::Array[PathSegment],
-          nested_context: bool
+          ?nested_context: bool
         ) { () -> AggregationDetail } -> AggregationDetail
 
         def computations_detail: () -> ::Hash[::String, untyped]
