@@ -467,16 +467,16 @@ module ElasticGraph
             it "builds a `count` filter on a nested sub-aggregation correctly for deeply nested fields" do
               # This test verifies the fix for nested count filters in aggregations by checking
               # that the field path gets the proper nested transformation when processing filters.
-              
+
               # Create a mock filter interpreter that captures the field path used
               captured_field_paths = []
-              
-              filter_interpreter = double("FilterInterpreter")
+
+              filter_interpreter = instance_double("GraphQL::Filtering::FilterInterpreter")
               allow(filter_interpreter).to receive(:build_query) do |filters, from_field_path:|
                 captured_field_paths << from_field_path
                 {"seasons_nested" => {"__counts" => {"gt" => 0}}}
               end
-              
+
               # Create the aggregation query with a nested count filter
               aggregations = aggregations_from_datastore_query("Query", :team_aggregations, <<~QUERY)
                 query {
@@ -495,24 +495,24 @@ module ElasticGraph
                   }
                 }
               QUERY
-              
+
               # Get the nested sub-aggregation and build its hash
               main_agg = aggregations.first
               nested_sub_agg = main_agg.sub_aggregations.values.first
-              
+
               # Build the aggregation hash - this is where the bug would manifest
               agg_hash = nested_sub_agg.build_agg_hash(filter_interpreter, parent_queries: [])
-              
+
               # The key test: verify that the field path used for filter processing
               # has the correct nested context
               expect(captured_field_paths.size).to eq(1)
               field_path = captured_field_paths.first
-              
-                             # With the fix: the field path should have empty from_parent due to .nested transformation
-               # Without the fix: the field path would have ["current_players_nested"] in from_parent (BUG!)
-               expect(field_path.from_parent).to eq([])  # This is the correct behavior with the fix
-               expect(field_path.from_root).to eq(["current_players_nested"])
-              
+
+              # With the fix: the field path should have empty from_parent due to .nested transformation
+              # Without the fix: the field path would have ["current_players_nested"] in from_parent (BUG!)
+              expect(field_path.from_parent).to eq([])  # This is the correct behavior with the fix
+              expect(field_path.from_root).to eq(["current_players_nested"])
+
               # Verify the aggregation hash is properly structured
               expect(agg_hash).to be_a(Hash)
               expect(agg_hash).to have_key("current_players_nested")

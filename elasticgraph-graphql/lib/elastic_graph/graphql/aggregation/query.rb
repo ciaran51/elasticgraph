@@ -72,14 +72,14 @@ module ElasticGraph
 
         def filter_detail(filter_interpreter, field_path, nested_context: false)
           filtering_field_path = Filtering::FieldPath.of(field_path.filter_map(&:name_in_index))
-          
+
           # When we're dealing with a nested sub-aggregation, we need to apply the nested transformation
           # to the filtering field path to ensure count filters and other nested field operations work correctly.
           # This is necessary because nested fields create separate document contexts in Elasticsearch/OpenSearch.
           if nested_context && field_path.any?
             filtering_field_path = filtering_field_path.nested
           end
-          
+
           filter_clause = filter_interpreter.build_query([filter].compact, from_field_path: filtering_field_path)
 
           inner_detail = yield
