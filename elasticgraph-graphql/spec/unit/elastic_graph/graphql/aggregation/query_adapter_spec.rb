@@ -471,7 +471,7 @@ module ElasticGraph
               # Create a mock filter interpreter that captures the field path used
               captured_field_paths = []
 
-              filter_interpreter = instance_double("GraphQL::Filtering::FilterInterpreter")
+              filter_interpreter = instance_double(ElasticGraph::GraphQL::Filtering::FilterInterpreter)
               allow(filter_interpreter).to receive(:build_query) do |filters, from_field_path:|
                 captured_field_paths << from_field_path
                 {"seasons_nested" => {"__counts" => {"gt" => 0}}}
