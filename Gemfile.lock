@@ -94,7 +94,7 @@ PATH
       elasticgraph-json_schema (= 1.0.0.pre)
       elasticgraph-schema_artifacts (= 1.0.0.pre)
       elasticgraph-support (= 1.0.0.pre)
-      hashdiff (~> 1.1, >= 1.1.2)
+      hashdiff (~> 1.2)
 
 PATH
   remote: elasticgraph-json_schema
@@ -324,7 +324,7 @@ GEM
     graphql-c_parser (1.1.3)
       graphql (>= 2.2.10)
     hana (1.3.7)
-    hashdiff (1.1.2)
+    hashdiff (1.2.0)
     hashery (2.1.2)
     html-proofer (5.0.10)
       addressable (~> 2.3)
