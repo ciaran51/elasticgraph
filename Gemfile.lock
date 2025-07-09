@@ -213,10 +213,10 @@ GEM
       google-protobuf (< 5)
       graphql
     ast (2.4.3)
-    async (2.23.1)
+    async (2.25.0)
       console (~> 1.29)
       fiber-annotation
-      io-event (~> 1.9)
+      io-event (~> 1.11)
       metrics (~> 0.12)
       traces (~> 0.15)
     attr_extras (7.1.0)
