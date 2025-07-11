@@ -57,10 +57,10 @@ ElasticGraph::QueryRegistry::RakeTasks.from_yaml_file(
 
 standard_checks = ["standard", "query_registry:validate_queries", "spec"]
 
-desc "Rebuild everything. Intended to be run locally as you iterate on the schema"
+desc "Rebuild everything--intended to be run locally as you iterate on the schema."
 task build: ["schema_artifacts:dump", *standard_checks]
 
-desc "Check everything. Intended to be run on CI to check your project."
+desc "Check everything--intended to be run on CI to check your project."
 task check: ["schema_artifacts:check", *standard_checks]
 
 # Make `rake` run `rake build` for convenience.

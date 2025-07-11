@@ -98,7 +98,7 @@ index 77e63de..7999fe4 100644
 
 Next, rebuild the project:
 
-{% include copyable_code_snippet.html language="shell" code="bundle exec rake build" %}
+{% include copyable_code_snippet.html language="shell" code="bundle exec rake" %}
 
 This will re-generate the schema artifacts, run the test suite, and fail. The failing test will indicate
 that the `:venue` factory is missing the new field. To fix it, define `yearOpened` on the `:venue` factory in the `factories.rb` file under `lib`:
@@ -116,8 +116,8 @@ index 0d8659c..509f274 100644
      capacity { Faker::Number.between(from: 200, to: 100_000) }
    end" %}
 
-Re-run `bundle exec rake build` and everything should pass. You can also run `bundle exec rake boot_locally`
-and query your new field to confirm the fake values being generated for it.
+Re-run `bundle exec rake` and everything should pass. You can also run `bundle exec rake boot_locally`
+and query your new field to confirm the random values being generated for it.
 
 ## Next Steps
 
@@ -132,8 +132,8 @@ Delete the `artist` schema definition:
 Then define your own schema in a Ruby file under `config/schema`.
 
 * Use the [schema definition API docs](/elasticgraph/api-docs/{{ site.data.doc_versions.latest_version }}/ElasticGraph/SchemaDefinition/API.html) as a reference.
-* Use our [AI Tools]({% link guides/ai-tools.md %}) together with an LLM such as [Goose](https://block.github.io/goose/) to translate a schema from an existing format such as protocol buffers, JSON schema, or SQL.
-* Run `bundle exec rake build` and deal with any errors that are reported.
+* Use our [AI Tools]({% link guides/ai-tools.md %}) together with an AI agent such as [Goose](https://block.github.io/goose/) to translate a schema from an existing format such as protocol buffers, JSON schema, or SQL.
+* Run `bundle exec rake` and deal with any errors that are reported.
 * Hint: search the project codebase for `TODO` comments to find things that need updating.
 
 ### Setup a CI Build
