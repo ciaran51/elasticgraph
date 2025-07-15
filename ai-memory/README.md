@@ -12,6 +12,38 @@ This document serves as the primary, single source of truth for understanding th
     -   Get exactly the needed data in a single query (no over- or under-serving).
     -   Push filtering and complex calculations to the backend.
 
+## Guiding Principles
+
+**IMPORTANT**: All AI agents working on ElasticGraph MUST read and incorporate the guiding principles from `config/site/src/guides/guiding-principles.md`. These principles serve as "north stars" that guide all development decisions and tradeoffs.
+
+### Key Principles Summary:
+
+**General Principles:**
+- **Modular with minimal dependencies**: Only add dependencies when functionality goes far beyond what can be quickly written internally. This supports slim deployment artifacts for AWS Lambda.
+- **Highly extensible**: Core supports common needs, but includes extension system for specialized requirements. Extensions apply hermetically to specific instances.
+
+**Query API Principles:**
+- **Maximize functionality while minimizing API surface area**: Users learn fewer concepts that apply to more situations.
+- **Query validity must be statically verifiable**: Leverage GraphQL's type system so schema-valid queries are guaranteed to work at runtime.
+
+**Indexing Principles:**
+- **Deterministic convergence**: The indexing pipeline must converge on the same state regardless of duplicate and out-of-order events. This enables safe retries, multi-region deployments, and disaster recovery.
+
+**Schema Principles:**
+- **Impact of changes must be statically visible**: Source-controlled schema artifacts clearly show which stakeholders are affected by changes.
+- **Friendly, actionable errors**: Invalid schema definitions produce clear error messages explaining what's wrong and how to fix it.
+- **Safely evolvable without coordinated deploys**: Schema evolution supports independent deployment of indexer and data publishers.
+- **Consistent APIs across schema elements**: Same API patterns (like documentation) work everywhere they're applicable.
+
+**Codebase Principles:**
+- **Consistency**: Terminology, API style, and patterns are consistent throughout.
+- **No global state**: Dependency injection instead of global state makes code easier to reason about and threadsafe.
+- **Immutable functional style**: Prefer immutable objects and functional transformations where feasible.
+- **Prefer simpler approaches**: Choose simpler implementations for easier debugging and contributor onboarding.
+- **Avoid monkey patching**: Prevents future problems common with this Ruby technique.
+- **100% test coverage**: Every line and branch covered except where explicitly opted out with `:nocov:` comments.
+- **Validate all documentation snippets**: Code examples in documentation are validated by CI to ensure they always work.
+
 ## System Patterns
 
 ElasticGraph is designed to be modular with a small core and many built-in extensions. The codebase is a monorepo containing multiple Ruby gems.
@@ -125,6 +157,7 @@ This section lists key folders and files in the repository with a short descript
         -   `config/schema/artifacts/`: Directory for generated schema artifacts (GraphQL SDL, runtime metadata, JSON schemas, datastore configurations) for the default schema.
         -   `config/schema/artifacts_with_apollo/`: Directory for schema artifacts when Apollo Federation is enabled.
     -   `config/site/`: Files related to the project's documentation website.
+        -   `config/site/src/guides/guiding-principles.md`: **CRITICAL** - The guiding principles document that all AI agents must read and follow.
 -   `script/`: Contains various utility and automation scripts.
 -   `.github/`: GitHub specific files.
     -   `.github/workflows/`: CI/CD pipeline definitions (GitHub Actions).
