@@ -58,6 +58,8 @@ gems:
     ignore: true
   - name: elasticgraph-elasticsearch
     ignore: true
+  - name: elasticgraph-graphiql
+    ignore: true
   - name: elasticgraph-graphql
     ignore: true
   - name: elasticgraph-graphql_lambda
@@ -79,6 +81,8 @@ gems:
   - name: elasticgraph-query_interceptor
     ignore: true
   - name: elasticgraph-query_registry
+    ignore: true
+  - name: elasticgraph-rack
     ignore: true
   - name: elasticgraph-schema_artifacts
     ignore: true

@@ -246,15 +246,18 @@ git add elasticgraph-newgem
 script/update_dependency_diagrams
 ```
 
-6. Write the code and specs for the gem. To run the gem's test suite in the way it's run on CI, run:
+6. Write the code, specs and type signatures for the gem. To run the gem's test suite in the way it's run on CI, run:
 
 ```bash
 script/run_gem_specs elasticgraph-newgem
 ```
 
-7. Open a PR with the new gem once it's ready for review.
+7. Update `rbs_collection.yaml` to list the new gem and ignore its type signatures provided by bundler (as they are already available
+   locally in this repo).
 
-8. Once that has merged, register the new gem with rubygems.org. We use RubyGems [trusted publishing](https://guides.rubygems.org/trusted-publishing/)
+8. Open a PR with the new gem once it's ready for review.
+
+9. Once that has merged, register the new gem with rubygems.org. We use RubyGems [trusted publishing](https://guides.rubygems.org/trusted-publishing/)
    to publish our gems to rubygems.org from a GitHub action. Follow the [guide](https://guides.rubygems.org/trusted-publishing/pushing-a-new-gem/) for
    pushing a new gem. Enter the following details into the "New Pending Trusted Publisher" form:
 
@@ -265,7 +268,7 @@ script/run_gem_specs elasticgraph-newgem
    * **Workflow filename**: release.yaml
    * **Environment**: rubygems.org
 
-9. Publish an ElasticGraph release to verify the new gem can be released successfully. This needs to happen within 12 hours of creating the
-   pending trusted publisher on rubygems.org (as that's how long a new pending trusted publisher is valid for). Use the release process
-   explained at the top of this document, but be sure to use a release candidate version (e.g. `1.2.3.rc1`). We don't want to be trying out
-   the publishing of a new gem for the first time when cutting a final release.
+10. Publish an ElasticGraph release to verify the new gem can be released successfully. This needs to happen within 12 hours of creating the
+    pending trusted publisher on rubygems.org (as that's how long a new pending trusted publisher is valid for). Use the release process
+    explained at the top of this document, but be sure to use a release candidate version (e.g. `1.2.3.rc1`). We don't want to be trying out
+    the publishing of a new gem for the first time when cutting a final release.
