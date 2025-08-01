@@ -29,28 +29,15 @@ graph LR;
 
 ## SQS Message Payload Format
 
-We use [JSON Lines](http://jsonlines.org/) to encode our indexing events. It is just individual JSON objects
+This gem is designed to run in an AWS lambda that consumes from an SQS queue. Messages in the SQS queue should use
+[JSON Lines](http://jsonlines.org/) format to encode indexing events.
+
+JSON lines format contains individual JSON objects
 delimited by a newline control character(not the `\n` string sequence), such as:
 
 ```
-{"op": "upsert", "__typename": "Payment", "id": "123", "version": "1", "record": {...} }
-{"op": "upsert", "__typename": "Payment", "id": "123", "version": "2", record: {...} }
-{"op": "delete", "__typename": "Payment", "id": "123", "version": "3"}
+{"op": "upsert", "__typename": "Widget", "id": "123", "version": 1, "record": {...} }
+{"op": "upsert", "__typename": "Widget", "id": "123", "version": 2, record: {...} }
 ```
 
-However, due to SQS message size limit, we have to batch our events carefully so each batch is below the size limit.
-This makes payload encoding a bit more complicated on the publisher side because each message has a size limit.
-The following code snippet respects the max message size limit and sends JSON Lines payloads with proper size:
-
-```ruby
-def partition_into_acceptably_sized_chunks(batch, max_size_per_chunk)
-  chunk_size = 0
-  batch
-    .map { |item| JSON.generate(item) }
-    .slice_before do |json|
-      chunk_size += (json.bytesize + 1)
-      (chunk_size > max_size_per_chunk).tap { |chunk_done| chunk_size = 0 if chunk_done }
-     end
-    .map { |chunk| chunk.join("\n") }
-end
-```
+When publishing into SQS, be sure to keep messages under the [256 KiB SQS message limit](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-messages.html).
