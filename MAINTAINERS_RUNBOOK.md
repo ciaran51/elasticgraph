@@ -224,7 +224,7 @@ To update the `graphiql.tar.gz` archive (e.g., to a newer version of GraphiQL or
     *   Cleans up the temporary build directory.
 
 4.  **Test the updated GraphiQL:**
-    * Boot locally with `bundle exec rake boot_local`.
+    * Boot locally with `bundle exec rake boot_locally`.
     * Try out the GraphiQL UI in the browser to confirm it works.
     * Confirm in the network tab that all assets load correctly.
 
