@@ -18,5 +18,10 @@ module ElasticGraph
   module SchemaArtifacts
     extend _BuildableFromParsedYaml[FromDisk]
     extend Support::FromYamlFile[FromDisk]
+
+    class Config
+      extend ElasticGraph::Config::ClassMethods[Config]
+      attr_reader directory: ::String
+    end
   end
 end

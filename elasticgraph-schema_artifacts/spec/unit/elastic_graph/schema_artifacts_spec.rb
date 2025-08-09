@@ -29,14 +29,11 @@ module ElasticGraph
           expect(artifacts.artifacts_dir).to eq "some_dir"
         end
 
-        it "fails with a clear error if the required keys are missing" do
-          expect {
-            from_parsed_yaml({})
-          }.to raise_error Errors::ConfigError, a_string_including("schema_artifacts")
+        it "uses a sensible directory by default when `schema_artifacts` is not configured" do
+          artifacts = from_parsed_yaml({})
 
-          expect {
-            from_parsed_yaml({"schema_artifacts" => {}})
-          }.to raise_error Errors::ConfigError, a_string_including("schema_artifacts.directory")
+          expect(artifacts).to be_a(FromDisk)
+          expect(artifacts.artifacts_dir).to eq "config/schema/artifacts"
         end
 
         it "fails with a clear error if extra `schema_artifacts` settings are provided" do
