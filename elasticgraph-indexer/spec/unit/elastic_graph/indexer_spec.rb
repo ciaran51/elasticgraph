@@ -22,6 +22,12 @@ module ElasticGraph
         expect(indexer).to be_a(Indexer)
         expect(indexer.datastore_core.client_customization_block).to be(customization_block)
       end
+
+      it "can build an instance with no `indexer` config" do
+        indexer = Indexer.from_parsed_yaml(parsed_test_settings_yaml.except("indexer"))
+
+        expect(indexer).to be_a(Indexer)
+      end
     end
   end
 end
