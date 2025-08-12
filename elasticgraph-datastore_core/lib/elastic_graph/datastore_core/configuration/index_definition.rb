@@ -85,7 +85,7 @@ module ElasticGraph
 
           def self.ranges_from(range_hashes)
             range_hashes.map do |range_hash|
-              __skip__ = from(**range_hash.transform_keys(&:to_sym))
+              __skip__ = from(**range_hash.compact.transform_keys(&:to_sym))
             end
           end
 

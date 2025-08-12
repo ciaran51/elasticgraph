@@ -22,6 +22,8 @@ module ElasticGraph
       end
 
       class ClusterDefinition < ClusterDefinitionSupertype
+        BACKEND_CLIENT_CLASSES: ::Hash[::String, ::String]
+
         def self.from_hash: (::Hash[::String, untyped]) -> ClusterDefinition
 
         def self.definitions_by_name_hash_from: (
