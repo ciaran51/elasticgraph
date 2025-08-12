@@ -26,7 +26,7 @@ module ElasticGraph
     # `from_yaml_file(file_name, &block)` is also available (via `Support::FromYamlFile`).
     def self.from_parsed_yaml(parsed_yaml, &datastore_client_customization_block)
       new(
-        config: GraphQL::Config.from_parsed_yaml(parsed_yaml),
+        config: GraphQL::Config.from_parsed_yaml(parsed_yaml) || GraphQL::Config.new,
         datastore_core: DatastoreCore.from_parsed_yaml(parsed_yaml, &datastore_client_customization_block)
       )
     end

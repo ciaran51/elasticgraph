@@ -12,6 +12,12 @@ require "yaml"
 module ElasticGraph
   class GraphQL
     RSpec.describe Config do
+      it "returns `nil` from `from_parsed_yaml` when there is no `graphql` key" do
+        config = GraphQL::Config.from_parsed_yaml({})
+
+        expect(config).to eq nil
+      end
+
       it "sets config values from the given parsed YAML" do
         config = Config.from_parsed_yaml("graphql" => {
           "default_page_size" => 27,
