@@ -1,15 +1,19 @@
 module ElasticGraph
   module HealthCheck
+    type dataRecencyCheckHash = ::Hash[::String, untyped]
+
     class ConfigSupertype
+      extend ::ElasticGraph::Config::ClassMethods[Config]
+
       attr_reader clusters_to_consider: ::Array[::String]
       attr_reader data_recency_checks: ::Hash[::String, Config::DataRecencyCheck]
 
       def self.new: (
         ::Array[::String],
-        ::Hash[::String, Config::DataRecencyCheck]
+        ::Hash[::String, dataRecencyCheckHash]
       ) -> Config | (
-        clusters_to_consider: ::Array[::String],
-        data_recency_checks: ::Hash[::String, Config::DataRecencyCheck]
+        ?clusters_to_consider: ::Array[::String],
+        ?data_recency_checks: ::Hash[::String, dataRecencyCheckHash]
       ) -> Config
 
       def with: (
@@ -18,21 +22,21 @@ module ElasticGraph
     end
 
     class Config < ConfigSupertype
-      EMPTY: Config
-      extend _BuildableFromParsedYaml[Config]
+      private
+
+      def convert_values: (clusters_to_consider: untyped, data_recency_checks: untyped) -> untyped
 
       class DataRecencyCheck
         attr_reader expected_max_recency_seconds: ::Integer
         attr_reader timestamp_field: ::String
 
-        def self.new: (
+        def initialize: (
           expected_max_recency_seconds: ::Integer,
           timestamp_field: ::String) -> DataRecencyCheck
+
         def with: (
           ?expected_max_recency_seconds: ::Integer,
           ?timestamp_field: ::String) -> DataRecencyCheck
-
-        def self.from: (::Hash[::String, untyped]) -> DataRecencyCheck
       end
     end
   end

@@ -21,7 +21,7 @@ module ElasticGraph
       def self.build_from(graphql)
         new(
           schema: graphql.schema,
-          config: HealthCheck::Config.from_parsed_yaml(graphql.config.extension_settings),
+          config: HealthCheck::Config.from_parsed_yaml(graphql.config.extension_settings) || HealthCheck::Config.new,
           datastore_search_router: graphql.datastore_search_router,
           datastore_query_builder: graphql.datastore_query_builder,
           datastore_clients_by_name: graphql.datastore_core.clients_by_name,
