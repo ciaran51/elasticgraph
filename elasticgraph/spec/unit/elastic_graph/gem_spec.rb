@@ -197,7 +197,6 @@ module ElasticGraph
         include_examples "an ElasticGraph gem", gem_name, config_pending: %w[
           elasticgraph-datastore_core
           elasticgraph-graphql
-          elasticgraph-query_interceptor
         ].include?(gem_name)
       end
     end

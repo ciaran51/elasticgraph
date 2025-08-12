@@ -6,40 +6,82 @@
 #
 # frozen_string_literal: true
 
+require "elastic_graph/config"
 require "elastic_graph/schema_artifacts/runtime_metadata/extension_loader"
 
 module ElasticGraph
   module QueryInterceptor
     # Defines configuration for elasticgraph-query_interceptor
-    class Config < ::Data.define(:interceptors)
-      # Builds Config from parsed YAML config.
-      def self.from_parsed_yaml(parsed_config_hash, parsed_runtime_metadata_hashes: [])
+    class Config < ElasticGraph::Config.define(:interceptors)
+      json_schema at: "query_interceptor",
+        properties: {
+          interceptors: {
+            description: "List of query interceptors to apply to datastore queries before they are executed.",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  description: "The name of the interceptor extension class.",
+                  type: "string",
+                  pattern: /^[A-Z]\w+(::[A-Z]\w+)*$/.source, # https://rubular.com/r/UuqAz4fR3kdMip
+                  examples: ["HideInternalRecordsInterceptor"]
+                },
+                require_path: {
+                  description: "The path to require to load the interceptor extension. This should be a relative path from a directory on " \
+                    "the Ruby `$LOAD_PATH` or a a relative path from the ElasticGraph application root.",
+                  type: "string",
+                  minLength: 1,
+                  examples: ["./lib/interceptors/hide_internal_records_interceptor"]
+                },
+                config: {
+                  description: "Configuration for the interceptor. Will be passed into the interceptors `#initialize` method.",
+                  type: "object",
+                  examples: [
+                    {}, # : untyped
+                    {"timeout" => 30}
+                  ],
+                  default: {} # : untyped
+                }
+              },
+              required: ["name", "require_path"]
+            },
+            examples: [
+              [], # : untyped
+              [
+                {
+                  "name" => "HideInternalRecordsInterceptor",
+                  "require_path" => "./lib/interceptors/hide_internal_records_interceptor"
+                }
+              ]
+            ],
+            default: [] # : untyped
+          }
+        }
+
+      def with_runtime_metadata_configs(parsed_runtime_metadata_hashes)
         interceptor_hashes = parsed_runtime_metadata_hashes.flat_map { |h| h["interceptors"] || [] }
+        return self if interceptor_hashes.empty?
 
-        if (config = parsed_config_hash["query_interceptor"])
-          extra_keys = config.keys - EXPECTED_KEYS
-
-          unless extra_keys.empty?
-            raise Errors::ConfigError, "Unknown `query_interceptor` config settings: #{extra_keys.join(", ")}"
-          end
-
-          interceptor_hashes += config.fetch("interceptors")
-        end
-
-        loader = SchemaArtifacts::RuntimeMetadata::ExtensionLoader.new(InterceptorInterface)
-
-        interceptors = interceptor_hashes.map do |hash|
-          empty_config = {}  # : ::Hash[::Symbol, untyped]
-          ext = loader.load(hash.fetch("name"), from: hash.fetch("require_path"), config: empty_config)
-          config = hash["config"] || {} # : ::Hash[::String, untyped]
-          InterceptorData.new(klass: ext.extension_class, config: config)
-        end
-
-        new(interceptors)
+        with(interceptors: interceptors + load_interceptors(interceptor_hashes))
       end
 
-      DEFAULT = new([])
-      EXPECTED_KEYS = members.map(&:to_s)
+      private
+
+      def convert_values(interceptors:)
+        {interceptors: load_interceptors(interceptors)}
+      end
+
+      def load_interceptors(interceptor_hashes)
+        loader = SchemaArtifacts::RuntimeMetadata::ExtensionLoader.new(InterceptorInterface)
+        empty_config = {}  # : ::Hash[::Symbol, untyped]
+
+        interceptor_hashes.map do |hash|
+          ext = loader.load(hash.fetch("name"), from: hash.fetch("require_path"), config: empty_config)
+          config = hash["config"] || {} # : ::Hash[::String, untyped]
+          InterceptorData.new(klass: (_ = ext.extension_class), config: config)
+        end
+      end
 
       # Defines a data structure to hold interceptor klass and config
       InterceptorData = ::Data.define(:klass, :config)
