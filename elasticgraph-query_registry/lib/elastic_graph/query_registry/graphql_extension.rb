@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require "elastic_graph/graphql/query_executor"
+require "elastic_graph/query_registry/config"
 require "elastic_graph/query_registry/registry"
 require "graphql"
 require "pathname"
@@ -15,9 +16,7 @@ module ElasticGraph
   module QueryRegistry
     module GraphQLExtension
       def graphql_query_executor
-        @graphql_query_executor ||= begin
-          registry_config = QueryRegistry::Config.from_parsed_yaml(config.extension_settings)
-
+        @graphql_query_executor ||= if (registry_config = QueryRegistry::Config.from_parsed_yaml(config.extension_settings))
           RegistryAwareQueryExecutor.new(
             schema: schema,
             monotonic_clock: monotonic_clock,
@@ -27,6 +26,8 @@ module ElasticGraph
             allow_unregistered_clients: registry_config.allow_unregistered_clients,
             allow_any_query_for_clients: registry_config.allow_any_query_for_clients
           )
+        else
+          super
         end
       end
     end
@@ -78,24 +79,6 @@ module ElasticGraph
           [query, result]
         end
       end
-    end
-
-    class Config < ::Data.define(:path_to_registry, :allow_unregistered_clients, :allow_any_query_for_clients)
-      def self.from_parsed_yaml(hash)
-        hash = hash.fetch("query_registry") { return DEFAULT }
-
-        new(
-          path_to_registry: hash.fetch("path_to_registry"),
-          allow_unregistered_clients: hash.fetch("allow_unregistered_clients"),
-          allow_any_query_for_clients: hash.fetch("allow_any_query_for_clients")
-        )
-      end
-
-      DEFAULT = new(
-        path_to_registry: (_ = __dir__),
-        allow_unregistered_clients: true,
-        allow_any_query_for_clients: []
-      )
     end
   end
 end

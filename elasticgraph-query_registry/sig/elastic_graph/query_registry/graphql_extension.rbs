@@ -1,7 +1,6 @@
 module ElasticGraph
   module QueryRegistry
     module GraphQLExtension: GraphQL
-      def graphql_query_executor: () -> RegistryAwareQueryExecutor
     end
 
     class RegistryAwareQueryExecutor < GraphQL::QueryExecutor
@@ -18,29 +17,6 @@ module ElasticGraph
       private
 
       @registry: Registry
-    end
-
-    class ConfigSupertype
-      attr_reader path_to_registry: ::String
-      attr_reader allow_unregistered_clients: bool
-      attr_reader allow_any_query_for_clients: ::Array[::String]
-
-      def self.new: (
-        path_to_registry: ::String,
-        allow_unregistered_clients: bool,
-        allow_any_query_for_clients: ::Array[::String]
-      ) -> Config
-
-      def with: (
-        ?path_to_registry: ::String,
-        ?allow_unregistered_clients: bool,
-        ?allow_any_query_for_clients: ::Array[::String]
-      ) -> Config
-    end
-
-    class Config < ConfigSupertype
-      extend _BuildableFromParsedYaml[Config]
-      DEFAULT: Config
     end
   end
 end
