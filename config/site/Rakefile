@@ -24,6 +24,7 @@ module ElasticGraph
     JEKYLL_API_DOCS_DIR = JEKYLL_SITE_DIR / "api-docs"
     JEKYLL_DATA_DIR = SITE_SOURCE_DIR / "_data"
     STAGED_MARKDOWN_DIR = REPO_ROOT / "tmp" / "staged_markdown"
+    RAW_YARD_FILES_DIR = REPO_ROOT / "tmp" / "raw_yard_files"
     EXAMPLE_SCHEMA_FILES_BY_NAME = SITE_CONFIG_DIR.glob("examples/*/schema.rb").to_h do |file|
       [file.parent.basename.to_s, file]
     end
@@ -555,6 +556,12 @@ module ElasticGraph
       require_relative "support/markdown_post_processor"
       ElasticGraph::MarkdownPostProcessor.new(YARD_OUTPUT_DIR, staged_markdown_mappings).process!
 
+      RAW_YARD_FILES_DIR.glob("**/*").each do |raw_file|
+        relative_path = raw_file.relative_path_from(RAW_YARD_FILES_DIR)
+        ::FileUtils.copy(raw_file, YARD_OUTPUT_DIR + relative_path)
+      end
+      puts "Copied raw files to YARD output directory"
+
       ignored_warnings_output = YARD_WARNINGS_TO_IGNORE.filter_map do |warning, regex|
         if (count = doc_output.scan(regex).count) > 0
           "Ignored #{count} #{warning} warning(s)."
@@ -625,14 +632,32 @@ module ElasticGraph
       FileUtils.cp(codebase_overview_path, staged_path)
       puts "Staged CODEBASE_OVERVIEW.md"
 
+      # Generate and stage configuration documentation
+      generate_and_stage_config_documentation(staged_markdown_mappings)
+
       puts "Staged #{STAGED_MARKDOWN_DIR.glob("*.md").size} README files for documentation"
 
       # Get the list of staged markdown files (use relative paths from repo root)
-      staged_files = STAGED_MARKDOWN_DIR.glob("*.md").map do |absolute_path|
+      staged_files = STAGED_MARKDOWN_DIR.children.sort.map do |absolute_path|
         Pathname.new(absolute_path).relative_path_from(REPO_ROOT).to_s
       end
 
       [staged_files, staged_markdown_mappings]
+    end
+
+    def generate_and_stage_config_documentation(staged_markdown_mappings)
+      require_relative "support/config_doc_generator"
+
+      config_schema_path = REPO_ROOT / "elasticgraph-local" / "lib" / "elastic_graph" / "local" / "spec_support" / "config_schema.yaml"
+
+      generator = ElasticGraph::ConfigDocGenerator.new(config_schema_path, STAGED_MARKDOWN_DIR, RAW_YARD_FILES_DIR)
+      generator.generate!
+
+      # Add to staged mappings for link rewriting
+      staged_markdown_mappings["Configuration.md"] = "Configuration.md"
+      # Don't add ConfigurationSchema.yaml to staged mappings since it's in raw/ subdirectory
+
+      puts "Generated and staged configuration documentation files"
     end
 
     COMMON_JEKYLL_ARGS = [
