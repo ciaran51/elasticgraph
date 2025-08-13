@@ -1,0 +1,632 @@
+---
+"$schema": http://json-schema.org/draft-07/schema#
+title: ElasticGraph Configuration
+description: Complete configuration schema for ElasticGraph applications
+type: object
+properties:
+  datastore:
+    properties:
+      client_faraday_adapter:
+        type: object
+        description: Configuration of the faraday adapter to use with the datastore
+          client.
+        properties:
+          name:
+            type:
+            - string
+            - 'null'
+            minLength: 1
+            description: The faraday adapter to use with the datastore client, such
+              as `httpx` or `typhoeus`.
+            examples:
+            - net_http
+            - httpx
+            - typhoeus
+            -
+            default:
+          require:
+            type:
+            - string
+            - 'null'
+            minLength: 1
+            description: A Ruby library to require which provides the named adapter
+              (optional).
+            examples:
+            - httpx/adapters/faraday
+            default:
+        default:
+          name:
+          require:
+        examples:
+        - name: net_http
+        - name: httpx
+          require: httpx/adapters/faraday
+        additionalProperties: false
+      clusters:
+        type: object
+        description: Map of datastore cluster definitions, keyed by cluster name.
+          The names will be referenced within `index_definitions` by `query_cluster`
+          and `index_into_clusters` to identify datastore clusters.
+        patternProperties:
+          ".+":
+            type: object
+            description: Configuration for a specific datastore cluster.
+            examples:
+            - url: http://localhost:9200
+              backend: elasticsearch
+              settings:
+                cluster.max_shards_per_node: 2000
+            properties:
+              url:
+                type: string
+                minLength: 1
+                description: The URL of the datastore cluster.
+                examples:
+                - http://localhost:9200
+                - https://my-cluster.example.com:9200
+              backend:
+                enum:
+                - elasticsearch
+                - opensearch
+                description: Determines whether `elasticgraph-elasticsearch` or `elasticgraph-opensearch`
+                  is used for the datastore client.
+                examples:
+                - elasticsearch
+                - opensearch
+              settings:
+                type: object
+                description: Datastore settings in flattened (i.e. dot-separated)
+                  name form.
+                patternProperties:
+                  ".+":
+                    type:
+                    - array
+                    - string
+                    - number
+                    - boolean
+                    - object
+                    - 'null'
+                examples:
+                - cluster.max_shards_per_node: 2000
+                default: {}
+            required:
+            - url
+            - backend
+            additionalProperties: false
+        examples:
+        - main:
+            url: http://localhost:9200
+            backend: elasticsearch
+            settings:
+              cluster.max_shards_per_node: 2000
+      index_definitions:
+        type: object
+        description: Map of index definition names to `IndexDefinition` objects containing
+          customizations for the named index definitions for this environment.
+        patternProperties:
+          ".+":
+            type: object
+            description: Configuration for a specific index definition.
+            examples:
+            - query_cluster: main
+              index_into_clusters:
+              - main
+              ignore_routing_values: []
+              setting_overrides: {}
+              setting_overrides_by_timestamp: {}
+              custom_timestamp_ranges: []
+            properties:
+              query_cluster:
+                type: string
+                description: Named search cluster to be used for queries on this index.
+                  The value must match be a key in the `clusters` map.
+                examples:
+                - main
+                - search_cluster
+              index_into_clusters:
+                type: array
+                items:
+                  type: string
+                  minLength: 1
+                description: Named search clusters to index data into. The values
+                  must match keys in the `clusters` map.
+                examples:
+                - - main
+                - - cluster1
+                  - cluster2
+              ignore_routing_values:
+                type: array
+                items:
+                  type: string
+                description: Shard routing values for which the data should be spread
+                  across all shards instead of concentrating it on a single shard.
+                  This is intended to be used when a handful of known routing value
+                  contain such a large portion of the dataset that it extremely lopsided
+                  shards would result. Spreading the data across all shards may perform
+                  better.
+                default: []
+                examples:
+                - []
+                - - mega_tenant1
+                  - mega_tenant2
+              setting_overrides:
+                type: object
+                description: Overrides for index (or index template) settings. The
+                  settings specified here will override any settings specified on
+                  the Ruby schema definition. This is commonly used to configure a
+                  different `number_of_shards` in each environment. An `index.` prefix
+                  will be added to the names of all settings before submitting them
+                  to the datastore.
+                patternProperties:
+                  ".+":
+                    type:
+                    - array
+                    - string
+                    - number
+                    - boolean
+                    - object
+                    - 'null'
+                default: {}
+                examples:
+                - number_of_shards: 5
+              setting_overrides_by_timestamp:
+                type: object
+                description: Overrides for index template settings for specific dates,
+                  allowing variation of settings for different rollover indices. This
+                  is commonly used to configure a different `number_of_shards` for
+                  each year or month when using yearly or monthly rollover.
+                propertyNames:
+                  type: string
+                  format: date-time
+                additionalProperties:
+                  type: object
+                  patternProperties:
+                    ".+":
+                      type:
+                      - array
+                      - string
+                      - number
+                      - boolean
+                      - object
+                      - 'null'
+                default: {}
+                examples:
+                - '2025-01-01T00:00:00Z':
+                    number_of_shards: 10
+              custom_timestamp_ranges:
+                type: array
+                description: Array of custom timestamp ranges that allow different
+                  index settings for specific time periods.
+                items:
+                  type: object
+                  properties:
+                    index_name_suffix:
+                      type: string
+                      description: Suffix to append to the index name for this custom
+                        range.
+                      examples:
+                      - before_2020
+                      - after_2027
+                    setting_overrides:
+                      type: object
+                      description: Setting overrides for this custom timestamp range.
+                      patternProperties:
+                        ".+":
+                          type:
+                          - array
+                          - string
+                          - number
+                          - boolean
+                          - object
+                          - 'null'
+                      examples:
+                      - number_of_shards: 17
+                      - number_of_replicas: 2
+                    lt:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                      description: Less than timestamp boundary (ISO 8601 format).
+                      examples:
+                      - '2015-01-01T00:00:00Z'
+                      - '2020-12-31T23:59:59Z'
+                      default:
+                    lte:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                      description: Less than or equal timestamp boundary (ISO 8601
+                        format).
+                      examples:
+                      - '2015-01-01T00:00:00Z'
+                      - '2020-12-31T23:59:59Z'
+                      default:
+                    gt:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                      description: Greater than timestamp boundary (ISO 8601 format).
+                      examples:
+                      - '2015-01-01T00:00:00Z'
+                      - '2020-01-01T00:00:00Z'
+                      default:
+                    gte:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                      description: Greater than or equal timestamp boundary (ISO 8601
+                        format).
+                      examples:
+                      - '2015-01-01T00:00:00Z'
+                      - '2020-01-01T00:00:00Z'
+                      default:
+                  required:
+                  - index_name_suffix
+                  - setting_overrides
+                  additionalProperties: false
+                default: []
+                examples:
+                - - index_name_suffix: before_2015
+                    lt: '2015-01-01T00:00:00Z'
+                    setting_overrides:
+                      number_of_shards: 17
+            required:
+            - query_cluster
+            - index_into_clusters
+            additionalProperties: false
+        examples:
+        - widgets:
+            query_cluster: main
+            index_into_clusters:
+            - main
+            ignore_routing_values: []
+            setting_overrides: {}
+            setting_overrides_by_timestamp: {}
+            custom_timestamp_ranges: []
+      log_traffic:
+        type: boolean
+        description: Determines if we log requests/responses to/from the datastore.
+        default: false
+        examples:
+        - false
+        - true
+      max_client_retries:
+        type: integer
+        description: Passed down to the datastore client. Controls the number of times
+          ElasticGraph attempts a call against the datastore before failing. Retrying
+          a handful of times is generally advantageous, since some sporadic failures
+          are expected during the course of operation, and better to retry than fail
+          the entire call.
+        default: 3
+        minimum: 0
+        examples:
+        - 3
+        - 5
+        - 10
+    required:
+    - clusters
+    - index_definitions
+    additionalProperties: false
+  graphql:
+    properties:
+      default_page_size:
+        description: Determines the `size` of our datastore search requests if the
+          query does not specify via `first` or `last`.
+        type: integer
+        minimum: 1
+        default: 50
+        examples:
+        - 25
+        - 50
+        - 100
+      max_page_size:
+        description: Determines the maximum size of a requested page. If the client
+          requests a page larger than this value, the `size` will be capped by this
+          value.
+        type: integer
+        minimum: 1
+        default: 500
+        examples:
+        - 100
+        - 500
+        - 1000
+      slow_query_latency_warning_threshold_in_ms:
+        description: Queries that take longer than this configured threshold will
+          have a sanitized version logged so that they can be investigated.
+        type: integer
+        minimum: 0
+        default: 5000
+        examples:
+        - 3000
+        - 5000
+        - 10000
+      client_resolver:
+        description: Object used to identify the client of a GraphQL query based on
+          the HTTP request.
+        type: object
+        properties:
+          name:
+            description: Name of the client resolver class.
+            type:
+            - string
+            - 'null'
+            minLength: 1
+            default:
+            examples:
+            -
+            - MyCompany::ElasticGraphClientResolver
+          require_path:
+            description: The path to require to load the client resolver class.
+            type:
+            - string
+            - 'null'
+            minLength: 1
+            default:
+            examples:
+            -
+            - "./lib/my_company/elastic_graph/client_resolver"
+        patternProperties:
+          ".+":
+            type:
+            - array
+            - string
+            - number
+            - boolean
+            - object
+            - 'null'
+        default: {}
+        examples:
+        - {}
+        - name: ElasticGraph::GraphQL::ClientResolvers::ViaHTTPHeader
+          require_path: support/client_resolvers
+          header_name: X-Client-Name
+        additionalProperties: false
+      extension_modules:
+        description: Array of modules that will be extended onto the `GraphQL` instance
+          to support extension libraries.
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+              minLength: 1
+              description: The name of the extension module class to load.
+              examples:
+              - MyExtensionModule
+              - ElasticGraph::MyExtension
+            require_path:
+              type: string
+              minLength: 1
+              description: The path to require to load the extension module.
+              examples:
+              - "./my_extension_module"
+              - elastic_graph/my_extension
+          required:
+          - name
+          - require_path
+          additionalProperties: false
+        default: []
+        examples:
+        - []
+        - - name: MyExtensionModule
+            require_path: "./my_extension_module"
+    additionalProperties: false
+  health_check:
+    properties:
+      clusters_to_consider:
+        description: The list of clusters to perform datastore status health checks
+          on. A `green` status maps to `healthy`, a `yellow` status maps to `degraded`,
+          and a `red` status maps to `unhealthy`. The returned status is the minimum
+          status from all clusters in the list (a `yellow` cluster and a `green` cluster
+          will result in a `degraded` status).
+        type: array
+        items:
+          type: string
+          minLength: 1
+        default: []
+        examples:
+        - []
+        - - cluster-one
+          - cluster-two
+      data_recency_checks:
+        description: A map of types to perform recency checks on. If no new records
+          for that type have been indexed within the specified period, a `degraded`
+          status will be returned.
+        type: object
+        patternProperties:
+          "^[A-Z]\\w*$":
+            type: object
+            description: Configuration for data recency checks on a specific type.
+            examples:
+            - timestamp_field: createdAt
+              expected_max_recency_seconds: 30
+            properties:
+              expected_max_recency_seconds:
+                type: integer
+                minimum: 0
+                description: The maximum number of seconds since the last record was
+                  indexed for this type before considering it stale.
+                examples:
+                - 30
+                - 300
+                - 3600
+              timestamp_field:
+                type: string
+                minLength: 1
+                description: The name of the timestamp field to use for recency checks.
+                examples:
+                - createdAt
+                - updatedAt
+            required:
+            - expected_max_recency_seconds
+            - timestamp_field
+            additionalProperties: false
+        default: {}
+        examples:
+        - {}
+        - Widget:
+            timestamp_field: createdAt
+            expected_max_recency_seconds: 30
+    additionalProperties: false
+  indexer:
+    properties:
+      latency_slo_thresholds_by_timestamp_in_ms:
+        description: Map of indexing latency thresholds (in milliseconds), keyed by
+          the name of the indexing latency metric. When an event is indexed with an
+          indexing latency exceeding the threshold, a warning with the event type,
+          id, and version will be logged, so the issue can be investigated.
+        type: object
+        patternProperties:
+          ".+":
+            type: integer
+            minimum: 0
+        default: {}
+        examples:
+        - {}
+        - ingested_from_topic_at: 10000
+          entity_updated_at: 15000
+      skip_derived_indexing_type_updates:
+        description: Setting that can be used to specify some derived indexing type
+          updates that should be skipped. This setting should be a map keyed by the
+          name of the derived indexing type, and the values should be sets of ids.
+          This can be useful when you have a "hot spot" of a single derived document
+          that is receiving a ton of updates. During a backfill (or whatever) you
+          may want to skip the derived type updates.
+        type: object
+        patternProperties:
+          "^[A-Z]\\w*$":
+            type: array
+            items:
+              type: string
+              minLength: 1
+        default: {}
+        examples:
+        - {}
+        - WidgetWorkspace:
+          - ABC12345678
+    additionalProperties: false
+  query_interceptor:
+    properties:
+      interceptors:
+        description: List of query interceptors to apply to datastore queries before
+          they are executed.
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              description: The name of the interceptor extension class.
+              type: string
+              pattern: "^[A-Z]\\w+(::[A-Z]\\w+)*$"
+              examples:
+              - HideInternalRecordsInterceptor
+            require_path:
+              description: The path to require to load the interceptor extension.
+                This should be a relative path from a directory on the Ruby `$LOAD_PATH`
+                or a a relative path from the ElasticGraph application root.
+              type: string
+              minLength: 1
+              examples:
+              - "./lib/interceptors/hide_internal_records_interceptor"
+            config:
+              description: Configuration for the interceptor. Will be passed into
+                the interceptors `#initialize` method.
+              type: object
+              examples:
+              - {}
+              - timeout: 30
+              default: {}
+          required:
+          - name
+          - require_path
+          additionalProperties: false
+        examples:
+        - []
+        - - name: HideInternalRecordsInterceptor
+            require_path: "./lib/interceptors/hide_internal_records_interceptor"
+        default: []
+    additionalProperties: false
+  query_registry:
+    properties:
+      path_to_registry:
+        description: Path to the directory containing the query registry files.
+        type: string
+        examples:
+        - config/queries
+      allow_unregistered_clients:
+        description: Whether to allow clients that are not registered in the registry.
+        type: boolean
+        examples:
+        - true
+        - false
+        default: true
+      allow_any_query_for_clients:
+        description: List of client names that are allowed to execute any query, even
+          if not registered.
+        type: array
+        items:
+          type: string
+        examples:
+        - []
+        - - admin
+          - internal
+        default: []
+    required:
+    - path_to_registry
+    additionalProperties: false
+  schema_artifacts:
+    properties:
+      directory:
+        description: Path to the directory where schema artifacts are stored.
+        examples:
+        - config/schema/artifacts
+        default: config/schema/artifacts
+        type: string
+        minLength: 1
+    additionalProperties: false
+  logger:
+    properties:
+      level:
+        description: Determines what severity level we log.
+        examples:
+        - INFO
+        - WARN
+        enum:
+        - DEBUG
+        - debug
+        - INFO
+        - info
+        - WARN
+        - warn
+        - ERROR
+        - error
+        - FATAL
+        - fatal
+        - UNKNOWN
+        - unknown
+        default: INFO
+      device:
+        description: Determines where we log to. Must be a string. "stdout" or "stderr"
+          are interpreted as being those output streams; any other value is assumed
+          to be a file path.
+        examples:
+        - stdout
+        - logs/development.log
+        default: stdout
+        type: string
+        minLength: 1
+      formatter:
+        description: Class used to format log messages.
+        examples:
+        - ElasticGraph::Support::Logger::JSONAwareFormatter
+        - MyAlternateFormatter
+        type: string
+        pattern: "^[A-Z]\\w+(::[A-Z]\\w+)*$"
+        default: ElasticGraph::Support::Logger::JSONAwareFormatter
+    additionalProperties: false
+additionalProperties: true

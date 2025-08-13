@@ -11,7 +11,9 @@ require "elastic_graph/graphql"
 require "elastic_graph/indexer"
 require "elastic_graph/indexer/test_support/converters"
 require "elastic_graph/indexer/spec_support/event_matcher"
+require "elastic_graph/support/json_schema/validator"
 require "factory_bot"
+require "json_schemer"
 
 RSpec.shared_examples "an ElasticGraph project" do |repo_root: Dir.pwd,
   settings_dir: "config/settings",
@@ -42,8 +44,22 @@ RSpec.shared_examples "an ElasticGraph project" do |repo_root: Dir.pwd,
         expect(settings_files).not_to be_empty
       end
 
+      config_schema = ::YAML.load_file(::File.join(__dir__, "config_schema.yaml"))
+
+      validator = ::ElasticGraph::Support::JSONSchema::Validator.new(
+        schema: ::JSONSchemer.schema(config_schema, meta_schema: config_schema.fetch("$schema")),
+        sanitize_pii: false
+      )
+
       settings_files.each do |file_name|
         describe "the `#{file_name}` settings file" do
+          it "valid according to ElasticGraph's configuration JSON schema" do
+            settings = ::YAML.safe_load_file(file_name, aliases: true)
+            error = validator.validate_with_error_message(settings)
+
+            expect(error).to eq(nil), error
+          end
+
           it "can boot each part of ElasticGraph and has `number_of_shards` configured on every index definition" do
             all_components = [::ElasticGraph::Admin, ::ElasticGraph::GraphQL, ::ElasticGraph::Indexer].map do |klass|
               klass.from_yaml_file(file_name)
@@ -89,10 +105,10 @@ RSpec.shared_examples "an ElasticGraph project" do |repo_root: Dir.pwd,
     end
   end.to_h
 
-  indexer, all_type_names, event_types = Dir.chdir(repo_root) do
-    indexer = ::ElasticGraph::Indexer.from_yaml_file(settings_yaml_file_to_use)
-    all_defs = indexer.schema_artifacts
-      .json_schemas_for(indexer.schema_artifacts.latest_json_schema_version)
+  all_type_names, event_types = Dir.chdir(repo_root) do
+    schema_artifacts = ::ElasticGraph::SchemaArtifacts.from_yaml_file(settings_yaml_file_to_use)
+    all_defs = schema_artifacts
+      .json_schemas_for(schema_artifacts.latest_json_schema_version)
       .fetch("$defs")
 
     event_types = all_defs
@@ -102,10 +118,12 @@ RSpec.shared_examples "an ElasticGraph project" do |repo_root: Dir.pwd,
       .fetch("enum")
       .to_set
 
-    [indexer, all_defs.keys.to_set, event_types]
+    [all_defs.keys.to_set, event_types]
   end
 
   describe "Factories" do
+    let(:indexer) { ::ElasticGraph::Indexer.from_yaml_file(settings_yaml_file_to_use) }
+
     specify "all factories have valid `__typename` values" do
       unknown_type_names_by_factory_name = typenames_by_factory_name.reject { |k, v| all_type_names.include?(v) }
 
