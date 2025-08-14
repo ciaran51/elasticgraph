@@ -201,7 +201,6 @@ module ElasticGraph
           elasticgraph-indexer
           elasticgraph-query_interceptor
           elasticgraph-query_registry
-          elasticgraph-support
         ].include?(gem_name)
       end
     end
