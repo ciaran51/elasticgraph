@@ -12,10 +12,10 @@ require "elastic_graph/query_interceptor/config"
 module ElasticGraph
   module QueryInterceptor
     RSpec.describe Config, :in_temp_dir do
-      it "returns a config instance with no interceptors if extension settings has no `query_interceptor` key" do
+      it "returns nil if extension settings has no `query_interceptor` key" do
         config = Config.from_parsed_yaml({})
 
-        expect(config.interceptors).to eq []
+        expect(config).to eq nil
       end
 
       it "raises an error if configured with unknown keys" do
@@ -24,10 +24,10 @@ module ElasticGraph
         }.to raise_error Errors::ConfigError, a_string_including("other_key")
       end
 
-      it "raises an error if configured with no `interceptors` key" do
-        expect {
-          Config.from_parsed_yaml({"query_interceptor" => {}})
-        }.to raise_error KeyError, a_string_including("interceptors")
+      it "returns a config instance with empty interceptors if configured with no `interceptors` key" do
+        config = Config.from_parsed_yaml({"query_interceptor" => {}})
+
+        expect(config.interceptors).to eq []
       end
 
       it "loads interceptors from disk based on config settings" do

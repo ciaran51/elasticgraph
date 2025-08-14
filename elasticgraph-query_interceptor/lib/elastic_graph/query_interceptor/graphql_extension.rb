@@ -19,8 +19,10 @@ module ElasticGraph
             Support::HashUtil.stringify_keys(ext_mod.config) if ext_mod.extension_class == GraphQLExtension
           end
 
-          interceptors = Config
-            .from_parsed_yaml(config.extension_settings, parsed_runtime_metadata_hashes: runtime_metadata_configs)
+          query_interceptor_config = Config.from_parsed_yaml(config.extension_settings) || Config.new
+
+          interceptors = query_interceptor_config
+            .with_runtime_metadata_configs(runtime_metadata_configs)
             .interceptors
             .map { |data| data.klass.new(elasticgraph_graphql: self, config: data.config) }
 

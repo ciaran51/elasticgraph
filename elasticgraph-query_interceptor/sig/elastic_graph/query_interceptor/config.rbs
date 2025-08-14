@@ -3,34 +3,36 @@ module ElasticGraph
     type interceptorClass = Class & _InterceptorFactory
 
     class ConfigSupertype
-      attr_reader interceptors: ::Array[InterceptorDataSuperType]
+      extend ::ElasticGraph::Config::ClassMethods[Config]
 
-      def self.new: (::Array[InterceptorDataSuperType]) -> Config
-      def with: (?interceptors: ::Array[InterceptorDataSuperType]) -> Config
-      def self.members: () -> ::Array[::Symbol]
+      attr_reader interceptors: ::Array[Config::InterceptorData]
+
+      def initialize: (?interceptors: ::Array[::Hash[::String, untyped]]) -> void
+      def with: (?interceptors: ::Array[Config::InterceptorData]) -> Config
     end
 
     class Config < ConfigSupertype
-      def self.from_parsed_yaml: (parsedYamlSettings, ?parsed_runtime_metadata_hashes: ::Array[::Hash[::String, untyped]]) -> Config
+      def with_runtime_metadata_configs: (::Array[::Hash[::String, untyped]]) -> Config
 
-      DEFAULT: Config
-      EXPECTED_KEYS: ::Array[::String]
+      private
 
-      class InterceptorData < InterceptorDataSuperType
+      def convert_values: (interceptors: untyped) -> untyped
+
+      def load_interceptors: (::Array[::Hash[::String, untyped]]) -> ::Array[InterceptorData]
+
+      class InterceptorData
+        attr_reader klass: interceptorClass
+        attr_reader config: ::Hash[::String, untyped]
+
+        def initialize: (
+          klass: interceptorClass,
+          config: ::Hash[::String, untyped]
+        ) -> void
       end
 
       class InterceptorInterface
         include _Interceptor
       end
-    end
-
-    class InterceptorDataSuperType
-      attr_reader klass: interceptorClass
-      attr_reader config: ::Hash[::String, untyped]
-
-      def initialize: (
-        klass: ::ElasticGraph::SchemaArtifacts::RuntimeMetadata::extensionClass,
-        config: ::Hash[::String, untyped]) -> void
     end
 
     interface _InterceptorFactory
