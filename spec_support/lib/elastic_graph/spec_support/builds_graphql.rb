@@ -31,16 +31,22 @@ module ElasticGraph
       **datastore_core_options,
       &customize_datastore_config
     )
+      config = GraphQL::Config.new(
+        max_page_size: max_page_size,
+        default_page_size: default_page_size,
+        slow_query_latency_warning_threshold_in_ms: slow_query_latency_warning_threshold_in_ms
+      )
+
+      # These config settings must bypass the JSON schema validation so we provide them via `with`.
+      config = config.with(
+        client_resolver: client_resolver || config.client_resolver,
+        extension_settings: config.extension_settings.merge(extension_settings),
+        extension_modules: config.extension_modules + extension_modules
+      )
+
       GraphQL.new(
         datastore_core: datastore_core || build_datastore_core(**datastore_core_options, &customize_datastore_config),
-        config: GraphQL::Config.new(
-          max_page_size: max_page_size,
-          default_page_size: default_page_size,
-          slow_query_latency_warning_threshold_in_ms: slow_query_latency_warning_threshold_in_ms,
-          client_resolver: client_resolver || GraphQL::Client::DefaultResolver.new({}),
-          extension_modules: extension_modules,
-          extension_settings: extension_settings
-        ),
+        config: config,
         graphql_adapter: graphql_adapter,
         datastore_search_router: datastore_search_router,
         filter_interpreter: filter_interpreter,

@@ -27,7 +27,7 @@ module ElasticGraph
       expect(duplicate_config_paths).to be_empty
     end
 
-    shared_examples_for "an ElasticGraph gem" do |gem_name, config_pending: false|
+    shared_examples_for "an ElasticGraph gem" do |gem_name, extra_config_attributes:|
       around do |ex|
         ::Dir.chdir(::File.join(CommonSpecHelpers::REPO_ROOT, gem_name), &ex)
       end
@@ -60,8 +60,6 @@ module ElasticGraph
       end
 
       it "uses `ElasticGraph::Config` for its configuration, if it has it" do
-        pending "Not yet implemented" if config_pending
-
         expect(config_definition_lines).to all include("ElasticGraph::Config.define")
 
         files = config_definition_lines.map { |line| line.split(":").first }
@@ -69,16 +67,13 @@ module ElasticGraph
       end
 
       it "has a valid, complete JSON schema for all `ElasticGraph::Config` classes" do
-        pending "Not yet implemented" if config_pending
-
         config_definition_lines.each do |config_def_line|
           config_class = load_config_class_for(config_def_line)
           config_paths << config_class.path
-          # :nocov: -- we need to convert our config classes to use `ElasticGraph::Config` before this will all be covered.
           json_schema = config_class.validator.schema.value
 
           expect(meta_schema_validator.validate_with_error_message(json_schema)).to eq nil
-          expect(json_schema.fetch("properties").keys).to match_array(config_class.members.map(&:to_s))
+          expect(json_schema.fetch("properties").keys).to match_array((config_class.members - extra_config_attributes).map(&:to_s))
 
           # Recursively validate all properties have required attributes
           validate_schema_properties_recursively(json_schema, config_class.name)
@@ -126,7 +121,7 @@ module ElasticGraph
 
         # Validate pattern properties (dynamic keys)
         pattern_properties.each do |pattern, property_schema|
-          current_path = path.empty? ? "<pattern:#{pattern}>" : "#{path}.<pattern:#{pattern}>"
+          current_path = "#{path}.<pattern:#{pattern}>"
 
           # Pattern properties don't need to be required or have defaults since they're dynamic
           # But they still need examples and descriptions if they define object structures
@@ -190,11 +185,11 @@ module ElasticGraph
         $LOAD_PATH.replace(orig_load_path)
       end
     end
-    # :nocov:
 
     ::ElasticGraphGems.list.each do |gem_name|
       describe gem_name do
-        include_examples "an ElasticGraph gem", gem_name, config_pending: %w[elasticgraph-graphql].include?(gem_name)
+        extra_config_attributes = (gem_name == "elasticgraph-graphql") ? [:extension_settings] : []
+        include_examples "an ElasticGraph gem", gem_name, extra_config_attributes: extra_config_attributes
       end
     end
 

@@ -4,7 +4,7 @@ module ElasticGraph
       class ExtensionLoader
         def initialize: (extensionClass) -> void
 
-        def load: (::String, from: ::String, config: ::Hash[::Symbol, untyped]) -> Extension
+        def load: (::String, from: ::String, config: ::Hash[::Symbol | ::String, untyped]) -> Extension
 
         private
 

@@ -1,6 +1,8 @@
 module ElasticGraph
   class GraphQL
     class ConfigSupertype
+      extend ::ElasticGraph::Config::ClassMethods[Config]
+
       attr_reader default_page_size: ::Integer
       attr_reader max_page_size: ::Integer
       attr_reader slow_query_latency_warning_threshold_in_ms: ::Integer
@@ -9,12 +11,12 @@ module ElasticGraph
       attr_reader extension_settings: parsedYamlSettings
 
       def initialize: (
-        default_page_size: ::Integer,
-        max_page_size: ::Integer,
-        slow_query_latency_warning_threshold_in_ms: ::Integer,
-        client_resolver: Client::_Resolver,
-        extension_modules: ::Array[::Module],
-        extension_settings: parsedYamlSettings
+        ?default_page_size: ::Integer,
+        ?max_page_size: ::Integer,
+        ?slow_query_latency_warning_threshold_in_ms: ::Integer,
+        ?client_resolver: Client::_Resolver,
+        ?extension_modules: ::Array[::Module],
+        ?extension_settings: parsedYamlSettings
       ) -> void
 
       def with: (
@@ -27,16 +29,21 @@ module ElasticGraph
       ) -> Config
 
       def self.members: () -> ::Array[::Symbol]
-
-      private
-
-      def self.load_client_resolver: (::Hash[::String, untyped]) -> Client::_Resolver
     end
 
     class Config < ConfigSupertype
-      extend _BuildableFromParsedYaml[Config]
-      EXPECTED_KEYS: ::Array[::String]
       ELASTICGRAPH_CONFIG_KEYS: ::Array[::String]
+
+      private
+
+      def convert_values: (
+        client_resolver: untyped,
+        extension_modules: untyped,
+        **untyped
+      ) -> ::Hash[::Symbol, untyped]
+
+      def load_client_resolver: (::Hash[::String, untyped]) -> Client::_Resolver
+      def load_extension_modules: (::Array[::Hash[::String, untyped]]) -> ::Array[::Module]
     end
   end
 end

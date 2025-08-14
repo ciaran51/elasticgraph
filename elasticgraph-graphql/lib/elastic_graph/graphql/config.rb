@@ -6,65 +6,137 @@
 #
 # frozen_string_literal: true
 
+require "elastic_graph/config"
 require "elastic_graph/errors"
 require "elastic_graph/graphql/client"
 require "elastic_graph/schema_artifacts/runtime_metadata/extension_loader"
 
 module ElasticGraph
   class GraphQL
-    class Config < Data.define(
-      # Determines the size of our datastore search requests if the query does not specify.
+    class Config < ElasticGraph::Config.define(
       :default_page_size,
-      # Determines the maximum size of a requested page. If the client requests a page larger
-      # than this value, `max_page_size` elements will be returned instead.
       :max_page_size,
-      # Queries that take longer than this configured threshold will have a sanitized version logged.
       :slow_query_latency_warning_threshold_in_ms,
-      # Object used to identify the client of a GraphQL query based on the HTTP request.
       :client_resolver,
-      # Array of modules that will be extended onto the `GraphQL` instance to support extension libraries.
       :extension_modules,
-      # Contains any additional settings that were in the settings file beyond settings that are expected as part of ElasticGraph
-      # itself. Extensions are free to use these extra settings.
       :extension_settings
     )
-      def self.from_parsed_yaml(entire_parsed_yaml)
-        parsed_yaml = entire_parsed_yaml.fetch("graphql")
-        extra_keys = parsed_yaml.keys - EXPECTED_KEYS
+      all_json_schema_types = ["array", "string", "number", "boolean", "object", "null"]
 
-        unless extra_keys.empty?
-          raise Errors::ConfigError, "Unknown `graphql` config settings: #{extra_keys.join(", ")}"
-        end
-
-        extension_loader = SchemaArtifacts::RuntimeMetadata::ExtensionLoader.new(::Module.new)
-        extension_mods = parsed_yaml.fetch("extension_modules", []).map do |mod_hash|
-          extension_loader.load(mod_hash.fetch("name"), from: mod_hash.fetch("require_path"), config: {}).extension_class.tap do |mod|
-            unless mod.instance_of?(::Module)
-              raise Errors::ConfigError, "`#{mod_hash.fetch("name")}` is not a module, but all application extension modules must be modules."
-            end
-          end
-        end
-
-        new(
-          default_page_size: parsed_yaml.fetch("default_page_size"),
-          max_page_size: parsed_yaml.fetch("max_page_size"),
-          slow_query_latency_warning_threshold_in_ms: parsed_yaml["slow_query_latency_warning_threshold_in_ms"] || 5000,
-          client_resolver: load_client_resolver(parsed_yaml),
-          extension_modules: extension_mods,
-          extension_settings: entire_parsed_yaml.except(*ELASTICGRAPH_CONFIG_KEYS)
-        )
-      end
-
-      # The keys we expect under `graphql`.
-      EXPECTED_KEYS = members.map(&:to_s)
+      json_schema at: "graphql",
+        properties: {
+          default_page_size: {
+            description: "Determines the `size` of our datastore search requests if the query does not specify via `first` or `last`.",
+            type: "integer",
+            minimum: 1,
+            default: 50,
+            examples: [25, 50, 100]
+          },
+          max_page_size: {
+            description: "Determines the maximum size of a requested page. If the client requests a page larger " \
+              "than this value, the `size` will be capped by this value.",
+            type: "integer",
+            minimum: 1,
+            default: 500,
+            examples: [100, 500, 1000]
+          },
+          slow_query_latency_warning_threshold_in_ms: {
+            description: "Queries that take longer than this configured threshold will have a sanitized version logged so that they can be investigated.",
+            type: "integer",
+            minimum: 0,
+            default: 5000,
+            examples: [3000, 5000, 10000]
+          },
+          client_resolver: {
+            description: "Object used to identify the client of a GraphQL query based on the HTTP request.",
+            type: "object",
+            properties: {
+              name: {
+                description: "Name of the client resolver class.",
+                type: ["string", "null"],
+                minLength: 1,
+                default: nil,
+                examples: [nil, "MyCompany::ElasticGraphClientResolver"]
+              },
+              require_path: {
+                description: "The path to require to load the client resolver class.",
+                type: ["string", "null"],
+                minLength: 1,
+                default: nil,
+                examples: [nil, "./lib/my_company/elastic_graph/client_resolver"]
+              }
+            },
+            patternProperties: {/.+/.source => {type: all_json_schema_types}},
+            default: {}, # : untyped
+            examples: [
+              {}, # : untyped
+              {
+                "name" => "ElasticGraph::GraphQL::ClientResolvers::ViaHTTPHeader",
+                "require_path" => "support/client_resolvers",
+                "header_name" => "X-Client-Name"
+              }
+            ]
+          },
+          extension_modules: {
+            description: "Array of modules that will be extended onto the `GraphQL` instance to support extension libraries.",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  minLength: 1,
+                  description: "The name of the extension module class to load.",
+                  examples: ["MyExtensionModule", "ElasticGraph::MyExtension"]
+                },
+                require_path: {
+                  type: "string",
+                  minLength: 1,
+                  description: "The path to require to load the extension module.",
+                  examples: ["./my_extension_module", "elastic_graph/my_extension"]
+                }
+              },
+              required: ["name", "require_path"]
+            },
+            default: [], # : untyped
+            examples: [
+              [], # : untyped
+              [
+                {
+                  "name" => "MyExtensionModule",
+                  "require_path" => "./my_extension_module"
+                }
+              ]
+            ]
+          }
+        }
 
       # The standard ElasticGraph root config setting keys; anything else is assumed to be extension settings.
       ELASTICGRAPH_CONFIG_KEYS = %w[graphql indexer logger datastore schema_artifacts]
 
-      private_class_method def self.load_client_resolver(parsed_yaml)
-        config = parsed_yaml.fetch("client_resolver") do
-          return Client::DefaultResolver.new({})
-        end
+      def self.from_parsed_yaml(parsed_yaml)
+        original = super(parsed_yaml)
+        return nil if original.nil?
+
+        extension_settings = original.extension_settings.merge(parsed_yaml.except(*ELASTICGRAPH_CONFIG_KEYS))
+        original.with(extension_settings: extension_settings)
+      end
+
+      private
+
+      def convert_values(client_resolver:, extension_modules:, **values)
+        client_resolver = load_client_resolver(client_resolver)
+        extension_modules = load_extension_modules(extension_modules)
+
+        values.merge({
+          client_resolver: client_resolver,
+          extension_modules: extension_modules,
+          extension_settings: {} # : parsedYamlSettings
+        })
+      end
+
+      def load_client_resolver(config)
+        return Client::DefaultResolver.new({}) if config.empty?
 
         client_resolver_loader = SchemaArtifacts::RuntimeMetadata::ExtensionLoader.new(Client::DefaultResolver)
         extension = client_resolver_loader.load(
@@ -75,6 +147,18 @@ module ElasticGraph
         extension_class = extension.extension_class # : ::Class
 
         __skip__ = extension_class.new(extension.config)
+      end
+
+      def load_extension_modules(extension_module_hashes)
+        extension_loader = SchemaArtifacts::RuntimeMetadata::ExtensionLoader.new(::Module.new)
+
+        extension_module_hashes.map do |mod_hash|
+          extension_loader.load(mod_hash.fetch("name"), from: mod_hash.fetch("require_path"), config: {}).extension_class.tap do |mod|
+            unless mod.instance_of?(::Module)
+              raise Errors::ConfigError, "`#{mod_hash.fetch("name")}` is not a module, but all application extension modules must be modules."
+            end
+          end
+        end
       end
     end
   end
