@@ -1,0 +1,26 @@
+module ElasticGraph
+  module QueryRegistry
+    class ConfigSupertype
+      extend ::ElasticGraph::Config::ClassMethods[Config]
+
+      attr_reader path_to_registry: ::String
+      attr_reader allow_unregistered_clients: bool
+      attr_reader allow_any_query_for_clients: ::Array[::String]
+
+      def initialize: (
+        ?path_to_registry: ::String,
+        ?allow_unregistered_clients: bool,
+        ?allow_any_query_for_clients: ::Array[::String]
+      ) -> void
+
+      def with: (
+        ?path_to_registry: ::String,
+        ?allow_unregistered_clients: bool,
+        ?allow_any_query_for_clients: ::Array[::String]
+      ) -> Config
+    end
+
+    class Config < ConfigSupertype
+    end
+  end
+end

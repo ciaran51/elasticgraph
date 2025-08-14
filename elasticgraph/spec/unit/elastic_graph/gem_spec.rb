@@ -198,7 +198,6 @@ module ElasticGraph
           elasticgraph-datastore_core
           elasticgraph-graphql
           elasticgraph-query_interceptor
-          elasticgraph-query_registry
         ].include?(gem_name)
       end
     end
