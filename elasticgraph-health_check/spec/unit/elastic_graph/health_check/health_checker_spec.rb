@@ -50,8 +50,8 @@ module ElasticGraph
           Config.new(
             clusters_to_consider: ["main", "other1"],
             data_recency_checks: {
-              "Widget" => build_recency_check(timestamp_field: "created_at", expected_max_recency_seconds: 30),
-              "Component" => build_recency_check(timestamp_field: "created_at", expected_max_recency_seconds: 30)
+              "Widget" => build_recency_check_hash(timestamp_field: "created_at", expected_max_recency_seconds: 30),
+              "Component" => build_recency_check_hash(timestamp_field: "created_at", expected_max_recency_seconds: 30)
             }
           )
         end
@@ -194,7 +194,7 @@ module ElasticGraph
           it "correctly uses the `name_in_index` for all index field references" do
             config = valid_config.with(data_recency_checks: {
               # created_at2 is defined in config/schema.rb with `name_in_index: "created_at"
-              "Widget" => build_recency_check(timestamp_field: "created_at2")
+              "Widget" => build_recency_check_hash(timestamp_field: "created_at2")
             })
 
             status = build_health_checker(
@@ -221,6 +221,12 @@ module ElasticGraph
       end
 
       describe "config validation" do
+        it "can be instantiated with no config" do
+          health_checker = build_health_checker(health_check: nil)
+
+          expect(health_checker).to be_a HealthChecker
+        end
+
         it "raises a clear error when instantiated with a `clusters_to_consider` option referencing a cluster that does not exist" do
           expect {
             build_health_checker(health_check: Config.new(
@@ -245,7 +251,7 @@ module ElasticGraph
                 health_check: Config.new(
                   clusters_to_consider: ["main"],
                   data_recency_checks: {
-                    "Widget" => build_recency_check(timestamp_field: "created_at")
+                    "Widget" => build_recency_check_hash(timestamp_field: "created_at")
                   }
                 ),
                 index_definitions: {
@@ -277,7 +283,7 @@ module ElasticGraph
                 health_check: Config.new(
                   clusters_to_consider: ["main"],
                   data_recency_checks: {
-                    "Widget" => build_recency_check(timestamp_field: "created_at")
+                    "Widget" => build_recency_check_hash(timestamp_field: "created_at")
                   }
                 ),
                 index_definitions: {
@@ -327,8 +333,8 @@ module ElasticGraph
                 health_check: Config.new(
                   clusters_to_consider: [],
                   data_recency_checks: {
-                    "Widget" => build_recency_check(timestamp_field: "created_at"),
-                    "Component" => build_recency_check(timestamp_field: "created_at")
+                    "Widget" => build_recency_check_hash(timestamp_field: "created_at"),
+                    "Component" => build_recency_check_hash(timestamp_field: "created_at")
                   }
                 ),
                 index_definitions: {
@@ -367,9 +373,9 @@ module ElasticGraph
             build_health_checker(health_check: Config.new(
               clusters_to_consider: ["main"],
               data_recency_checks: {
-                "UnknownType1" => build_recency_check,
-                "UnknownType2" => build_recency_check,
-                "Widget" => build_recency_check
+                "UnknownType1" => build_recency_check_hash,
+                "UnknownType2" => build_recency_check_hash,
+                "Widget" => build_recency_check_hash
               }
             ))
           }.to raise_error Errors::ConfigError, a_string_including(
@@ -384,13 +390,13 @@ module ElasticGraph
             build_health_checker(health_check: Config.new(
               clusters_to_consider: ["main"],
               data_recency_checks: {
-                "Component" => build_recency_check,
+                "Component" => build_recency_check_hash,
                 # Color is an enum type
-                "Color" => build_recency_check,
+                "Color" => build_recency_check_hash,
                 # DateTime is a scalar type
-                "DateTime" => build_recency_check,
+                "DateTime" => build_recency_check_hash,
                 # WidgetOptions is an embedded object type
-                "WidgetOptions" => build_recency_check
+                "WidgetOptions" => build_recency_check_hash
               }
             ))
           }.to raise_error Errors::ConfigError, a_string_including(
@@ -405,8 +411,8 @@ module ElasticGraph
             build_health_checker(health_check: Config.new(
               clusters_to_consider: ["main"],
               data_recency_checks: {
-                "Widget" => build_recency_check(timestamp_field: "created_at"),
-                "Component" => build_recency_check(timestamp_field: "generated_at")
+                "Widget" => build_recency_check_hash(timestamp_field: "created_at"),
+                "Component" => build_recency_check_hash(timestamp_field: "generated_at")
               }
             ))
           }.to raise_error Errors::ConfigError, a_string_including(
@@ -421,8 +427,8 @@ module ElasticGraph
             build_health_checker(health_check: Config.new(
               clusters_to_consider: ["main"],
               data_recency_checks: {
-                "Widget" => build_recency_check(timestamp_field: "created_at"),
-                "Component" => build_recency_check(timestamp_field: "name")
+                "Widget" => build_recency_check_hash(timestamp_field: "created_at"),
+                "Component" => build_recency_check_hash(timestamp_field: "name")
               }
             ))
           }.to raise_error Errors::ConfigError, a_string_including(
@@ -438,16 +444,18 @@ module ElasticGraph
           [name, build_fake_datastore_client(name, latest, &customize_health)]
         end
 
-        health_check_settings = Support::HashUtil.stringify_keys(health_check.to_h.merge(
-          data_recency_checks: health_check.data_recency_checks.transform_values(&:to_h)
-        ))
+        if health_check
+          health_check_settings = Support::HashUtil.stringify_keys(health_check.to_h.merge(
+            data_recency_checks: health_check.data_recency_checks.transform_values(&:to_h)
+          ))
+        end
 
         graphql = build_graphql(
           clients_by_name: datastore_clients_by_name,
           clock: class_double(::Time, now: now),
           schema_definition: schema_definition,
           index_definitions: index_definitions,
-          extension_settings: {"health_check" => health_check_settings}
+          extension_settings: {"health_check" => health_check_settings}.compact
         )
 
         HealthChecker.build_from(graphql)
@@ -496,11 +504,11 @@ module ElasticGraph
         {"responses" => responses}
       end
 
-      def build_recency_check(expected_max_recency_seconds: 30, timestamp_field: "created_at")
-        Config::DataRecencyCheck.new(
-          expected_max_recency_seconds: expected_max_recency_seconds,
-          timestamp_field: timestamp_field
-        )
+      def build_recency_check_hash(expected_max_recency_seconds: 30, timestamp_field: "created_at")
+        {
+          "expected_max_recency_seconds" => expected_max_recency_seconds,
+          "timestamp_field" => timestamp_field
+        }
       end
     end
   end

@@ -22,13 +22,13 @@ module ElasticGraph
           health_check: {
             clusters_to_consider: ["main", "other2"],
             data_recency_checks: {
-              Widget: {
-                expected_max_recency_seconds: 300,
-                timestamp_field: "created_at2" # use a field that has an alternate `name_in_index`.
+              "Widget" => {
+                "expected_max_recency_seconds" => 300,
+                "timestamp_field" => "created_at2" # use a field that has an alternate `name_in_index`.
               },
-              Component: {
-                expected_max_recency_seconds: 30,
-                timestamp_field: "created_at"
+              "Component" => {
+                "expected_max_recency_seconds" => 30,
+                "timestamp_field" => "created_at"
               }
             }
           }

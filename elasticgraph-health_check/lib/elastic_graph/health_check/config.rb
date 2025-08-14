@@ -6,43 +6,72 @@
 #
 # frozen_string_literal: true
 
+require "elastic_graph/config"
+
 module ElasticGraph
   module HealthCheck
-    class Config < ::Data.define(
-      # The list of clusters to perform datastore status health checks on. A `green` status maps to `healthy`, a
-      # `yellow` status maps to `degraded`, and a `red` status maps to `unhealthy`. The returned status is the minimum
-      # status from all clusters in the list (a `yellow` cluster and a `green` cluster will result in a `degraded` status).
-      #
-      # Example: ["cluster-one", "cluster-two"]
-      :clusters_to_consider,
-      # A map of types to perform recency checks on. If no new records for that type have been indexed within the specified
-      # period, a `degraded` status will be returned.
-      #
-      # Example: { Widget: { timestamp_field: createdAt, expected_max_recency_seconds: 30 }}
-      :data_recency_checks
-    )
-      EMPTY = new([], {})
+    class Config < ElasticGraph::Config.define(:clusters_to_consider, :data_recency_checks)
+      json_schema at: "health_check",
+        properties: {
+          clusters_to_consider: {
+            description: "The list of clusters to perform datastore status health checks on. A `green` status maps to `healthy`, a " \
+              "`yellow` status maps to `degraded`, and a `red` status maps to `unhealthy`. The returned status is the minimum " \
+              "status from all clusters in the list (a `yellow` cluster and a `green` cluster will result in a `degraded` status).",
+            type: "array",
+            items: {type: "string", minLength: 1},
+            default: [], # : untyped
+            examples: [
+              [], # : untyped
+              ["cluster-one", "cluster-two"]
+            ]
+          },
+          data_recency_checks: {
+            description: "A map of types to perform recency checks on. If no new records for that type have been indexed within the specified " \
+              "period, a `degraded` status will be returned.",
+            type: "object",
+            patternProperties: {/^[A-Z]\w*$/.source => {
+              type: "object",
+              description: "Configuration for data recency checks on a specific type.",
+              examples: [{"timestamp_field" => "createdAt", "expected_max_recency_seconds" => 30}],
+              properties: {
+                expected_max_recency_seconds: {
+                  type: "integer",
+                  minimum: 0,
+                  description: "The maximum number of seconds since the last record was indexed for this type before considering it stale.",
+                  examples: [30, 300, 3600]
+                },
+                timestamp_field: {
+                  type: "string",
+                  minLength: 1,
+                  description: "The name of the timestamp field to use for recency checks.",
+                  examples: ["createdAt", "updatedAt"]
+                }
+              },
+              required: ["expected_max_recency_seconds", "timestamp_field"]
+            }},
+            default: {}, # : untyped
+            examples: [
+              {}, # : untyped
+              {"Widget" => {"timestamp_field" => "createdAt", "expected_max_recency_seconds" => 30}}
+            ]
+          }
+        }
 
-      def self.from_parsed_yaml(config_hash)
-        config_hash = config_hash.fetch("health_check") { return EMPTY }
+      private
 
-        new(
-          clusters_to_consider: config_hash.fetch("clusters_to_consider"),
-          data_recency_checks: config_hash.fetch("data_recency_checks").transform_values do |value_hash|
-            DataRecencyCheck.from(value_hash)
+      def convert_values(clusters_to_consider:, data_recency_checks:)
+        {
+          clusters_to_consider: clusters_to_consider,
+          data_recency_checks: data_recency_checks.transform_values do |value_hash|
+            DataRecencyCheck.new(
+              expected_max_recency_seconds: value_hash.fetch("expected_max_recency_seconds"),
+              timestamp_field: value_hash.fetch("timestamp_field")
+            )
           end
-        )
+        }
       end
 
-      DataRecencyCheck = ::Data.define(:expected_max_recency_seconds, :timestamp_field) do
-        # @implements DataRecencyCheck
-        def self.from(config_hash)
-          new(
-            expected_max_recency_seconds: config_hash.fetch("expected_max_recency_seconds"),
-            timestamp_field: config_hash.fetch("timestamp_field")
-          )
-        end
-      end
+      DataRecencyCheck = ::Data.define(:expected_max_recency_seconds, :timestamp_field)
     end
   end
 end
