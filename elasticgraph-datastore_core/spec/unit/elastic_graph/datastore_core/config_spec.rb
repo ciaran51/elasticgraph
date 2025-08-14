@@ -31,7 +31,7 @@ module ElasticGraph
               ignore_routing_values: []
               setting_overrides: {}
               setting_overrides_by_timestamp: {}
-              custom_timestamp_ranges: {}
+              custom_timestamp_ranges: []
           log_traffic: true
           max_client_retries: 3
         YAML
@@ -59,7 +59,7 @@ module ElasticGraph
 
       it "provides useful defaults for config settings that rarely need to be set" do
         config = config_from_yaml(<<~YAML)
-          client_faraday_adapter:
+          client_faraday_adapter: {}
           clusters:
             main1:
               url: http://example.com/1234
@@ -73,7 +73,7 @@ module ElasticGraph
               ignore_routing_values: []
               setting_overrides: {}
               setting_overrides_by_timestamp: {}
-              custom_timestamp_ranges: {}
+              custom_timestamp_ranges: []
         YAML
 
         expect(config.client_faraday_adapter).to eq Configuration::ClientFaradayAdapter.new(
@@ -100,7 +100,7 @@ module ElasticGraph
       it "surfaces misspellings in `backend`" do
         expect {
           config_from_yaml(<<~YAML)
-            client_faraday_adapter:
+            client_faraday_adapter: {}
             clusters:
               main1:
                 url: http://example.com/1234
@@ -114,9 +114,11 @@ module ElasticGraph
                 ignore_routing_values: []
                 setting_overrides: {}
                 setting_overrides_by_timestamp: {}
-                custom_timestamp_ranges: {}
+                custom_timestamp_ranges: []
           YAML
-        }.to raise_error Errors::ConfigError, a_string_including("Unknown `datastore.clusters` backend: `opensaerch`. Valid backends are `elasticsearch` and `opensearch`.")
+        }.to raise_error Errors::ConfigError, a_string_including(
+          'value at `/clusters/main1/backend` is not one of: [\"elasticsearch\", \"opensearch\"]'
+        )
       end
 
       it "surfaces any unknown root config settings" do
@@ -138,7 +140,7 @@ module ElasticGraph
                 ignore_routing_values: []
                 setting_overrides: {}
                 setting_overrides_by_timestamp: {}
-                custom_timestamp_ranges: {}
+                custom_timestamp_ranges: []
           YAML
         }.to raise_error Errors::ConfigError, a_string_including("not_a_real_setting")
       end
@@ -162,7 +164,7 @@ module ElasticGraph
                 ignore_routing_values: []
                 setting_overrides: {}
                 setting_overrides_by_timestamp: {}
-                custom_timestamp_ranges: {}
+                custom_timestamp_ranges: []
           YAML
         }.to raise_error Errors::ConfigError, a_string_including("not_a_real_setting")
       end
@@ -186,9 +188,9 @@ module ElasticGraph
                 ignore_routing_values: []
                 setting_overrides: {}
                 setting_overrides_by_timestamp: {}
-                custom_timestamp_ranges: {}
+                custom_timestamp_ranges: []
           YAML
-        }.to raise_error ArgumentError, a_string_including("not_a_real_setting")
+        }.to raise_error Errors::ConfigError, a_string_including("not_a_real_setting")
       end
 
       it "surfaces unknown client_faraday_adapter config settings" do
@@ -210,7 +212,7 @@ module ElasticGraph
                 ignore_routing_values: []
                 setting_overrides: {}
                 setting_overrides_by_timestamp: {}
-                custom_timestamp_ranges: {}
+                custom_timestamp_ranges: []
           YAML
         }.to raise_error Errors::ConfigError, a_string_including("not_a_real_setting")
       end
@@ -316,7 +318,9 @@ module ElasticGraph
                 setting_overrides:
                   number_of_shards: 17
             YAML
-          }.to raise_error ArgumentError, a_string_including("out of range")
+          }.to raise_error Errors::ConfigError, a_string_including(
+            "value at `/index_definitions/widgets/custom_timestamp_ranges/0/gte` does not match format: date-time"
+          )
         end
 
         it "raises an error when a range is invalid due to no timestamps being covered by it" do
@@ -366,7 +370,9 @@ module ElasticGraph
                 setting_overrides:
                   number_of_shards: 17
             YAML
-          }.to raise_error ArgumentError, a_string_including("gtf")
+          }.to raise_error Errors::ConfigError, a_string_including(
+            "object property at `/index_definitions/widgets/custom_timestamp_ranges/0/gtf` is a disallowed additional property"
+          )
         end
 
         def only_custom_range_from(yaml_section)

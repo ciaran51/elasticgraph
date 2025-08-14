@@ -12,25 +12,15 @@ module ElasticGraph
   class DatastoreCore
     module Configuration
       class ClusterDefinition < ::Data.define(:url, :backend_client_class, :settings)
+        BACKEND_CLIENT_CLASSES = {
+          "elasticsearch" => "ElasticGraph::Elasticsearch::Client",
+          "opensearch" => "ElasticGraph::OpenSearch::Client"
+        }
+
         def self.from_hash(hash)
-          extra_keys = hash.keys - EXPECTED_KEYS
-
-          unless extra_keys.empty?
-            raise Errors::ConfigError, "Unknown `datastore.clusters` config settings: #{extra_keys.join(", ")}"
-          end
-
-          backend_name = hash["backend"]
-          backend_client_class =
-            case backend_name
-            when "elasticsearch"
-              require "elastic_graph/elasticsearch/client"
-              Elasticsearch::Client
-            when "opensearch"
-              require "elastic_graph/opensearch/client"
-              OpenSearch::Client
-            else
-              raise Errors::ConfigError, "Unknown `datastore.clusters` backend: `#{backend_name}`. Valid backends are `elasticsearch` and `opensearch`."
-            end
+          backend_name = hash.fetch("backend")
+          require "elastic_graph/#{backend_name}/client"
+          backend_client_class = ::Object.const_get(BACKEND_CLIENT_CLASSES.fetch(backend_name))
 
           new(
             url: hash.fetch("url"),
@@ -44,8 +34,6 @@ module ElasticGraph
             from_hash(cluster_def_hash)
           end
         end
-
-        EXPECTED_KEYS = members.map(&:to_s) - ["backend_client_class"] + ["backend"]
       end
     end
   end

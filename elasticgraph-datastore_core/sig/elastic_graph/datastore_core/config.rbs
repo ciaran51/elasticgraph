@@ -1,6 +1,8 @@
 module ElasticGraph
   class DatastoreCore
     class ConfigSupertype
+      extend ::ElasticGraph::Config::ClassMethods[Config]
+
       attr_reader client_faraday_adapter: Configuration::ClientFaradayAdapter
       attr_reader clusters: ::Hash[::String, Configuration::ClusterDefinition]
       attr_reader index_definitions: ::Hash[::String, Configuration::IndexDefinition]
@@ -27,8 +29,14 @@ module ElasticGraph
     end
 
     class Config < ConfigSupertype
-      extend _BuildableFromParsedYaml[Config]
-      EXPECTED_KEYS: ::Array[::String]
+      private
+
+      def convert_values: (
+        clusters: untyped,
+        index_definitions: untyped,
+        client_faraday_adapter: untyped,
+        **untyped
+      ) -> ::Hash[::Symbol, untyped]
     end
   end
 end

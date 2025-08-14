@@ -194,10 +194,7 @@ module ElasticGraph
 
     ::ElasticGraphGems.list.each do |gem_name|
       describe gem_name do
-        include_examples "an ElasticGraph gem", gem_name, config_pending: %w[
-          elasticgraph-datastore_core
-          elasticgraph-graphql
-        ].include?(gem_name)
+        include_examples "an ElasticGraph gem", gem_name, config_pending: %w[elasticgraph-graphql].include?(gem_name)
       end
     end
 
