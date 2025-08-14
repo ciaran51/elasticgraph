@@ -6,6 +6,7 @@
 #
 # frozen_string_literal: true
 
+require "elastic_graph/config"
 require "elastic_graph/errors"
 require "elastic_graph/schema_artifacts/from_disk"
 require "elastic_graph/support/from_yaml_file"
@@ -22,19 +23,23 @@ module ElasticGraph
     # @param parsed_yaml [Hash<String, Object>] hash parsed from a settings YAML file
     # @return [FromDisk]
     def self.from_parsed_yaml(parsed_yaml)
-      schema_artifacts = parsed_yaml.fetch("schema_artifacts") do
-        raise Errors::ConfigError, "Config is missing required key `schema_artifacts`."
-      end
+      config = Config.from_parsed_yaml(parsed_yaml) || Config.new
+      FromDisk.new(config.directory)
+    end
 
-      if (extra_keys = schema_artifacts.keys - ["directory"]).any?
-        raise Errors::ConfigError, "Config has extra `schema_artifacts` keys: #{extra_keys}"
-      end
-
-      directory = schema_artifacts.fetch("directory") do
-        raise Errors::ConfigError, "Config is missing required key `schema_artifacts.directory`."
-      end
-
-      FromDisk.new(directory)
+    # @private
+    Config = ElasticGraph::Config.define(:directory) do
+      # @implements Config
+      json_schema at: "schema_artifacts",
+        properties: {
+          directory: {
+            description: "Path to the directory where schema artifacts are stored.",
+            examples: ["config/schema/artifacts"],
+            default: "config/schema/artifacts",
+            type: "string",
+            minLength: 1
+          }
+        }
     end
   end
 end
