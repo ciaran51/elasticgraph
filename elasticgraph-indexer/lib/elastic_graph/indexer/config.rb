@@ -6,12 +6,12 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/errors"
 
 module ElasticGraph
   class Indexer
-    class Config < ElasticGraph::Config.define(:latency_slo_thresholds_by_timestamp_in_ms, :skip_derived_indexing_type_updates)
+    class Config < Support::Config.define(:latency_slo_thresholds_by_timestamp_in_ms, :skip_derived_indexing_type_updates)
       json_schema at: "indexer",
         properties: {
           latency_slo_thresholds_by_timestamp_in_ms: {

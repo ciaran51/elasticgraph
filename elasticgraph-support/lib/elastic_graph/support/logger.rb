@@ -6,7 +6,7 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/errors"
 require "json"
 require "logger"
@@ -22,7 +22,7 @@ module ElasticGraph
       end
 
       # @private
-      class Config < ElasticGraph::Config.define(:level, :device, :formatter)
+      class Config < Support::Config.define(:level, :device, :formatter)
         # @dynamic self.from_parsed_yaml
 
         json_schema at: "logger",

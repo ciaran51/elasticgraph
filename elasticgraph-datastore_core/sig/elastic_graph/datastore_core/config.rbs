@@ -1,7 +1,7 @@
 module ElasticGraph
   class DatastoreCore
     class ConfigSupertype
-      extend ::ElasticGraph::Config::ClassMethods[Config]
+      extend Support::Config::ClassMethods[Config]
 
       attr_reader client_faraday_adapter: Configuration::ClientFaradayAdapter
       attr_reader clusters: ::Hash[::String, Configuration::ClusterDefinition]

@@ -6,13 +6,13 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/schema_artifacts/runtime_metadata/extension_loader"
 
 module ElasticGraph
   module QueryInterceptor
     # Defines configuration for elasticgraph-query_interceptor
-    class Config < ElasticGraph::Config.define(:interceptors)
+    class Config < Support::Config.define(:interceptors)
       json_schema at: "query_interceptor",
         properties: {
           interceptors: {

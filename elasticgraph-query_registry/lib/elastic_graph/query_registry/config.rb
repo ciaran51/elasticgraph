@@ -6,11 +6,11 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 
 module ElasticGraph
   module QueryRegistry
-    class Config < ElasticGraph::Config.define(:path_to_registry, :allow_unregistered_clients, :allow_any_query_for_clients)
+    class Config < Support::Config.define(:path_to_registry, :allow_unregistered_clients, :allow_any_query_for_clients)
       json_schema at: "query_registry",
         properties: {
           path_to_registry: {

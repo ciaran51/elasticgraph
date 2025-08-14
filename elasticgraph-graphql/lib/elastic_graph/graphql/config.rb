@@ -6,14 +6,14 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/errors"
 require "elastic_graph/graphql/client"
 require "elastic_graph/schema_artifacts/runtime_metadata/extension_loader"
 
 module ElasticGraph
   class GraphQL
-    class Config < ElasticGraph::Config.define(
+    class Config < Support::Config.define(
       :default_page_size,
       :max_page_size,
       :slow_query_latency_warning_threshold_in_ms,

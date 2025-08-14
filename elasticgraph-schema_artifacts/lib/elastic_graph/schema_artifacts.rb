@@ -6,7 +6,7 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/errors"
 require "elastic_graph/schema_artifacts/from_disk"
 require "elastic_graph/support/from_yaml_file"
@@ -28,7 +28,7 @@ module ElasticGraph
     end
 
     # @private
-    Config = ElasticGraph::Config.define(:directory) do
+    Config = Support::Config.define(:directory) do
       # @implements Config
       json_schema at: "schema_artifacts",
         properties: {
