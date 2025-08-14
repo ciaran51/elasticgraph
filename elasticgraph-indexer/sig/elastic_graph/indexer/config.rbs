@@ -1,12 +1,14 @@
 module ElasticGraph
   class Indexer
     class ConfigSupertype
+      extend ::ElasticGraph::Config::ClassMethods[Config]
+
       attr_reader latency_slo_thresholds_by_timestamp_in_ms: ::Hash[::String, ::Integer]
       attr_reader skip_derived_indexing_type_updates: ::Hash[::String, ::Set[::String]]
 
       def initialize: (
-        latency_slo_thresholds_by_timestamp_in_ms: ::Hash[::String, ::Integer],
-        skip_derived_indexing_type_updates: ::Hash[::String, ::Set[::String]]) -> void
+        ?latency_slo_thresholds_by_timestamp_in_ms: ::Hash[::String, ::Integer],
+        ?skip_derived_indexing_type_updates: ::Hash[::String, ::Set[::String]]) -> void
 
       def with: (
         ?latency_slo_thresholds_by_timestamp_in_ms: ::Hash[::String, ::Integer],
@@ -16,8 +18,12 @@ module ElasticGraph
     end
 
     class Config < ConfigSupertype
-      extend _BuildableFromParsedYaml[Config]
-      EXPECTED_KEYS: ::Array[::String]
+      private
+
+      def convert_values: (
+        latency_slo_thresholds_by_timestamp_in_ms: untyped,
+        skip_derived_indexing_type_updates: untyped
+      ) -> ::Hash[::Symbol, untyped]
     end
   end
 end
