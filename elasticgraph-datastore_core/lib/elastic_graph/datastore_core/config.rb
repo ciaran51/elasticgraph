@@ -18,6 +18,8 @@ module ElasticGraph
       all_json_schema_types = ["array", "string", "number", "boolean", "object", "null"]
 
       json_schema at: "datastore",
+        optional: false,
+        description: "Configuration for datastore connections and index definitions used by all parts of ElasticGraph.",
         properties: {
           client_faraday_adapter: {
             type: "object",
@@ -97,13 +99,36 @@ module ElasticGraph
               /.+/.source => {
                 type: "object",
                 description: "Configuration for a specific index definition.",
-                examples: [{
+                examples: [example_index_def = {
                   "query_cluster" => "main",
                   "index_into_clusters" => ["main"],
-                  "ignore_routing_values" => [], # : untyped
-                  "setting_overrides" => {}, # : untyped
-                  "setting_overrides_by_timestamp" => {}, # : untyped
-                  "custom_timestamp_ranges" => [] # : untyped
+                  "ignore_routing_values" => ["ABC1234567"], # : untyped
+                  "setting_overrides" => {
+                    "number_of_shards" => 256
+                  },
+                  "setting_overrides_by_timestamp" => {
+                    "2022-01-01T00:00:00Z" => {
+                      "number_of_shards" => 64
+                    },
+                    "2023-01-01T00:00:00Z" => {
+                      "number_of_shards" => 96
+                    },
+                    "2024-01-01T00:00:00Z" => {
+                      "number_of_shards" => 128
+                    }
+                  },
+                  "custom_timestamp_ranges" => [
+                    {
+                      "index_name_suffix" => "before_2022",
+                      "lt" => "2022-01-01T00:00:00Z",
+                      "setting_overrides" => {"number_of_shards" => 32}
+                    },
+                    {
+                      "index_name_suffix" => "after_2026",
+                      "gte" => "2027-01-01T00:00:00Z",
+                      "setting_overrides" => {"number_of_shards" => 32}
+                    }
+                  ]
                 }],
                 properties: {
                   query_cluster: {
@@ -195,7 +220,13 @@ module ElasticGraph
                           default: nil
                         }
                       },
-                      required: ["index_name_suffix", "setting_overrides"]
+                      required: ["index_name_suffix", "setting_overrides"],
+                      anyOf: [
+                        {required: ["lt"]},
+                        {required: ["lte"]},
+                        {required: ["gt"]},
+                        {required: ["gte"]}
+                      ]
                     },
                     default: [], # : untyped
                     examples: [[{
@@ -208,16 +239,7 @@ module ElasticGraph
                 required: ["query_cluster", "index_into_clusters"]
               }
             },
-            examples: [{
-              "widgets" => {
-                "query_cluster" => "main",
-                "index_into_clusters" => ["main"],
-                "ignore_routing_values" => [], # : untyped
-                "setting_overrides" => {}, # : untyped
-                "setting_overrides_by_timestamp" => {}, # : untyped
-                "custom_timestamp_ranges" => [] # : untyped
-              }
-            }]
+            examples: [{"widgets" => example_index_def}]
           },
 
           log_traffic: {

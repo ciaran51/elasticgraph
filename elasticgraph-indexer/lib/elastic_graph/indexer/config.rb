@@ -13,6 +13,8 @@ module ElasticGraph
   class Indexer
     class Config < Support::Config.define(:latency_slo_thresholds_by_timestamp_in_ms, :skip_derived_indexing_type_updates)
       json_schema at: "indexer",
+        optional: false,
+        description: "Configuration for indexing operations and metrics used by `elasticgraph-indexer`.",
         properties: {
           latency_slo_thresholds_by_timestamp_in_ms: {
             description: "Map of indexing latency thresholds (in milliseconds), keyed by the name of " \

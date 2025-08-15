@@ -26,7 +26,7 @@ module ElasticGraph
       #    require "elastic_graph/support/config"
       #
       #    ExampleConfigClass = ElasticGraph::Support::Config.define(:size, :name) do
-      #      json_schema at: "example",
+      #      json_schema at: "example", optional: false,
       #        properties: {
       #          size: {
       #            description: "Determines the size.",
@@ -57,7 +57,7 @@ module ElasticGraph
       module ClassMethods
         include Support::FromYamlFile
 
-        # @dynamic validator, path
+        # @dynamic validator, path, required
 
         # @return [Support::JSONSchema::Validator] validator for this configuration class
         attr_reader :validator
@@ -65,9 +65,13 @@ module ElasticGraph
         # @return [::String] path from the global configuration root to where this configuration resides.
         attr_reader :path
 
+        # @return [::Boolean] whether this configuration property is required
+        attr_reader :required
+
         # Defines the JSON schema and path for this configuration class.
         #
         # @param at [::String] path from the global configuration root to where this configuration resides
+        # @param optional [::Boolean] whether configuration at the provided `path` is optional
         # @param schema [::Hash<::Symbol, ::Object>] JSON schema definition
         # @return [void]
         #
@@ -75,7 +79,7 @@ module ElasticGraph
         #    require "elastic_graph/support/config"
         #
         #    ExampleConfigClass = ElasticGraph::Support::Config.define(:size, :name) do
-        #      json_schema at: "example",
+        #      json_schema at: "example", optional: false,
         #        properties: {
         #          size: {
         #            description: "Determines the size.",
@@ -92,8 +96,9 @@ module ElasticGraph
         #        },
         #        required: ["size", "name"]
         #    end
-        def json_schema(at:, **schema)
+        def json_schema(at:, optional:, **schema)
           @path = at
+          @required = !optional
 
           schema = Support::HashUtil.stringify_keys(schema)
           @validator = Support::JSONSchema::ValidatorFactory

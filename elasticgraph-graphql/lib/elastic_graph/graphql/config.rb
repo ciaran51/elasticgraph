@@ -24,6 +24,8 @@ module ElasticGraph
       all_json_schema_types = ["array", "string", "number", "boolean", "object", "null"]
 
       json_schema at: "graphql",
+        optional: false,
+        description: "Configuration for GraphQL behavior used by `elasticgraph-graphql`.",
         properties: {
           default_page_size: {
             description: "Determines the `size` of our datastore search requests if the query does not specify via `first` or `last`.",

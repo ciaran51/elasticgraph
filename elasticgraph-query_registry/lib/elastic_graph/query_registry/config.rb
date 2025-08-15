@@ -12,6 +12,8 @@ module ElasticGraph
   module QueryRegistry
     class Config < Support::Config.define(:path_to_registry, :allow_unregistered_clients, :allow_any_query_for_clients)
       json_schema at: "query_registry",
+        optional: true,
+        description: "Configuration for client and query registration used by `elasticgraph-query_registry`.",
         properties: {
           path_to_registry: {
             description: "Path to the directory containing the query registry files.",

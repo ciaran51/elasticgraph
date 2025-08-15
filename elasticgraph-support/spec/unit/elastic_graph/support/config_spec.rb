@@ -15,7 +15,7 @@ module ElasticGraph
       describe ".define" do
         it "defines a data class with the named attributes" do
           config_def = Config.define(:size, :name) do
-            json_schema at: "test"
+            json_schema at: "test", optional: false
           end
 
           valid_config = config_def.new(size: 10, name: "test")
@@ -27,7 +27,7 @@ module ElasticGraph
 
         it "validates upon instantiation" do
           config_def = Config.define(:size, :name) do
-            json_schema at: "test",
+            json_schema at: "test", optional: false,
               properties: {
                 size: {type: "integer", minimum: 1},
                 name: {type: "string", minLength: 1}
@@ -54,7 +54,7 @@ module ElasticGraph
 
         it "can be defined as a subclass of the class returned by `Config.define`" do
           config_def = ::Class.new(Config.define(:size, :name)) do
-            json_schema at: "test",
+            json_schema at: "test", optional: false,
               properties: {
                 size: {type: "integer", minimum: 1},
                 name: {type: "string", minLength: 1}
@@ -76,7 +76,7 @@ module ElasticGraph
 
         it "prevents unknown keys since they are likely typos" do
           config_def = Config.define(:size, :name) do
-            json_schema at: "test",
+            json_schema at: "test", optional: false,
               properties: {
                 size: {type: "integer", minimum: 1},
                 name: {type: "string", minLength: 1}
@@ -90,7 +90,7 @@ module ElasticGraph
 
         it "honors defaults specified in the JSON schema" do
           config_def = Config.define(:size, :name) do
-            json_schema at: "test",
+            json_schema at: "test", optional: false,
               properties: {
                 size: {type: "integer", minimum: 1, default: 7},
                 name: {type: "string", minLength: 1, default: "example"}
@@ -105,7 +105,7 @@ module ElasticGraph
 
         it "does not allow defaults to violate validations" do
           config_def = Config.define(:size, :name) do
-            json_schema at: "test",
+            json_schema at: "test", optional: false,
               properties: {
                 size: {type: "integer", minimum: 1, default: 0},
                 name: {type: "string", minLength: 1, default: "example"}
@@ -120,7 +120,7 @@ module ElasticGraph
         context "when the config class defines `convert_values`" do
           login_class = ::Data.define(:username, :password)
           config_class = Config.define(:login, :timeout) do
-            json_schema at: "test", properties: {
+            json_schema at: "test", optional: false, properties: {
               login: {type: "object"},
               timeout: {type: "number", default: 10}
             }
@@ -159,7 +159,7 @@ module ElasticGraph
         describe ".from_parsed_yaml" do
           it "loads from a from parsed YAML hash" do
             config_def = Config.define(:size, :name) do
-              json_schema at: "test",
+              json_schema at: "test", optional: false,
                 properties: {
                   size: {type: "integer", minimum: 1},
                   name: {type: "string", minLength: 1}
@@ -182,7 +182,7 @@ module ElasticGraph
 
           it "returns `nil` if the parsed YAML hash has no entry at the specified path" do
             config_def = Config.define(:size, :name) do
-              json_schema at: "test",
+              json_schema at: "test", optional: false,
                 properties: {
                   size: {type: "integer", minimum: 1},
                   name: {type: "string", minLength: 1}
@@ -195,7 +195,7 @@ module ElasticGraph
 
           it "raises from `from_parsed_yaml!` if the parsed YAML hash has no entry at the specified path" do
             config_def = Config.define(:size, :name) do
-              json_schema at: "test",
+              json_schema at: "test", optional: false,
                 properties: {
                   size: {type: "integer", minimum: 1},
                   name: {type: "string", minLength: 1}
@@ -211,7 +211,7 @@ module ElasticGraph
 
           it "extracts config data from nested YAML structure" do
             config_def = Config.define(:database_url, :pool_size) do
-              json_schema at: "database.connection",
+              json_schema at: "database.connection", optional: false,
                 properties: {
                   database_url: {type: "string", minLength: 1},
                   pool_size: {type: "integer", minimum: 1}
@@ -235,7 +235,7 @@ module ElasticGraph
 
           it "does not symbolize string keys on map values" do
             config_def = Config.define(:thresholds_by_name) do
-              json_schema at: "test",
+              json_schema at: "test", optional: false,
                 properties: {
                   thresholds_by_name: {type: "object", patternProperties: {
                     /^\w+$/.source => {type: "integer"}
@@ -253,7 +253,7 @@ module ElasticGraph
 
           it "raises a clear error if the value at the specified path is not a hash" do
             config_def = Config.define(:size, :name) do
-              json_schema at: "test",
+              json_schema at: "test", optional: false,
                 properties: {
                   size: {type: "integer", minimum: 1},
                   name: {type: "string", minLength: 1}
@@ -271,7 +271,7 @@ module ElasticGraph
         context "YAML file integration", :in_temp_dir do
           it "loads configuration from YAML file" do
             config_def = Config.define(:host, :port) do
-              json_schema at: "server",
+              json_schema at: "server", optional: false,
                 properties: {
                   host: {type: "string", minLength: 1},
                   port: {type: "integer", minimum: 1, maximum: 65535}
@@ -295,7 +295,7 @@ module ElasticGraph
 
           it "returns `nil` if the YAML file has no entry at the specified path" do
             config_def = Config.define(:host, :port) do
-              json_schema at: "server",
+              json_schema at: "server", optional: false,
                 properties: {
                   host: {type: "string", minLength: 1},
                   port: {type: "integer", minimum: 1, maximum: 65535}
@@ -318,7 +318,7 @@ module ElasticGraph
 
           it "supports YAML file with block for preprocessing" do
             config_def = Config.define(:name, :env) do
-              json_schema at: "app",
+              json_schema at: "app", optional: false,
                 properties: {
                   name: {type: "string"},
                   env: {type: "string", enum: ["development", "test", "production"]}

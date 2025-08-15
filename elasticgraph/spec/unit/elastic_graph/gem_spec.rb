@@ -75,6 +75,10 @@ module ElasticGraph
           expect(meta_schema_validator.validate_with_error_message(json_schema)).to eq nil
           expect(json_schema.fetch("properties").keys).to match_array((config_class.members - extra_config_attributes).map(&:to_s))
 
+          # Check that the root schema has a description
+          expect(json_schema.key?("description")).to be(true),
+            "Config class #{config_class.name} schema must have a description at the root level"
+
           # Recursively validate all properties have required attributes
           validate_schema_properties_recursively(json_schema, config_class.name)
         end

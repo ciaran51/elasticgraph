@@ -55,7 +55,7 @@ module ElasticGraph
     end
 
     def generate_json_schema
-      merged_schemas = @config_loader.merged_json_schema
+      merged_schemas, required_properties = @config_loader.merge_config_schemas
 
       # Create a comprehensive JSON schema
       {
@@ -63,6 +63,7 @@ module ElasticGraph
         "title" => "ElasticGraph Configuration",
         "description" => "Complete configuration schema for ElasticGraph applications",
         "type" => "object",
+        "required" => required_properties,
         "properties" => merged_schemas,
         "additionalProperties" => true
       }
@@ -70,11 +71,23 @@ module ElasticGraph
   end
 
   class ConfigLoader
-    def merged_json_schema
-      @merged_json_schema ||= config_definition_lines.to_h do |line|
-        config_class = load_config_class_for(line)
+    def merge_config_schemas
+      config_classes = config_definition_lines.map { |line| load_config_class_for(line) }
+
+      required_properties = config_classes.filter_map do |config_class|
+        config_class.path if config_class.required
+      end
+
+      properties = config_classes.map do |config_class|
         [config_class.path, config_class.validator.schema.value]
       end
+
+      ordered_properties = properties.sort_by do |prop, _|
+        # Sort required properties before optional properties; then sort alphabetical.
+        [required_properties.include?(prop) ? 0 : 1, prop]
+      end.to_h
+
+      [ordered_properties, required_properties]
     end
 
     private

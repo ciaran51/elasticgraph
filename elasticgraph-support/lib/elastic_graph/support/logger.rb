@@ -26,6 +26,8 @@ module ElasticGraph
         # @dynamic self.from_parsed_yaml
 
         json_schema at: "logger",
+          optional: false,
+          description: "Configuration for logging used by all parts of ElasticGraph.",
           properties: {
             level: {
               description: "Determines what severity level we log.",
@@ -34,7 +36,7 @@ module ElasticGraph
               default: "INFO"
             },
             device: {
-              description: 'Determines where we log to. Must be a string. "stdout" or "stderr" are interpreted ' \
+              description: 'Determines where we log to. "stdout" or "stderr" are interpreted ' \
                 "as being those output streams; any other value is assumed to be a file path.",
               examples: %w[stdout logs/development.log],
               default: "stdout",
