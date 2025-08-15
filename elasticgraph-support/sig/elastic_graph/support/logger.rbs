@@ -16,7 +16,7 @@ module ElasticGraph
       end
 
       class ConfigSupertype
-        extend ::ElasticGraph::Config::ClassMethods[Config]
+        extend Support::Config::ClassMethods[Config]
 
         attr_reader level: ::String
         attr_reader device: ::String

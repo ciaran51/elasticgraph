@@ -20,7 +20,7 @@ module ElasticGraph
     extend Support::FromYamlFile[FromDisk]
 
     class Config
-      extend ElasticGraph::Config::ClassMethods[Config]
+      extend Support::Config::ClassMethods[Config]
       attr_reader directory: ::String
     end
   end

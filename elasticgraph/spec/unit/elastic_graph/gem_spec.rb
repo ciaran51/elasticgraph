@@ -59,14 +59,14 @@ module ElasticGraph
         expect(::File.read("LICENSE.txt")).to include("MIT License", /Copyright .* Block, Inc/)
       end
 
-      it "uses `ElasticGraph::Config` for its configuration, if it has it" do
-        expect(config_definition_lines).to all include("ElasticGraph::Config.define")
+      it "uses `ElasticGraph::Support::Config` for its configuration, if it has it" do
+        expect(config_definition_lines).to all include("Support::Config.define")
 
         files = config_definition_lines.map { |line| line.split(":").first }
-        expect(files).to all satisfy { |f| ::File.read(f).include?('require "elastic_graph/config"') }
+        expect(files).to all satisfy { |f| ::File.read(f).include?('require "elastic_graph/support/config"') }
       end
 
-      it "has a valid, complete JSON schema for all `ElasticGraph::Config` classes" do
+      it "has a valid, complete JSON schema for all `ElasticGraph::Support::Config` classes" do
         config_definition_lines.each do |config_def_line|
           config_class = load_config_class_for(config_def_line)
           config_paths << config_class.path

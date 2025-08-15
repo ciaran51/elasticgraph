@@ -6,7 +6,7 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 require "elastic_graph/datastore_core/configuration/cluster_definition"
 require "elastic_graph/datastore_core/configuration/index_definition"
 require "elastic_graph/errors"
@@ -14,7 +14,7 @@ require "elastic_graph/errors"
 module ElasticGraph
   class DatastoreCore
     # Defines the configuration related to datastores.
-    class Config < ElasticGraph::Config.define(:client_faraday_adapter, :clusters, :index_definitions, :log_traffic, :max_client_retries)
+    class Config < Support::Config.define(:client_faraday_adapter, :clusters, :index_definitions, :log_traffic, :max_client_retries)
       all_json_schema_types = ["array", "string", "number", "boolean", "object", "null"]
 
       json_schema at: "datastore",

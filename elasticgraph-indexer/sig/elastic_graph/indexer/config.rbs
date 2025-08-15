@@ -1,7 +1,7 @@
 module ElasticGraph
   class Indexer
     class ConfigSupertype
-      extend ::ElasticGraph::Config::ClassMethods[Config]
+      extend Support::Config::ClassMethods[Config]
 
       attr_reader latency_slo_thresholds_by_timestamp_in_ms: ::Hash[::String, ::Integer]
       attr_reader skip_derived_indexing_type_updates: ::Hash[::String, ::Set[::String]]

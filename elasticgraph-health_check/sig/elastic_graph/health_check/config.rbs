@@ -3,7 +3,7 @@ module ElasticGraph
     type dataRecencyCheckHash = ::Hash[::String, untyped]
 
     class ConfigSupertype
-      extend ::ElasticGraph::Config::ClassMethods[Config]
+      extend Support::Config::ClassMethods[Config]
 
       attr_reader clusters_to_consider: ::Array[::String]
       attr_reader data_recency_checks: ::Hash[::String, Config::DataRecencyCheck]

@@ -3,7 +3,7 @@ module ElasticGraph
     type interceptorClass = Class & _InterceptorFactory
 
     class ConfigSupertype
-      extend ::ElasticGraph::Config::ClassMethods[Config]
+      extend Support::Config::ClassMethods[Config]
 
       attr_reader interceptors: ::Array[Config::InterceptorData]
 

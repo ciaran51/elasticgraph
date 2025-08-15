@@ -6,11 +6,11 @@
 #
 # frozen_string_literal: true
 
-require "elastic_graph/config"
+require "elastic_graph/support/config"
 
 module ElasticGraph
   module HealthCheck
-    class Config < ElasticGraph::Config.define(:clusters_to_consider, :data_recency_checks)
+    class Config < Support::Config.define(:clusters_to_consider, :data_recency_checks)
       json_schema at: "health_check",
         properties: {
           clusters_to_consider: {
