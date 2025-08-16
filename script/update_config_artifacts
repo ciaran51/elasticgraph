@@ -1,0 +1,113 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "yaml"
+
+module ElasticGraph
+  PROJECT_ROOT = File.expand_path("..", __dir__)
+
+  class ConfigArtifactsUpdater
+    def initialize(mode_arg)
+      @mode = mode_arg
+      @config_schema_path = File.join(PROJECT_ROOT, "elasticgraph-local", "lib", "elastic_graph", "local", "spec_support", "config_schema.yaml")
+      @config_loader = ConfigLoader.new
+    end
+
+    def run
+      case @mode
+      when "--verify"
+        verify_config_schema
+      when nil
+        update_config_schema
+        puts "Config artifacts update complete."
+        exit 0
+      else
+        warn "Unknown argument: #{@mode}. Expected `--verify` or nothing."
+        exit 1
+      end
+    end
+
+    private
+
+    def verify_config_schema
+      puts "Verifying config_schema.yaml..."
+      generated_content = generate_yaml_schema_content
+
+      if File.exist?(@config_schema_path) && File.read(@config_schema_path) == generated_content
+        puts "✅ config_schema.yaml is up-to-date."
+        exit 0
+      else
+        puts "❌ config_schema.yaml is out-of-date."
+        exit 1
+      end
+    end
+
+    def update_config_schema
+      puts "Updating config_schema.yaml..."
+      generated_content = generate_yaml_schema_content
+      File.write(@config_schema_path, generated_content)
+      puts "✅ config_schema.yaml updated."
+    end
+
+    def generate_yaml_schema_content
+      schema = generate_json_schema
+      YAML.dump(schema)
+    end
+
+    def generate_json_schema
+      merged_schemas = @config_loader.merged_json_schema
+
+      # Create a comprehensive JSON schema
+      {
+        "$schema" => "http://json-schema.org/draft-07/schema#",
+        "title" => "ElasticGraph Configuration",
+        "description" => "Complete configuration schema for ElasticGraph applications",
+        "type" => "object",
+        "properties" => merged_schemas,
+        "additionalProperties" => true
+      }
+    end
+  end
+
+  class ConfigLoader
+    def merged_json_schema
+      @merged_json_schema ||= config_definition_lines.to_h do |line|
+        config_class = load_config_class_for(line)
+        [config_class.path, config_class.validator.schema.value]
+      end
+    end
+
+    private
+
+    def config_definition_lines
+      @config_definition_lines ||= `git grep "Config.define"`.lines.reject do |line|
+        line.include?("elasticgraph-support/lib/elastic_graph/support/config") ||
+          line.include?("/spec/") ||
+          line.include?(::File.basename(__FILE__))
+      end
+    end
+
+    def load_config_class_for(config_def_line)
+      file_name = config_def_line.split(":").first
+      file_contents = ::File.read(file_name)
+
+      enclosing_module_name = file_contents
+        .scan(/module ElasticGraph.*(?:(?:class Config\b)|(?:Config =))/m)
+        .first
+        .scan(/(?:module|class) (\w+)/)
+        .flatten
+        .join("::")
+        .delete_suffix("::Config")
+
+      require "./#{file_name}"
+
+      ::Object.const_get("#{enclosing_module_name}::Config")
+    end
+  end
+end
+
+# --- Main script execution ---
+if __FILE__ == $PROGRAM_NAME
+  updater = ElasticGraph::ConfigArtifactsUpdater.new(ARGV.first)
+  updater.run
+end
