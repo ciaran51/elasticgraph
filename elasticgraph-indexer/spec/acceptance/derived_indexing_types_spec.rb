@@ -258,8 +258,8 @@ module ElasticGraph
 
     it "handles numeric min/max when source values are Integers" do
       large_value = 200_000_000
-      small = widget("SMALL", "RED", "USD", name: "small_cost", tags: [], cost: { amount_cents: 100, currency: "USD" })
-      large = widget("LARGE", "RED", "USD", name: "large_cost", tags: [], cost: { amount_cents: large_value, currency: "USD" })
+      small = widget("SMALL", "RED", "USD", name: "small_cost", tags: [], cost: {amount_cents: 100, currency: "USD"})
+      large = widget("LARGE", "RED", "USD", name: "large_cost", tags: [], cost: {amount_cents: large_value, currency: "USD"})
 
       index_records(small, large)
 
