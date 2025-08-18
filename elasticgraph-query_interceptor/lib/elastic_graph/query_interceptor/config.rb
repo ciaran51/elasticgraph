@@ -14,6 +14,8 @@ module ElasticGraph
     # Defines configuration for elasticgraph-query_interceptor
     class Config < Support::Config.define(:interceptors)
       json_schema at: "query_interceptor",
+        optional: true,
+        description: "Configuration of datastore query interceptors used by `elasticgraph-query_interceptor`.",
         properties: {
           interceptors: {
             description: "List of query interceptors to apply to datastore queries before they are executed.",

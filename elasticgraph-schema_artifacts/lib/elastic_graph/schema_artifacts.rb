@@ -31,6 +31,8 @@ module ElasticGraph
     Config = Support::Config.define(:directory) do
       # @implements Config
       json_schema at: "schema_artifacts",
+        optional: false,
+        description: "Configuration for schema artifact management used by all parts of ElasticGraph.",
         properties: {
           directory: {
             description: "Path to the directory where schema artifacts are stored.",

@@ -6,8 +6,9 @@ module ElasticGraph
       module ClassMethods[T]: ::Class
         attr_reader validator: Support::JSONSchema::Validator
         attr_reader path: ::String
+        attr_reader required: bool
 
-        def json_schema: (at: ::String, **untyped) -> void
+        def json_schema: (at: ::String, optional: bool, **untyped) -> void
         def from_parsed_yaml: (parsedYamlSettings) -> T?
         def from_parsed_yaml!: (parsedYamlSettings) -> T
         def raise_invalid_config: (::String) -> bot

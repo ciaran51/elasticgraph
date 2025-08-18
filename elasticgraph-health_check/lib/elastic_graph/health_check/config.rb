@@ -12,6 +12,8 @@ module ElasticGraph
   module HealthCheck
     class Config < Support::Config.define(:clusters_to_consider, :data_recency_checks)
       json_schema at: "health_check",
+        optional: true,
+        description: "Configuration for health checks used by `elasticgraph-health_check`.",
         properties: {
           clusters_to_consider: {
             description: "The list of clusters to perform datastore status health checks on. A `green` status maps to `healthy`, a " \

@@ -3,8 +3,16 @@
 title: ElasticGraph Configuration
 description: Complete configuration schema for ElasticGraph applications
 type: object
+required:
+- datastore
+- graphql
+- indexer
+- schema_artifacts
+- logger
 properties:
   datastore:
+    description: Configuration for datastore connections and index definitions used
+      by all parts of ElasticGraph.
     properties:
       client_faraday_adapter:
         type: object
@@ -111,10 +119,26 @@ properties:
             - query_cluster: main
               index_into_clusters:
               - main
-              ignore_routing_values: []
-              setting_overrides: {}
-              setting_overrides_by_timestamp: {}
-              custom_timestamp_ranges: []
+              ignore_routing_values:
+              - ABC1234567
+              setting_overrides:
+                number_of_shards: 256
+              setting_overrides_by_timestamp:
+                '2022-01-01T00:00:00Z':
+                  number_of_shards: 64
+                '2023-01-01T00:00:00Z':
+                  number_of_shards: 96
+                '2024-01-01T00:00:00Z':
+                  number_of_shards: 128
+              custom_timestamp_ranges:
+              - index_name_suffix: before_2022
+                lt: '2022-01-01T00:00:00Z'
+                setting_overrides:
+                  number_of_shards: 32
+              - index_name_suffix: after_2026
+                gte: '2027-01-01T00:00:00Z'
+                setting_overrides:
+                  number_of_shards: 32
             properties:
               query_cluster:
                 type: string
@@ -267,6 +291,15 @@ properties:
                   required:
                   - index_name_suffix
                   - setting_overrides
+                  anyOf:
+                  - required:
+                    - lt
+                  - required:
+                    - lte
+                  - required:
+                    - gt
+                  - required:
+                    - gte
                   additionalProperties: false
                 default: []
                 examples:
@@ -283,10 +316,26 @@ properties:
             query_cluster: main
             index_into_clusters:
             - main
-            ignore_routing_values: []
-            setting_overrides: {}
-            setting_overrides_by_timestamp: {}
-            custom_timestamp_ranges: []
+            ignore_routing_values:
+            - ABC1234567
+            setting_overrides:
+              number_of_shards: 256
+            setting_overrides_by_timestamp:
+              '2022-01-01T00:00:00Z':
+                number_of_shards: 64
+              '2023-01-01T00:00:00Z':
+                number_of_shards: 96
+              '2024-01-01T00:00:00Z':
+                number_of_shards: 128
+            custom_timestamp_ranges:
+            - index_name_suffix: before_2022
+              lt: '2022-01-01T00:00:00Z'
+              setting_overrides:
+                number_of_shards: 32
+            - index_name_suffix: after_2026
+              gte: '2027-01-01T00:00:00Z'
+              setting_overrides:
+                number_of_shards: 32
       log_traffic:
         type: boolean
         description: Determines if we log requests/responses to/from the datastore.
@@ -312,6 +361,7 @@ properties:
     - index_definitions
     additionalProperties: false
   graphql:
+    description: Configuration for GraphQL behavior used by `elasticgraph-graphql`.
     properties:
       default_page_size:
         description: Determines the `size` of our datastore search requests if the
@@ -416,7 +466,98 @@ properties:
         - - name: MyExtensionModule
             require_path: "./my_extension_module"
     additionalProperties: false
+  indexer:
+    description: Configuration for indexing operations and metrics used by `elasticgraph-indexer`.
+    properties:
+      latency_slo_thresholds_by_timestamp_in_ms:
+        description: Map of indexing latency thresholds (in milliseconds), keyed by
+          the name of the indexing latency metric. When an event is indexed with an
+          indexing latency exceeding the threshold, a warning with the event type,
+          id, and version will be logged, so the issue can be investigated.
+        type: object
+        patternProperties:
+          ".+":
+            type: integer
+            minimum: 0
+        default: {}
+        examples:
+        - {}
+        - ingested_from_topic_at: 10000
+          entity_updated_at: 15000
+      skip_derived_indexing_type_updates:
+        description: Setting that can be used to specify some derived indexing type
+          updates that should be skipped. This setting should be a map keyed by the
+          name of the derived indexing type, and the values should be sets of ids.
+          This can be useful when you have a "hot spot" of a single derived document
+          that is receiving a ton of updates. During a backfill (or whatever) you
+          may want to skip the derived type updates.
+        type: object
+        patternProperties:
+          "^[A-Z]\\w*$":
+            type: array
+            items:
+              type: string
+              minLength: 1
+        default: {}
+        examples:
+        - {}
+        - WidgetWorkspace:
+          - ABC12345678
+    additionalProperties: false
+  logger:
+    description: Configuration for logging used by all parts of ElasticGraph.
+    properties:
+      level:
+        description: Determines what severity level we log.
+        examples:
+        - INFO
+        - WARN
+        enum:
+        - DEBUG
+        - debug
+        - INFO
+        - info
+        - WARN
+        - warn
+        - ERROR
+        - error
+        - FATAL
+        - fatal
+        - UNKNOWN
+        - unknown
+        default: INFO
+      device:
+        description: Determines where we log to. "stdout" or "stderr" are interpreted
+          as being those output streams; any other value is assumed to be a file path.
+        examples:
+        - stdout
+        - logs/development.log
+        default: stdout
+        type: string
+        minLength: 1
+      formatter:
+        description: Class used to format log messages.
+        examples:
+        - ElasticGraph::Support::Logger::JSONAwareFormatter
+        - MyAlternateFormatter
+        type: string
+        pattern: "^[A-Z]\\w+(::[A-Z]\\w+)*$"
+        default: ElasticGraph::Support::Logger::JSONAwareFormatter
+    additionalProperties: false
+  schema_artifacts:
+    description: Configuration for schema artifact management used by all parts of
+      ElasticGraph.
+    properties:
+      directory:
+        description: Path to the directory where schema artifacts are stored.
+        examples:
+        - config/schema/artifacts
+        default: config/schema/artifacts
+        type: string
+        minLength: 1
+    additionalProperties: false
   health_check:
+    description: Configuration for health checks used by `elasticgraph-health_check`.
     properties:
       clusters_to_consider:
         description: The list of clusters to perform datastore status health checks
@@ -473,44 +614,8 @@ properties:
             timestamp_field: createdAt
             expected_max_recency_seconds: 30
     additionalProperties: false
-  indexer:
-    properties:
-      latency_slo_thresholds_by_timestamp_in_ms:
-        description: Map of indexing latency thresholds (in milliseconds), keyed by
-          the name of the indexing latency metric. When an event is indexed with an
-          indexing latency exceeding the threshold, a warning with the event type,
-          id, and version will be logged, so the issue can be investigated.
-        type: object
-        patternProperties:
-          ".+":
-            type: integer
-            minimum: 0
-        default: {}
-        examples:
-        - {}
-        - ingested_from_topic_at: 10000
-          entity_updated_at: 15000
-      skip_derived_indexing_type_updates:
-        description: Setting that can be used to specify some derived indexing type
-          updates that should be skipped. This setting should be a map keyed by the
-          name of the derived indexing type, and the values should be sets of ids.
-          This can be useful when you have a "hot spot" of a single derived document
-          that is receiving a ton of updates. During a backfill (or whatever) you
-          may want to skip the derived type updates.
-        type: object
-        patternProperties:
-          "^[A-Z]\\w*$":
-            type: array
-            items:
-              type: string
-              minLength: 1
-        default: {}
-        examples:
-        - {}
-        - WidgetWorkspace:
-          - ABC12345678
-    additionalProperties: false
   query_interceptor:
+    description: Configuration of datastore query interceptors used by `elasticgraph-query_interceptor`.
     properties:
       interceptors:
         description: List of query interceptors to apply to datastore queries before
@@ -552,6 +657,7 @@ properties:
         default: []
     additionalProperties: false
   query_registry:
+    description: Configuration for client and query registration used by `elasticgraph-query_registry`.
     properties:
       path_to_registry:
         description: Path to the directory containing the query registry files.
@@ -578,55 +684,5 @@ properties:
         default: []
     required:
     - path_to_registry
-    additionalProperties: false
-  schema_artifacts:
-    properties:
-      directory:
-        description: Path to the directory where schema artifacts are stored.
-        examples:
-        - config/schema/artifacts
-        default: config/schema/artifacts
-        type: string
-        minLength: 1
-    additionalProperties: false
-  logger:
-    properties:
-      level:
-        description: Determines what severity level we log.
-        examples:
-        - INFO
-        - WARN
-        enum:
-        - DEBUG
-        - debug
-        - INFO
-        - info
-        - WARN
-        - warn
-        - ERROR
-        - error
-        - FATAL
-        - fatal
-        - UNKNOWN
-        - unknown
-        default: INFO
-      device:
-        description: Determines where we log to. Must be a string. "stdout" or "stderr"
-          are interpreted as being those output streams; any other value is assumed
-          to be a file path.
-        examples:
-        - stdout
-        - logs/development.log
-        default: stdout
-        type: string
-        minLength: 1
-      formatter:
-        description: Class used to format log messages.
-        examples:
-        - ElasticGraph::Support::Logger::JSONAwareFormatter
-        - MyAlternateFormatter
-        type: string
-        pattern: "^[A-Z]\\w+(::[A-Z]\\w+)*$"
-        default: ElasticGraph::Support::Logger::JSONAwareFormatter
     additionalProperties: false
 additionalProperties: true

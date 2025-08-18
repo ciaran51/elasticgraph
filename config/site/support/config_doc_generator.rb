@@ -9,6 +9,7 @@
 require "elastic_graph/support/json_schema/validator_factory"
 require "json"
 require "pathname"
+require "time"
 require "yaml"
 
 module ElasticGraph
@@ -186,6 +187,9 @@ module ElasticGraph
           end
         end
 
+        # Avoid YAML loading errors when dealing with keys that are timestamps: `Tried to load unspecified class: Time`.
+        key = "'#{key}'" if timestamp?(key)
+
         # Add the key-value pair
         if value.is_a?(Hash) && !value.empty?
           lines << "#{" " * indent}#{key}:"
@@ -201,6 +205,13 @@ module ElasticGraph
 
         lines << "" # Add blank line between sections
       end
+    end
+
+    def timestamp?(key)
+      ::Time.iso8601(key)
+      true
+    rescue ::ArgumentError
+      false
     end
 
     def build_commented_array(config, schema, lines, indent)
