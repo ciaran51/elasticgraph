@@ -10,7 +10,7 @@ function install_codespell() {
     echo "Installing codespell in Linux environment"
     python3 -m venv tmp/codespell
     source tmp/codespell/bin/activate
-    pip install codespell==2.3.0
+    pip install codespell==2.4.1
     ;;
   *)
     echo "Unsupported platform: $(uname)"
