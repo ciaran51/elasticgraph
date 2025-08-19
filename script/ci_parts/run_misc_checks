@@ -10,6 +10,7 @@ script/update_dependency_diagrams --verify
 script/update_ci_yaml --verify
 script/update_licenses --verify
 script/validate_readme_snippets
+script/validate_release_workflow
 
 bundle exec standardrb
 bundle exec rake schema_artifacts:check VERBOSE=true
