@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+# Our release workflow (at `.github/workflows/release.yaml`) has proven to be a bit brittle.
+# We don't run it frequently (just when we release!) so if we break it, we don't automatically
+# know. It's gotten broken a couple times due to changes to `config/site/Rakefile` (and its
+# dependencies), which `config/release/Rakefile` pulls in. Here we validate that the task from
+# `config/site/Rakefile` which we need to run can pass when run in the context of the release
+# bundle.
+
+# Abort script at first error, when a command exits with non-zero status.
+# Verbose form of `set -e`.
+set -o errexit
+
+# Attempt to use undefined variable outputs error message, and forces an exit
+# Verbose form of `set -u`.
+set -o nounset
+
+# If set, the return value of a pipeline is the value of the last (rightmost)
+# command to exit with a non-zero status, or zero if all commands in the
+# pipeline exit successfully.
+set -o pipefail
+
+# Print a trace of simple commands.
+# Verbose form of `set -x`.
+set -o xtrace
+
+verify_git_status_clean() {
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Error: Git working directory is not clean."
+    echo "Uncommitted changes:"
+    git status --porcelain
+    exit 1
+  fi
+}
+
+# Function to restore the original Rakefile
+restore_rakefile() {
+  if [[ -f "Rakefile.backup" ]]; then
+    echo "Restoring original Rakefile..."
+    mv Rakefile.backup Rakefile
+  fi
+}
+
+verify_git_status_clean
+
+# Make a backup of the original Rakefile and replace it with the release version
+cp Rakefile Rakefile.backup
+
+# Set up trap to ensure Rakefile is restored even if the script fails
+trap restore_rakefile EXIT
+
+cp config/release/Rakefile Rakefile
+
+BUNDLE_GEMFILE=config/release/Gemfile bundle install
+BUNDLE_GEMFILE=config/release/Gemfile bundle exec rake "site:archive_docs[99.99.99]"
+
+# Delete the archived docs artifact
+if [[ -f "config/site/archived_docs/v99.99.99.tar.gz" ]]; then
+  rm config/site/archived_docs/v99.99.99.tar.gz
+fi
+
+restore_rakefile
+
+# Re-run bundle install without BUNDLE_GEMFILE to ensure the original bundle is still in good shape
+bundle install
+
+# Confirm we're still leaving the git status clean. (If not, it's likely a bug in this script.)
+verify_git_status_clean
