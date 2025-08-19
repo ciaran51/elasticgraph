@@ -9,6 +9,10 @@ module JSONSchemer
     "details" => untyped?
   }
 
+  module Draft7
+    SCHEMA: ::Hash[::String, untyped]
+  end
+
   class Schema
     attr_reader value: ::Hash[::String, untyped]
     attr_reader configuration: Configuration
