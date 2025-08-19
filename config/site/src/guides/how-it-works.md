@@ -20,6 +20,8 @@ Here's an example of the schema definition API:
 
 From this schema definition, ElasticGraph generates four different schema artifacts.
 
+![Local Development]({% link assets/images/local-development-diagram.svg %} "Local Development")
+
 ### Artifact 1: `datastore_config.yaml`
 
 The [`datastore_config.yaml` artifact]({% link guides/how-it-works/schema-artifacts/datastore_config.yaml %})
@@ -48,8 +50,11 @@ indices:
               format: strict_date
           type: nested" %}
 
-This artifact is used by [elasticgraph-admin](https://github.com/block/elasticgraph/tree/main/elasticgraph-admin)
-to administer the datastore, including both initial setup and ongoing maintenance as your schema evolves.
+This artifact is used by [elasticgraph-admin](https://github.com/block/elasticgraph/tree/main/elasticgraph-admin),
+along with `runtime_metadata.yaml` (described later) to administer the datastore, including both initial setup and
+ongoing maintenance as your schema evolves.
+
+![Production Admin]({% link assets/images/production-admin-diagram.svg %} "Production Admin")
 
 ### Artifact 2: `json_schemas.yaml`
 
@@ -89,8 +94,10 @@ This artifact is designed to be a _public_ artifact. It should be provided to th
 * Validation in a test suite or at runtime
 
 In addition, [elasticgraph-indexer](https://github.com/block/elasticgraph/tree/main/elasticgraph-indexer) uses a
-[versioned variant of this artifact]({% link guides/how-it-works/schema-artifacts/json_schemas_by_version/v1.yaml %})
-to validate all data before indexing it into the datastore.
+[versioned variant of this artifact]({% link guides/how-it-works/schema-artifacts/json_schemas_by_version/v1.yaml %}),
+along with `runtime_metadata.yaml` (described later) to validate all data before indexing it into the datastore.
+
+![Production Indexer]({% link assets/images/production-indexer-diagram.svg %} "Production Indexer")
 
 ### Artifact 3: `schema.graphql`
 
@@ -127,8 +134,11 @@ input ElasticGraph generates to support filtering on `Album` objects:
   releasedOn: DateFilterInput
 }" %}
 
-This artifact is used by [elasticgraph-graphql](https://github.com/block/elasticgraph/tree/main/elasticgraph-graphql)
-to provide the GraphQL endpoint. In addition, it's a public artifact which can be provided to GraphQL clients.
+This artifact is used by [elasticgraph-graphql](https://github.com/block/elasticgraph/tree/main/elasticgraph-graphql),
+along with `runtime_metadata` (described next) to provide the GraphQL endpoint. In addition, it's a public artifact
+which can be provided to GraphQL clients.
+
+![Production GraphQL]({% link assets/images/production-graphql-diagram.svg %} "Production GraphQL")
 
 ### Artifact 4: `runtime_metadata.yaml`
 
