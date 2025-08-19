@@ -15,8 +15,7 @@ require "gem/release"
 require "#{project_root}/elasticgraph-support/lib/elastic_graph/version"
 require "#{project_root}/script/list_eg_gems"
 
-# Load tasks from config/site/Rakefile. `elasticgraph-support` must be on the `$LOAD_PATH`.
-$LOAD_PATH << ::File.join(project_root, "elasticgraph-support", "lib")
+# Load tasks from config/site/Rakefile
 load "#{project_root}/config/site/Rakefile"
 
 bump_version = lambda do |version:, message:|
