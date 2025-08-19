@@ -1591,6 +1591,8 @@ index_definitions_by_name:
         source: __self
       __counts.current_players_object|name:
         source: __self
+      __counts.current_players_object|name_text:
+        source: __self
       __counts.current_players_object|nicknames:
         source: __self
       __counts.current_players_object|seasons_nested:
@@ -1650,6 +1652,8 @@ index_definitions_by_name:
       __counts.seasons_object|players_object|affiliations|sponsorships_object|sponsor_id:
         source: __self
       __counts.seasons_object|players_object|name:
+        source: __self
+      __counts.seasons_object|players_object|name_text:
         source: __self
       __counts.seasons_object|players_object|nicknames:
         source: __self
@@ -1731,6 +1735,8 @@ index_definitions_by_name:
         source: __self
       current_players_nested.name:
         source: __self
+      current_players_nested.name_text:
+        source: __self
       current_players_nested.nicknames:
         source: __self
       current_players_nested.seasons_nested.__counts.awards:
@@ -1760,6 +1766,8 @@ index_definitions_by_name:
       current_players_object.affiliations.sponsorships_object.sponsor_id:
         source: __self
       current_players_object.name:
+        source: __self
+      current_players_object.name_text:
         source: __self
       current_players_object.nicknames:
         source: __self
@@ -1835,6 +1843,8 @@ index_definitions_by_name:
         source: __self
       nested_fields2.current_players.name:
         source: __self
+      nested_fields2.current_players.name_text:
+        source: __self
       nested_fields2.current_players.nicknames:
         source: __self
       nested_fields2.current_players.seasons_nested.__counts.awards:
@@ -1876,6 +1886,8 @@ index_definitions_by_name:
       nested_fields2.the_seasons.__counts.players_object|affiliations|sponsorships_object|sponsor_id:
         source: __self
       nested_fields2.the_seasons.__counts.players_object|name:
+        source: __self
+      nested_fields2.the_seasons.__counts.players_object|name_text:
         source: __self
       nested_fields2.the_seasons.__counts.players_object|nicknames:
         source: __self
@@ -1933,6 +1945,8 @@ index_definitions_by_name:
         source: __self
       nested_fields2.the_seasons.players_nested.name:
         source: __self
+      nested_fields2.the_seasons.players_nested.name_text:
+        source: __self
       nested_fields2.the_seasons.players_nested.nicknames:
         source: __self
       nested_fields2.the_seasons.players_nested.seasons_nested.__counts.awards:
@@ -1962,6 +1976,8 @@ index_definitions_by_name:
       nested_fields2.the_seasons.players_object.affiliations.sponsorships_object.sponsor_id:
         source: __self
       nested_fields2.the_seasons.players_object.name:
+        source: __self
+      nested_fields2.the_seasons.players_object.name_text:
         source: __self
       nested_fields2.the_seasons.players_object.nicknames:
         source: __self
@@ -2019,6 +2035,8 @@ index_definitions_by_name:
         source: __self
       seasons_nested.__counts.players_object|name:
         source: __self
+      seasons_nested.__counts.players_object|name_text:
+        source: __self
       seasons_nested.__counts.players_object|nicknames:
         source: __self
       seasons_nested.__counts.players_object|seasons_nested:
@@ -2075,6 +2093,8 @@ index_definitions_by_name:
         source: __self
       seasons_nested.players_nested.name:
         source: __self
+      seasons_nested.players_nested.name_text:
+        source: __self
       seasons_nested.players_nested.nicknames:
         source: __self
       seasons_nested.players_nested.seasons_nested.__counts.awards:
@@ -2104,6 +2124,8 @@ index_definitions_by_name:
       seasons_nested.players_object.affiliations.sponsorships_object.sponsor_id:
         source: __self
       seasons_nested.players_object.name:
+        source: __self
+      seasons_nested.players_object.name_text:
         source: __self
       seasons_nested.players_object.nicknames:
         source: __self
@@ -2179,6 +2201,8 @@ index_definitions_by_name:
         source: __self
       seasons_object.players_nested.name:
         source: __self
+      seasons_object.players_nested.name_text:
+        source: __self
       seasons_object.players_nested.nicknames:
         source: __self
       seasons_object.players_nested.seasons_nested.__counts.awards:
@@ -2208,6 +2232,8 @@ index_definitions_by_name:
       seasons_object.players_object.affiliations.sponsorships_object.sponsor_id:
         source: __self
       seasons_object.players_object.name:
+        source: __self
+      seasons_object.players_object.name_text:
         source: __self
       seasons_object.players_object.nicknames:
         source: __self
@@ -2283,6 +2309,8 @@ index_definitions_by_name:
         source: __self
       the_nested_fields.current_players.name:
         source: __self
+      the_nested_fields.current_players.name_text:
+        source: __self
       the_nested_fields.current_players.nicknames:
         source: __self
       the_nested_fields.current_players.seasons_nested.__counts.awards:
@@ -2324,6 +2352,8 @@ index_definitions_by_name:
       the_nested_fields.the_seasons.__counts.players_object|affiliations|sponsorships_object|sponsor_id:
         source: __self
       the_nested_fields.the_seasons.__counts.players_object|name:
+        source: __self
+      the_nested_fields.the_seasons.__counts.players_object|name_text:
         source: __self
       the_nested_fields.the_seasons.__counts.players_object|nicknames:
         source: __self
@@ -2381,6 +2411,8 @@ index_definitions_by_name:
         source: __self
       the_nested_fields.the_seasons.players_nested.name:
         source: __self
+      the_nested_fields.the_seasons.players_nested.name_text:
+        source: __self
       the_nested_fields.the_seasons.players_nested.nicknames:
         source: __self
       the_nested_fields.the_seasons.players_nested.seasons_nested.__counts.awards:
@@ -2410,6 +2442,8 @@ index_definitions_by_name:
       the_nested_fields.the_seasons.players_object.affiliations.sponsorships_object.sponsor_id:
         source: __self
       the_nested_fields.the_seasons.players_object.name:
+        source: __self
+      the_nested_fields.the_seasons.players_object.name_text:
         source: __self
       the_nested_fields.the_seasons.players_object.nicknames:
         source: __self
@@ -4775,6 +4809,9 @@ object_types_by_name:
       name:
         resolver:
           name: get_record_field_value
+      name_text:
+        resolver:
+          name: get_record_field_value
       nicknames:
         resolver:
           name: get_record_field_value
@@ -4819,6 +4856,9 @@ object_types_by_name:
         resolver:
           name: get_record_field_value
       name:
+        resolver:
+          name: get_record_field_value
+      name_text:
         resolver:
           name: get_record_field_value
       nicknames:
@@ -6112,6 +6152,10 @@ object_types_by_name:
       players_object:
         resolver:
           name: object_with_lookahead
+  TextListFilterInput:
+    graphql_fields_by_name:
+      count:
+        name_in_index: __counts
   Widget:
     graphql_fields_by_name:
       amount_cents:

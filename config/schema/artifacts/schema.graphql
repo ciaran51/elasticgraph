@@ -7217,6 +7217,7 @@ type Person implements NamedInventor {
 type Player {
   affiliations: Affiliations!
   name: String
+  name_text: String
   nicknames: [String!]!
   seasons_nested: [PlayerSeason!]!
   seasons_object: [PlayerSeason!]!
@@ -7298,6 +7299,13 @@ input PlayerFieldsListFilterInput {
   name: StringListFilterInput
 
   """
+  Used to filter on the `name_text` field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  name_text: TextListFilterInput
+
+  """
   Used to filter on the `nicknames` field.
 
   When `null` or an empty object is passed, matches all documents.
@@ -7369,6 +7377,13 @@ input PlayerFilterInput {
   name: StringFilterInput
 
   """
+  Used to filter on the `name_text` field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  name_text: TextFilterInput
+
+  """
   Used to filter on the `nicknames` field.
 
   When `null` or an empty object is passed, matches all documents.
@@ -7438,6 +7453,11 @@ type PlayerHighlights {
   Search highlights for the `name`, providing snippets of the matching text.
   """
   name: [String!]!
+
+  """
+  Search highlights for the `name_text`, providing snippets of the matching text.
+  """
+  name_text: [String!]!
 
   """
   Search highlights for the `nicknames`, providing snippets of the matching text.
@@ -12554,6 +12574,102 @@ input TextFilterInput {
   When `null` or an empty object is passed, matches no documents.
   """
   not: TextFilterInput
+}
+
+"""
+Input type used to specify filters on `String` fields that have been indexed for full text search.
+
+Will match all documents if passed as an empty object (or as `null`).
+"""
+input TextListElementFilterInput {
+  """
+  Matches records where all of the provided sub-filters evaluate to true. This works just like an AND operator in SQL.
+
+  Note: multiple filters are automatically ANDed together. This is only needed when you have multiple filters that can't
+  be provided on a single `TextListElementFilterInput` input because of
+  collisions between key names. For example, if you want to AND multiple
+  OR'd sub-filters (the equivalent of (A OR B) AND (C OR D)), you could do all_of: [{any_of: [...]}, {any_of: [...]}].
+
+  When `null` or an empty list is passed, matches all documents.
+  """
+  all_of: [TextListElementFilterInput!]
+
+  """
+  Matches records where any of the provided sub-filters evaluate to true.
+  This works just like an OR operator in SQL.
+
+  When `null` is passed, matches all documents.
+  When an empty list is passed, this part of the filter matches no documents.
+  """
+  any_of: [TextListElementFilterInput!]
+
+  """
+  Matches records where the field value has a phrase matching the provided phrase using
+  full text search. This is stricter than `matches_query`: all terms must match
+  and be in the same order as the provided phrase.
+
+  When `null` is passed, matches all documents.
+  """
+  matches_phrase: MatchesPhraseFilterInput
+
+  """
+  Matches records where the field value matches the provided query using full text search.
+  This is more lenient than `matches_phrase`: the order of terms is ignored, and,
+  by default, only one search term is required to be in the field value.
+
+  When `null` is passed, matches all documents.
+  """
+  matches_query: MatchesQueryFilterInput
+}
+
+"""
+Input type used to specify filters on `[String]` fields that have been indexed for full text search.
+
+Will match all documents if passed as an empty object (or as `null`).
+"""
+input TextListFilterInput {
+  """
+  Matches records where all of the provided sub-filters evaluate to true. This works just like an AND operator in SQL.
+
+  Note: multiple filters are automatically ANDed together. This is only needed when you have multiple filters that can't
+  be provided on a single `TextListFilterInput` input because of collisions
+  between key names. For example, if you want to AND multiple
+  OR'd sub-filters (the equivalent of (A OR B) AND (C OR D)), you could do all_of: [{any_of: [...]}, {any_of: [...]}].
+
+  When `null` or an empty list is passed, matches all documents.
+  """
+  all_of: [TextListFilterInput!]
+
+  """
+  Matches records where any of the provided sub-filters evaluate to true.
+  This works just like an OR operator in SQL.
+
+  When `null` is passed, matches all documents.
+  When an empty list is passed, this part of the filter matches no documents.
+  """
+  any_of: [TextListFilterInput!]
+
+  """
+  Matches records where any of the list elements match the provided sub-filter.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  any_satisfy: TextListElementFilterInput
+
+  """
+  Used to filter on the number of non-null elements in this list field.
+
+  When `null` or an empty object is passed, matches all documents.
+  """
+  count: IntFilterInput
+
+  """
+  Matches records where the provided sub-filter evaluates to false.
+  This works just like a NOT operator in SQL.
+
+  When `null` or an empty object is passed, matches no documents.
+  """
+  not: TextListFilterInput
 }
 
 """

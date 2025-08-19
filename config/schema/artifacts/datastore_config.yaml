@@ -54,6 +54,8 @@ index_templates:
             properties:
               name:
                 type: keyword
+              name_text:
+                type: text
               nicknames:
                 type: keyword
               affiliations:
@@ -133,6 +135,8 @@ index_templates:
             properties:
               name:
                 type: keyword
+              name_text:
+                type: text
               nicknames:
                 type: keyword
               affiliations:
@@ -214,6 +218,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -293,6 +299,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -354,6 +362,8 @@ index_templates:
                     type: integer
                   players_object|name:
                     type: integer
+                  players_object|name_text:
+                    type: integer
                   players_object|nicknames:
                     type: integer
                   players_object|affiliations:
@@ -413,6 +423,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -492,6 +504,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -555,6 +569,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -662,6 +678,8 @@ index_templates:
                     properties:
                       name:
                         type: keyword
+                      name_text:
+                        type: text
                       nicknames:
                         type: keyword
                       affiliations:
@@ -741,6 +759,8 @@ index_templates:
                     properties:
                       name:
                         type: keyword
+                      name_text:
+                        type: text
                       nicknames:
                         type: keyword
                       affiliations:
@@ -801,6 +821,8 @@ index_templates:
                       players_object:
                         type: integer
                       players_object|name:
+                        type: integer
+                      players_object|name_text:
                         type: integer
                       players_object|nicknames:
                         type: integer
@@ -842,6 +864,8 @@ index_templates:
                 properties:
                   name:
                     type: keyword
+                  name_text:
+                    type: text
                   nicknames:
                     type: keyword
                   affiliations:
@@ -949,6 +973,8 @@ index_templates:
                     properties:
                       name:
                         type: keyword
+                      name_text:
+                        type: text
                       nicknames:
                         type: keyword
                       affiliations:
@@ -1028,6 +1054,8 @@ index_templates:
                     properties:
                       name:
                         type: keyword
+                      name_text:
+                        type: text
                       nicknames:
                         type: keyword
                       affiliations:
@@ -1088,6 +1116,8 @@ index_templates:
                       players_object:
                         type: integer
                       players_object|name:
+                        type: integer
+                      players_object|name_text:
                         type: integer
                       players_object|nicknames:
                         type: integer
@@ -1139,6 +1169,8 @@ index_templates:
               current_players_object:
                 type: integer
               current_players_object|name:
+                type: integer
+              current_players_object|name_text:
                 type: integer
               current_players_object|nicknames:
                 type: integer
@@ -1197,6 +1229,8 @@ index_templates:
               seasons_object|players_object:
                 type: integer
               seasons_object|players_object|name:
+                type: integer
+              seasons_object|players_object|name_text:
                 type: integer
               seasons_object|players_object|nicknames:
                 type: integer

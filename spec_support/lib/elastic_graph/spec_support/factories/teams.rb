@@ -101,6 +101,7 @@ FactoryBot.define do
   factory :player, parent: :hash_base do
     __typename { "Player" }
     name { Faker::Name.name }
+    name_text { name }
 
     nicknames do
       Array.new(Faker::Number.between(from: 0, to: 3)) { Faker::FunnyName.name }

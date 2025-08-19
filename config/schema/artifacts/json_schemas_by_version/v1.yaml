@@ -582,6 +582,15 @@ json_schema_version: 1
         ElasticGraph:
           type: String
           nameInIndex: name
+      name_text:
+        anyOf:
+        - allOf:
+          - "$ref": "#/$defs/String"
+          - maxLength: 104857600
+        - type: 'null'
+        ElasticGraph:
+          type: String
+          nameInIndex: name_text
       nicknames:
         type: array
         items:
@@ -616,6 +625,7 @@ json_schema_version: 1
         default: Player
     required:
     - name
+    - name_text
     - nicknames
     - affiliations
     - seasons_nested

@@ -369,7 +369,7 @@ module ElasticGraph
             DateTimeUnitInput DateUnitInput
             DayOfWeekGroupingOffsetInput
             LocalTimeGroupingOffsetInput LocalTimeGroupingTruncationUnitInput LocalTimeUnitInput
-            NonNumericAggregatedValues TextFilterInput
+            NonNumericAggregatedValues TextFilterInput TextListElementFilterInput TextListFilterInput
             MatchesQueryFilterInput MatchesQueryAllowedEditsPerTermInput MatchesPhraseFilterInput
           ]
 

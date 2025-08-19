@@ -459,6 +459,12 @@ json_schema_version: 1
           - "$ref": "#/$defs/String"
           - maxLength: 8191
         - type: 'null'
+      name_text:
+        anyOf:
+        - allOf:
+          - "$ref": "#/$defs/String"
+          - maxLength: 104857600
+        - type: 'null'
       nicknames:
         type: array
         items:
@@ -481,6 +487,7 @@ json_schema_version: 1
         default: Player
     required:
     - name
+    - name_text
     - nicknames
     - affiliations
     - seasons_nested

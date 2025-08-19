@@ -88,6 +88,9 @@ ElasticGraph.define_schema do |schema|
 
   schema.object_type "Player" do |t|
     t.field "name", "String"
+    t.field "name_text", "String" do |f|
+      f.mapping type: "text"
+    end
     t.field "nicknames", "[String!]!"
     t.field "affiliations", "Affiliations!"
 
