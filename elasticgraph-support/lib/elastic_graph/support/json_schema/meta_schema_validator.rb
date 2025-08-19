@@ -51,8 +51,7 @@ module ElasticGraph
         #
         # @param overrides [Hash<String, Object>] meta schema overrides
         def self.load_strict_validator(overrides = {})
-          # Downloaded from: https://json-schema.org/draft-07/schema
-          schema = ::JSON.parse(::File.read(::File.expand_path("../json_schema_draft_7_schema.json", __FILE__)))
+          schema = ::JSONSchemer::Draft7::SCHEMA
           schema = ::ElasticGraph::Support::HashUtil.deep_merge(schema, overrides) unless overrides.empty?
 
           # The meta schema allows additionalProperties in nearly every place. While a JSON schema definition
