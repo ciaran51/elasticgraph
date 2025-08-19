@@ -10,13 +10,7 @@ require "elastic_graph/support/json_schema/meta_schema_validator"
 require "elastic_graph/support/json_schema/validator_factory"
 require "json"
 
-RSpec::Matchers.define :have_json_schema_like do |type, expected_schema, options = {}|
-  # RSpec 3.13 has a regression related to keyword args that we work around here with an `options` hash.
-  # TODO: Switch back to an `include_typename` keyword arg once we upgrade to a version that fixes the regression.
-  # https://github.com/rspec/rspec-expectations/issues/1451
-  include_typename = options.fetch(:include_typename, true)
-  ignore_descriptions = options.fetch(:ignore_descriptions, false)
-
+RSpec::Matchers.define :have_json_schema_like do |type, expected_schema, include_typename: true, ignore_descriptions: false|
   diffable
 
   attr_reader :actual, :expected
