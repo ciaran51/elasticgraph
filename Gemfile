@@ -46,6 +46,13 @@ group :site do
   gem "jekyll", "~> 4.4", ">= 4.4.1"
   gem "nokogiri", "~> 1.18", ">= 1.18.9"
   gem "redcarpet", "~> 3.6", ">= 3.6.1"
+
+  # Pull in a YAML syntax highlighting fix so that our JSON schemas render correctly at the website:
+  # https://github.com/rouge-ruby/rouge/pull/2156
+  #
+  # TODO: switch back to a release version once that fix is merged and released.
+  gem "rouge", github: "myronmarston/rouge", ref: "12c0da6aa98e0d0a0762c47103b64290c88620a1"
+
   gem "yard", "~> 0.9", ">= 0.9.37"
   gem "yard-doctest", "~> 0.1", ">= 0.1.17"
   gem "yard-markdown", "~> 0.5"

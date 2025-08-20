@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/myronmarston/rouge.git
+  revision: 12c0da6aa98e0d0a0762c47103b64290c88620a1
+  ref: 12c0da6aa98e0d0a0762c47103b64290c88620a1
+  specs:
+    rouge (4.6.0)
+
 PATH
   remote: elasticgraph-admin_lambda
   specs:
@@ -440,7 +447,6 @@ GEM
     redcarpet (3.6.1)
     regexp_parser (2.11.1)
     rexml (3.4.1)
-    rouge (4.6.0)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -634,6 +640,7 @@ DEPENDENCIES
   nokogiri (~> 1.18, >= 1.18.9)
   rack-test (~> 2.2)
   redcarpet (~> 3.6, >= 3.6.1)
+  rouge!
   rspec (~> 3.13, >= 3.13.1)
   rspec-retry (~> 0.6, >= 0.6.2)
   rubocop-factory_bot (~> 2.26.1)
