@@ -10,6 +10,7 @@ require "elastic_graph/constants"
 require "elastic_graph/errors"
 require "elastic_graph/schema_artifacts/runtime_metadata/schema"
 require "elastic_graph/schema_artifacts/artifacts_helper_methods"
+require "elastic_graph/schema_definition/indexing/deletion_schema_builder"
 require "elastic_graph/schema_definition/indexing/event_envelope"
 require "elastic_graph/schema_definition/indexing/json_schema_with_metadata"
 require "elastic_graph/schema_definition/indexing/relationship_resolver"
@@ -338,7 +339,7 @@ module ElasticGraph
           JSON_SCHEMA_VERSION_KEY => json_schema_version,
           "$defs" => {
             "ElasticGraphEventEnvelope" => Indexing::EventEnvelope.json_schema(indexed_type_names, json_schema_version)
-          }.merge(definitions_by_name)
+          }.merge(definitions_by_name).merge(build_deletion_schemas)
         }
       end
 
@@ -354,6 +355,23 @@ module ElasticGraph
           end
           .sort_by(&:name)
           .to_h { |type| [type.name, type.to_indexing_field_type] }
+      end
+
+      # Builds deletion schemas for indexed types that support deletes
+      # @return [Hash<String, Hash<String, ::Object>>] map of deletion schema names to their JSON schemas
+      def build_deletion_schemas
+        # Get all index definitions
+        all_index_defs = state.object_types_by_name.values
+          .reject { |type| type.abstract? || derived_indexing_type_names.include?(type.name) }
+          .filter_map(&:index_def)
+
+        # Get the non-deletion schemas and indexing field types to pass to the deletion schema generation
+        non_deletion_schemas = json_schema_indexing_field_types_by_name
+          .transform_values(&:to_json_schema)
+          .compact
+
+        deletion_schema_builder = Indexing::DeletionSchemaBuilder.new(non_deletion_schemas)
+        deletion_schema_builder.build_all_deletion_schemas(all_index_defs)
       end
 
       def verify_runtime_metadata(runtime_metadata)

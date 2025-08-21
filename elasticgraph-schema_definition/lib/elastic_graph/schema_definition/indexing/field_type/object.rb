@@ -73,6 +73,14 @@ module ElasticGraph
             customizations
           end
 
+          def self.typename_schema_for(type_name)
+            {
+              "type" => "string",
+              "const" => type_name,
+              "default" => type_name
+            }
+          end
+
           private
 
           def after_initialize
@@ -87,13 +95,7 @@ module ElasticGraph
           # aids tools like our kotlin codegen to save publishers from having to set the
           # property explicitly when creating events.
           def json_schema_typename_field
-            {
-              "__typename" => {
-                "type" => "string",
-                "const" => type_name,
-                "default" => type_name
-              }
-            }
+            {"__typename" => Object.typename_schema_for(type_name)}
           end
 
           def validate_sourced_fields_have_no_json_schema_overrides(other_source_subfields)
