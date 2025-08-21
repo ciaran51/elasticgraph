@@ -36,7 +36,9 @@ module ElasticGraph
       #   @return [Array<String>] path to the field used for shard routing
       # @!attribute [r] rollover_config
       #   @return [RolloverConfig, nil] rollover configuration for the index
-      class Index < Struct.new(:name, :default_sort_pairs, :settings, :schema_def_state, :indexed_type, :routing_field_path, :rollover_config)
+      # @!attribute [r] supports_deletes
+      #   @return [Boolean] whether this index supports delete events
+      class Index < Struct.new(:name, :default_sort_pairs, :settings, :schema_def_state, :indexed_type, :routing_field_path, :rollover_config, :supports_deletes)
         include Mixins::HasReadableToSAndInspect.new { |i| i.name }
 
         # @param name [String] name of the index
@@ -53,7 +55,7 @@ module ElasticGraph
 
           settings = DEFAULT_SETTINGS.merge(Support::HashUtil.flatten_and_stringify_keys(settings, prefix: "index"))
 
-          super(name, [], settings, schema_def_state, indexed_type, nil, nil)
+          super(name, [], settings, schema_def_state, indexed_type, nil, nil, false)
 
           schema_def_state.after_user_definition_complete do
             # `id` is the field Elasticsearch/OpenSearch use for routing by default:
@@ -188,6 +190,32 @@ module ElasticGraph
           end
         end
 
+        # Enables delete event support for this index. When enabled, ElasticGraph will:
+        # - Include a `__deleted` boolean field in the index mapping
+        # - Process delete events by tombstoning documents (setting `__deleted: true`)
+        # - Automatically filter out deleted documents from query results
+        # - Generate `<ObjectTypeName>Deletion` JSON schema for delete event validation
+        #
+        # @note Delete support must be enabled before indexing the first document. It cannot be added to a live index.
+        # @note Delete events must include rollover keys (if using rollover) and routing keys (if using custom routing).
+        #
+        # @return [void]
+        #
+        # @example Enable delete support for a `campaigns` index
+        #   ElasticGraph.define_schema do |schema|
+        #     schema.object_type "Campaign" do |t|
+        #       t.field "id", "ID!"
+        #       t.field "name", "String"
+        #
+        #       t.index "campaigns" do |i|
+        #         i.support_deletes!
+        #       end
+        #     end
+        #   end
+        def support_deletes!
+          self.supports_deletes = true
+        end
+
         # @see #route_with
         # @return [Boolean] whether or not this index uses custom shard routing
         def uses_custom_routing?
@@ -260,7 +288,7 @@ module ElasticGraph
             .except("type") # `type` is invalid at the mapping root because it always has to be an object.
             .then { |mapping| ListCountsMapping.merged_into(mapping, for_type: indexed_type) }
             .then do |fm|
-              Support::HashUtil.deep_merge(fm, {"properties" => {
+              internal_fields = {
                 "__sources" => {"type" => "keyword"},
                 "__versions" => {
                   "type" => "object",
@@ -280,7 +308,14 @@ module ElasticGraph
                   # a boolean.
                   "dynamic" => "false"
                 }
-              }})
+              }
+
+              # Add __deleted field if delete support is enabled
+              if supports_deletes
+                internal_fields["__deleted"] = {"type" => "boolean"}
+              end
+
+              Support::HashUtil.deep_merge(fm, {"properties" => internal_fields})
             end
 
           {"dynamic" => "strict"}.merge(field_mappings).tap do |hash|
