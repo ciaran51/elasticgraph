@@ -31,11 +31,13 @@ module ElasticGraph
       def self.on_a_type_union_or_interface_type(&block)
         context "on a type union" do
           include ObjectTypeMetadataUnionTypeImplementation
+
           module_exec(:union_type, &block)
         end
 
         context "on an interface type" do
           include ObjectTypeMetadataInterfaceTypeImplementation
+
           module_exec(:interface_type, &block)
         end
       end

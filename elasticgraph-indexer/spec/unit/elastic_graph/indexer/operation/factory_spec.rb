@@ -250,8 +250,8 @@ module ElasticGraph
               # behavior of the `factory` class.
               schemas = {
                 2 => indexer.schema_artifacts.json_schemas_for(1),
-                4 => ::Marshal.load(::Marshal.dump(indexer.schema_artifacts.json_schemas_for(1))).tap do |it|
-                  it["$defs"]["Color"]["enum"] << "YELLOW"
+                4 => ::Marshal.load(::Marshal.dump(indexer.schema_artifacts.json_schemas_for(1))).tap do |schema|
+                  schema["$defs"]["Color"]["enum"] << "YELLOW"
                 end
               }
 

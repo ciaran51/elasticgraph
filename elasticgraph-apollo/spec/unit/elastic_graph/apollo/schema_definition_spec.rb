@@ -15,6 +15,7 @@ module ElasticGraph
   module Apollo
     RSpec.describe SchemaDefinition do
       include SchemaArtifacts::RuntimeMetadata::RuntimeMetadataSupport
+
       include_context "SchemaDefinitionHelpers"
 
       def self.with_both_casing_forms(&block)

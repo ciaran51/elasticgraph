@@ -49,6 +49,7 @@ module ElasticGraph
           alias_method :__data_initialize, :initialize
           extend ClassMethods
           include InstanceMethods
+
           class_exec(&(_ = block)) if block
         end
       end

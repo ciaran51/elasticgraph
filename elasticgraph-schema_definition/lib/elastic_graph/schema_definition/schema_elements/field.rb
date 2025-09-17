@@ -1045,7 +1045,7 @@ module ElasticGraph
         # are exactly equal (in which case we can return either).
         #
         # @private
-        def self.pick_most_accurate_from(field1, field2, to_comparable: ->(it) { it })
+        def self.pick_most_accurate_from(field1, field2, to_comparable: ->(value) { value })
           return field1 if to_comparable.call(field1) == to_comparable.call(field2)
           yield if field1.accuracy_confidence == field2.accuracy_confidence
           # Array#max_by can return nil (when called on an empty array), but our steep type is non-nil.

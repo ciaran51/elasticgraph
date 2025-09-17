@@ -56,6 +56,7 @@ module ElasticGraph
     def self.with_both_casing_forms(&block)
       context "with a snake_case schema" do
         include SnakeCaseGraphQLAcceptanceAdapter
+
         module_exec(&block)
       end
 

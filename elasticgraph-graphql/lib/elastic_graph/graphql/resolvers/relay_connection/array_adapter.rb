@@ -22,6 +22,7 @@ module ElasticGraph
           # `def_delegators` provides the following methods:
           # @dynamic start_cursor, end_cursor, has_next_page, has_previous_page
           extend Forwardable
+
           def_delegators :graphql_impl, :start_cursor, :end_cursor, :has_next_page, :has_previous_page
 
           def self.build(nodes, args, context)

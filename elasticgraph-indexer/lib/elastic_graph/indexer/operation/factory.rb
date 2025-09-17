@@ -70,7 +70,7 @@ module ElasticGraph
           # behavior is in the event of a tie (highly unlikely, there shouldn't be a gap in available json schema versions), the higher version
           # should be selected. So to get that behavior, the list is sorted in descending order.
           #
-          selected_json_schema_version = available_json_schema_versions.sort.reverse.min_by { |it| (requested_json_schema_version - it).abs }
+          selected_json_schema_version = available_json_schema_versions.sort.reverse.min_by { |version| (requested_json_schema_version - version).abs }
 
           if selected_json_schema_version != requested_json_schema_version
             logger.info({

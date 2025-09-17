@@ -238,7 +238,7 @@ module ElasticGraph
 
           def add_query_directives_to(query_string, query_directives_string)
             # https://rubular.com/r/T2UXnaXfWr8nIg has examples of this regex
-            query_string.gsub(/^query (\w+)(?:\([^)]+\))?/) { |it| "#{it} #{query_directives_string}" }
+            query_string.gsub(/^query (\w+)(?:\([^)]+\))?/) { |query_header| "#{query_header} #{query_directives_string}" }
           end
 
           context "when given a query string that has only minor formatting differences compared to a registered query" do

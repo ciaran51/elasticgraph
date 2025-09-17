@@ -13,6 +13,7 @@ module ElasticGraph
   class GraphQL
     RSpec.describe DatastoreQuery, ".perform" do
       include AggregationsHelpers
+
       include_context "DatastoreQueryUnitSupport"
 
       let(:graphql) do

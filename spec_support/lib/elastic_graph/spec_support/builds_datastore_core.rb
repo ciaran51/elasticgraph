@@ -121,7 +121,7 @@ module ElasticGraph
       config = customize_config.call(config) if customize_config
 
       # If clients_by_name is specified, remove any entries from the config that *aren't* present.
-      config = config.with(clusters: config.clusters.select { |it| clients_by_name.key?(it) }) if clients_by_name
+      config = config.with(clusters: config.clusters.select { |cluster| clients_by_name.key?(cluster) }) if clients_by_name
 
       DatastoreCore.new(
         schema_artifacts: schema_artifacts,

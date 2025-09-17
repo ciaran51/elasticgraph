@@ -71,7 +71,7 @@ module ElasticGraph
         task :docs_coverage do
           doc_output = run_yard_doc_ignoring_expected_warnings
 
-          coverage = doc_output[/([\d\.]+)% documented/, 1]
+          coverage = doc_output[/([\d.]+)% documented/, 1]
           warning_count = doc_output.scan("[warn]:").count
           error_count = doc_output.scan("[error]:").count
 

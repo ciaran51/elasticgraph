@@ -13,6 +13,7 @@ module ElasticGraph
   class GraphQL
     RSpec.describe DatastoreQuery, "aggregations" do
       include AggregationsHelpers
+
       include_context "DatastoreQueryUnitSupport"
 
       it "excludes `aggs` if `aggregations` is not given" do

@@ -26,6 +26,7 @@ module ElasticGraph
   class ClusterConfigurationManager
     include CommonSpecHelpers
     include BuildsAdmin
+
     attr_reader :admin
     attr_accessor :state_file_name
 

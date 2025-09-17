@@ -14,6 +14,7 @@ require "support/graphql"
 module ElasticGraph
   RSpec.describe "Querying an evolving schema", :uses_datastore, :factories, :capture_logs, :in_temp_dir, :rake_task do
     include GraphQLSupport
+
     let(:path_to_schema) { "config/schema.rb" }
 
     before do
