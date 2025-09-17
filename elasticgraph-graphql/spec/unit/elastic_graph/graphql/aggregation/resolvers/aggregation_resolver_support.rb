@@ -14,6 +14,7 @@ module ElasticGraph
     module Aggregation
       RSpec.shared_context "aggregation resolver support" do
         include AggregationsHelpers
+
         let(:graphql) { build_graphql }
 
         def resolve_target_nodes(

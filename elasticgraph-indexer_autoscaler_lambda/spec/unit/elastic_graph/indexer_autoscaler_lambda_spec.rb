@@ -13,6 +13,7 @@ require "support/builds_indexer_autoscaler"
 module ElasticGraph
   RSpec.describe IndexerAutoscalerLambda do
     include BuildsIndexerAutoscalerLambda
+
     include_context "lambda function"
 
     it "returns non-nil values from each attribute" do

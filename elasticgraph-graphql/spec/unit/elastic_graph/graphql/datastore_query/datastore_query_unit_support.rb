@@ -14,6 +14,7 @@ module ElasticGraph
   class GraphQL
     RSpec.shared_context "DatastoreQueryUnitSupport", :capture_logs do
       include AggregationsHelpers
+
       let(:graphql) { build_graphql }
       let(:builder) { graphql.datastore_query_builder }
 

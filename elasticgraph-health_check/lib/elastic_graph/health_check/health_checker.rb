@@ -160,7 +160,7 @@ module ElasticGraph
         #
         # Below, `available_clusters_to_consider` will replace `clusters_to_consider` in the returned `Config` instance.
         available_clusters_to_consider, unavailable_clusters_to_consider =
-          (config.clusters_to_consider - unrecognized_cluster_names).partition { |it| @datastore_clients_by_name.key?(it) }
+          (config.clusters_to_consider - unrecognized_cluster_names).partition { |cluster_name| @datastore_clients_by_name.key?(cluster_name) }
 
         if unavailable_clusters_to_consider.any?
           @logger.warn("#{unavailable_clusters_to_consider.length} cluster(s) were unavailable for health-checking: #{unavailable_clusters_to_consider.join(", ")}")
@@ -224,8 +224,8 @@ module ElasticGraph
 
       def all_known_clusters
         @all_known_clusters ||= @indexed_document_types_by_name.flat_map do |_, index_type|
-          index_type.search_index_definitions.flat_map do |it|
-            [it.cluster_to_query] + it.clusters_to_index_into
+          index_type.search_index_definitions.flat_map do |index_def|
+            [index_def.cluster_to_query] + index_def.clusters_to_index_into
           end
         end + @datastore_clients_by_name.keys
       end

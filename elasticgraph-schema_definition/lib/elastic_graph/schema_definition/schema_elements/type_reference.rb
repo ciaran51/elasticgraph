@@ -28,6 +28,7 @@ module ElasticGraph
       # @private
       class TypeReference < Support::MemoizableData.define(:name, :schema_def_state)
         extend Forwardable
+
         # @dynamic type_namer
         def_delegator :schema_def_state, :type_namer
 

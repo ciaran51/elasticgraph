@@ -11,6 +11,7 @@ require "json"
 
 RSpec.shared_context "rack app support" do
   include Rack::Test::Methods
+
   let(:app) { ::Rack::Lint.new(app_to_test) }
 
   def last_parsed_response

@@ -85,7 +85,7 @@ module ElasticGraph
         @available_json_schema_versions ||= begin
           versioned_json_schemas_dir = ::File.join(artifacts_dir, JSON_SCHEMAS_BY_VERSION_DIRECTORY)
           if ::Dir.exist?(versioned_json_schemas_dir)
-            ::Dir.entries(versioned_json_schemas_dir).filter_map { |it| it[/v(\d+)\.yaml/, 1]&.to_i }.to_set
+            ::Dir.entries(versioned_json_schemas_dir).filter_map { |filename| filename[/v(\d+)\.yaml/, 1]&.to_i }.to_set
           else
             ::Set.new
           end

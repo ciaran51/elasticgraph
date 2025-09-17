@@ -14,6 +14,7 @@ module ElasticGraph
       # @private
       class GraphQLSDLEnumerator
         include ::Enumerable
+
         # @dynamic schema_def_state
         attr_reader :schema_def_state
 

@@ -23,6 +23,7 @@ module ElasticGraph
           Support::MemoizableData.define(:schema, *fields) do
             # @implements ResolvableValueClass
             include ResolvableValue
+
             class_exec(&block) if block
           end
         end

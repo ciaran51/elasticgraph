@@ -16,6 +16,7 @@ module ElasticGraph
     module Resolvers
       RSpec.describe NestedRelationshipsSource, :factories, :uses_datastore, :capture_logs do
         include AggregationsHelpers
+
         let(:merged_queries_message_type) { "NestedRelationshipsMergedQueries" }
         let(:graphql) { build_graphql }
 

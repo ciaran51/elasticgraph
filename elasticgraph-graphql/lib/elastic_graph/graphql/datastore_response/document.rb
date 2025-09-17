@@ -19,6 +19,7 @@ module ElasticGraph
       Document = Support::MemoizableData.define(:raw_data, :payload, :decoded_cursor_factory) do
         # @implements Document
         extend Forwardable
+
         def_delegators :payload, :[], :fetch
 
         def self.build(raw_data, decoded_cursor_factory: DecodedCursor::Factory::Null)

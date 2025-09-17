@@ -159,6 +159,7 @@ module ElasticGraph
         # ********************************************************************************************
 
         extend Forwardable
+
         def_delegators :@graphql_type, :list?, :non_null?
 
         def nullable?

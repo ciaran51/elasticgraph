@@ -44,7 +44,7 @@ module ExampleQueries
       case error
       when Hash
         if error["message"]
-          "#{error["message"]}#{error["locations"] ? " at #{error["locations"].inspect}" : ""}"
+          "#{error["message"]}#{" at #{error["locations"].inspect}" if error["locations"]}"
         else
           error.inspect
         end

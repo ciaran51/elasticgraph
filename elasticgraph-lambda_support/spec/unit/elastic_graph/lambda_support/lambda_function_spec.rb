@@ -115,6 +115,7 @@ module ElasticGraph
       def new_lambda_function(&definition)
         klass = ::Class.new do
           prepend LambdaFunction
+
           class_exec(&definition)
         end
 

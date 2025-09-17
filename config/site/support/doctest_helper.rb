@@ -132,6 +132,7 @@ module ElasticGraph
         # The validation performed on the resolver attempts to read the `source_location` of methods of the resolver, but
         # in this context, `eval` is being used and the file doesn't exist! So we have to stub it out here.
         extend ::RSpec::Mocks::ExampleMethods
+
         allow(::File).to receive(:read).and_wrap_original do |original, file_name|
           if file_name.include?("(eval")
             ([file_name] * 10).join("\n")

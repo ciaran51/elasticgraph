@@ -14,6 +14,7 @@ module ElasticGraph
   class GraphQL
     RSpec.describe DatastoreQuery, "#merge", :capture_logs do
       include SortSupport, AggregationsHelpers
+
       include_context "DatastoreQueryUnitSupport"
 
       before(:context) do
