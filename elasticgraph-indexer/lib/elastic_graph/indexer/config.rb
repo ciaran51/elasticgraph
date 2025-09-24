@@ -53,7 +53,7 @@ module ElasticGraph
 
       private
 
-      def convert_values(skip_derived_indexing_type_updates:, latency_slo_thresholds_by_timestamp_in_ms:, skip_mapping_completeness_validation: false)
+      def convert_values(skip_derived_indexing_type_updates:, latency_slo_thresholds_by_timestamp_in_ms:, skip_mapping_completeness_validation:)
         {
           skip_derived_indexing_type_updates: skip_derived_indexing_type_updates.transform_values(&:to_set),
           latency_slo_thresholds_by_timestamp_in_ms: latency_slo_thresholds_by_timestamp_in_ms,
