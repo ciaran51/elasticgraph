@@ -72,26 +72,26 @@ module ElasticGraph
             end
           end
 
-        context "when skip_meta_sources_lookup is true" do
-          it "returns `false` and avoids datastore calls when there are no `sourced_from` fields" do
-            index = define_index(skip_meta_sources_lookup: true)
+          context "when skip_meta_sources_lookup is true" do
+            it "returns `false` and avoids datastore calls when there are no `sourced_from` fields" do
+              index = define_index(skip_meta_sources_lookup: true)
 
-            expect {
-              expect(index.searches_could_hit_incomplete_docs?).to be false
-            }.not_to change { datastore_requests("main").count }
-          end
-
-          it "returns `false` on an index that no longer has `sourced_from` fields but used to, without datastore calls" do
-            define_index(skip_meta_sources_lookup: true) do |t|
-              t.field "owner_name", "String" do |f|
-                f.sourced_from "owner", "name"
-              end
+              expect {
+                expect(index.searches_could_hit_incomplete_docs?).to be false
+              }.not_to change { datastore_requests("main").count }
             end
 
-            index = define_index(skip_meta_sources_lookup: true)
-            expect(index.searches_could_hit_incomplete_docs?).to be false
+            it "returns `false` on an index that no longer has `sourced_from` fields but used to, without datastore calls" do
+              define_index(skip_meta_sources_lookup: true) do |t|
+                t.field "owner_name", "String" do |f|
+                  f.sourced_from "owner", "name"
+                end
+              end
+
+              index = define_index(skip_meta_sources_lookup: true)
+              expect(index.searches_could_hit_incomplete_docs?).to be false
+            end
           end
-        end
 
           describe "#mappings_in_datastore" do
             it "returns the mappings in normalized form" do

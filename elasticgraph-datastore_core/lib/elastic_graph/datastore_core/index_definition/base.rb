@@ -69,18 +69,16 @@ module ElasticGraph
           @searches_could_hit_incomplete_docs = if current_sources.size > 1
             # We know that incomplete docs are possible, without needing to check sources recorded in `_meta`.
             true
-          else
+          elsif env_index_config.respond_to?(:skip_meta_sources_lookup) && env_index_config.skip_meta_sources_lookup
             # While our current configuration can't produce incomplete documents, some may already exist in the index
             # if we previously had some `sourced_from` fields (but no longer have them). Here we check for the sources
             # we've recorded in `_meta` to account for that.
-            if env_index_config.respond_to?(:skip_meta_sources_lookup) && env_index_config.skip_meta_sources_lookup
-              current_sources.size > 1
-            else
-              client = datastore_clients_by_name.fetch(cluster_to_query)
-              recorded_sources = mappings_in_datastore(client).dig("_meta", "ElasticGraph", "sources") || []
-              sources = recorded_sources.union(current_sources.to_a)
-              sources.size > 1
-            end
+            current_sources.size > 1
+          else
+            client = datastore_clients_by_name.fetch(cluster_to_query)
+            recorded_sources = mappings_in_datastore(client).dig("_meta", "ElasticGraph", "sources") || []
+            sources = recorded_sources.union(current_sources.to_a)
+            sources.size > 1
           end
         end
 
