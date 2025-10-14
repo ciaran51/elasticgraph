@@ -106,6 +106,10 @@ module ElasticGraph
           mapping_hash
         end
 
+        def nullable?
+          json_schema_layers.include?(:nullable)
+        end
+
         private
 
         def inner_json_schema

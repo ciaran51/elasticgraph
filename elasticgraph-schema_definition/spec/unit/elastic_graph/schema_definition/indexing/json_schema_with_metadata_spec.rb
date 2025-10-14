@@ -19,6 +19,7 @@ module ElasticGraph
           v1_json_schema = dump_versioned_json_schema do |schema|
             schema.json_schema_version 1
 
+
             schema.object_type "Widget" do |t|
               t.field "amount", "Float"
               t.field "cost_currency", "String"

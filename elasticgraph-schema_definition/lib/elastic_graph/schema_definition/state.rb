@@ -52,7 +52,9 @@ module ElasticGraph
       :type_refs_by_name,
       :output,
       :type_namer,
-      :enum_value_namer
+      :enum_value_namer,
+      :allow_omitted_fields,
+      :allow_extra_fields
     )
       include Mixins::HasReadableToSAndInspect.new
 

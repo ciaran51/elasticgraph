@@ -2883,6 +2883,18 @@ module ElasticGraph
         widget_def = json_schema.fetch("$defs").fetch("Widget")
         expect(widget_def["properties"].keys).not_to include("test_runtime_field")
       end
+      fit "ignores missing fields if allow_omitted_fields is true" do
+        json_schema = dump_schema do |schema|
+          schema.json_schema_strictness allow_omitted_fields: true
+          schema.object_type "Widget" do |t|
+            t.field "test_omitted_field", "String"
+            t.field "test_expected_field", "String!"
+          end
+        end
+
+        widget_def = json_schema.fetch("$defs").fetch("Widget")
+        expect(widget_def["required"]).to contain_exactly("test_expected_field")
+      end
 
       def all_type_definitions_for(&schema_definition)
         dump_schema(&schema_definition).fetch("$defs")

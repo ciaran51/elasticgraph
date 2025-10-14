@@ -421,6 +421,20 @@ module ElasticGraph
         nil
       end
 
+      def json_schema_strictness(allow_omitted_fields: false, allow_extra_fields: true)
+        unless [true, false].include?(allow_omitted_fields)
+          raise Errors::SchemaError, "`allow_omitted_fields` must be true or false"
+        end
+
+        unless [true, false].include?(allow_extra_fields)
+          raise Errors::SchemaError, " `allow_extra_fields` must be true or false"
+        end
+
+        @state.allow_omitted_fields = allow_omitted_fields
+        @state.allow_extra_fields = allow_extra_fields
+        nil
+      end
+
       # Registers a customization callback that will be applied to every built-in type automatically provided by ElasticGraph. Provides
       # an opportunity to customize the built-in types (e.g. to add directives to them or whatever).
       #
