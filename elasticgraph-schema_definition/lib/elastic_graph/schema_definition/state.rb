@@ -101,7 +101,9 @@ module ElasticGraph
             name_overrides: type_name_overrides
           ),
           enum_value_namer: SchemaElements::EnumValueNamer.new(enum_value_overrides_by_type),
-          output: output
+          output: output,
+          allow_omitted_fields: false,
+          allow_extra_fields: true
         )
       end
 

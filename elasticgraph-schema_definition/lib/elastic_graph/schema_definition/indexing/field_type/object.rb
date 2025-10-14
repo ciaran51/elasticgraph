@@ -49,10 +49,10 @@ module ElasticGraph
                 validate_sourced_fields_have_no_json_schema_overrides(other_source_subfields)
                 json_schema_subfields = json_schema_candidate_subfields.reject(&:runtime_field_script)
                 required_fields = if schema_def_state.allow_omitted_fields
-                                    json_schema_subfields.reject(&:nullable?).map(&:name).freeze
-                                  else
-                                    json_schema_subfields.map(&:name).freeze
-                                  end
+                  json_schema_subfields.reject(&:nullable?).map(&:name).freeze
+                else
+                  json_schema_subfields.map(&:name).freeze
+                end
                 {
                   "type" => "object",
                   "properties" => json_schema_subfields.to_h { |f| [f.name, f.json_schema] }.merge(json_schema_typename_field),

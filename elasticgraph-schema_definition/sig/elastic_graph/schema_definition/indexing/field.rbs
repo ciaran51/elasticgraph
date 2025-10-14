@@ -52,6 +52,9 @@ module ElasticGraph
         def self.normalized_mapping_hash_for: (::Array[Field]) -> ::Hash[::String, untyped]
 
         def inner_json_schema: () -> ::Hash[::String, untyped]
+
+        def nullable?: () -> bool
+
         def outer_json_schema_customizations: () -> ::Hash[::String, untyped]
 
         def user_specified_json_schema_customizations_go_on_outside?: () -> bool

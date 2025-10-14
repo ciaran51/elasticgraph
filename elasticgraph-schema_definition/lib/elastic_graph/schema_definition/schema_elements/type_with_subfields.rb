@@ -483,7 +483,6 @@ module ElasticGraph
             subfields: indexing_fields_by_name_in_index.values.map(&:to_indexing_field).compact,
             mapping_options: mapping_options,
             json_schema_options: json_schema_options
-
           )
         end
 
