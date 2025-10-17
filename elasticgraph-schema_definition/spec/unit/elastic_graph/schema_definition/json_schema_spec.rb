@@ -2897,7 +2897,7 @@ module ElasticGraph
         expect(widget_def["required"]).to contain_exactly("test_expected_field")
       end
 
-      fit "allows additional fields if allow_extra_fields is false" do
+      fit "does not allow additional properties if allow_extra_fields is false" do
         json_schema = dump_schema do |schema|
           schema.json_schema_strictness allow_extra_fields: false
           schema.object_type "Widget" do |t|
