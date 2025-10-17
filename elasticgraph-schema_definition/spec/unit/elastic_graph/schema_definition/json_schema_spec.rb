@@ -2884,7 +2884,7 @@ module ElasticGraph
         expect(widget_def["properties"].keys).not_to include("test_runtime_field")
       end
 
-      fit "ignores missing fields if allow_omitted_fields is true" do
+      it "omits nullable fields from `required` if `allow_omitted_fields` is `true`" do
         json_schema = dump_schema do |schema|
           schema.json_schema_strictness allow_omitted_fields: true
           schema.object_type "Widget" do |t|
@@ -2897,7 +2897,7 @@ module ElasticGraph
         expect(widget_def["required"]).to contain_exactly("test_expected_field")
       end
 
-      fit "does not allow additional properties if allow_extra_fields is false" do
+      it "disallowed additional properties if `allow_extra_fields` is `false`" do
         json_schema = dump_schema do |schema|
           schema.json_schema_strictness allow_extra_fields: false
           schema.object_type "Widget" do |t|
