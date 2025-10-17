@@ -421,6 +421,19 @@ module ElasticGraph
         nil
       end
 
+      # Defines strictness of the JSON schema validation. By default, the JSON schema
+      # will set all fields to be required (but they can be nullable). That is, they must
+      # be passed across. You can use these fields to alter that behaviour
+      # proper
+      #
+      # @param allow_omitted_fields [bool] Set to true to not fail validation if a field is missing
+      # @param allow_extra_fields [bool] Set to false to fail validation if an extra field is present.
+      # @return [void]
+      #
+      # @example Set omitted fields to true
+      #   ElasticGraph.define_schema do |schema|
+      #     schema.allow_omitted_fields true
+      #   end
       def json_schema_strictness(allow_omitted_fields: false, allow_extra_fields: true)
         unless [true, false].include?(allow_omitted_fields)
           raise Errors::SchemaError, "`allow_omitted_fields` must be true or false"

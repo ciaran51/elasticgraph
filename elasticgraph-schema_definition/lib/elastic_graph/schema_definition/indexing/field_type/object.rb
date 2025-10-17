@@ -53,13 +53,15 @@ module ElasticGraph
                 else
                   json_schema_subfields.map(&:name).freeze
                 end
+                additional_properties = schema_def_state.allow_extra_fields ? true : false
                 {
                   "type" => "object",
                   "properties" => json_schema_subfields.to_h { |f| [f.name, f.json_schema] }.merge(json_schema_typename_field),
                   # Note: `__typename` is intentionally not included in the `required` list. If `__typename` is present
                   # we want it validated (as we do by merging in `json_schema_typename_field`) but we only want
                   # to require it in the context of a union type. The union's json schema requires the field.
-                  "required" => required_fields
+                  "required" => required_fields,
+                  "additionalProperties" => additional_properties
                 }.freeze
               else
                 Support::HashUtil.stringify_keys(json_schema_options)

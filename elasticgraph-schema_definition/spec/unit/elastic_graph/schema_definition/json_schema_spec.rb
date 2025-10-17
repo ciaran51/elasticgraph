@@ -2896,6 +2896,18 @@ module ElasticGraph
         expect(widget_def["required"]).to contain_exactly("test_expected_field")
       end
 
+      fit "allows additional fields if allow_extra_fields is false" do
+        json_schema = dump_schema do |schema|
+          schema.json_schema_strictness allow_extra_fields: false
+          schema.object_type "Widget" do |t|
+            t.field "test_expected_field", "String!"
+          end
+        end
+
+        widget_def = json_schema.fetch("$defs").fetch("Widget")
+        expect(widget_def["additionalProperties"]).to eq(false)
+      end
+
       def all_type_definitions_for(&schema_definition)
         dump_schema(&schema_definition).fetch("$defs")
       end
